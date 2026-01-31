@@ -76,7 +76,7 @@ class Inference():
 
     def load_resume(self, strict=True):
         if os.path.isfile(self.cfg["training"]["resume"]):
-            checkpoint = torch.load(self.cfg["training"]["resume"])
+            checkpoint = torch.load(self.cfg["training"]["resume"], weights_only=False)
             self.model.load_state_dict(checkpoint["model_state"], strict=strict)
         else:
             print(f"WARNING: load_resume - {self.cfg['training']['resume']} not found")
@@ -106,14 +106,33 @@ class Inference():
                 else:
                     outputs[("disp", 0)] = [None] * images_val.shape[0]
 
+                # for filename, img, seg, depth in zip(inputs_val["filename"], images_val, pred, outputs[("disp", 0)]):
+                #     fn = f"{self.logdir}/{filename}"
+                #     os.makedirs(os.path.dirname(fn), exist_ok=True)
+                #     save_image(img, fn)
+                #     if depth is not None:
+                #         save_image(depth, fn.replace(".jpg", "_depth.png"))
+                #     ps_lab_col = torch.tensor(self.val_loader.decode_segmap_tocolor(seg)).permute(2, 0, 1)
+                #     save_image(ps_lab_col, fn.replace(".jpg", "_label.png"))
+
                 for filename, img, seg, depth in zip(inputs_val["filename"], images_val, pred, outputs[("disp", 0)]):
                     fn = f"{self.logdir}/{filename}"
                     os.makedirs(os.path.dirname(fn), exist_ok=True)
+
+                    # 1) 保存原图（按原文件名）
                     save_image(img, fn)
+
+                    # 2) 用通用方式生成输出文件名（不依赖 .jpg）
+                    root, _ = os.path.splitext(fn)
+
+                    # 3) 保存深度图（如果有）
                     if depth is not None:
-                        save_image(depth, fn.replace(".jpg", "_depth.png"))
-                    ps_lab_col = torch.tensor(self.val_loader.decode_segmap_tocolor(seg)).permute(2, 0, 1)
-                    save_image(ps_lab_col, fn.replace(".jpg", "_label.png"))
+                        save_image(depth, root + "_depth.png")
+
+                    # 4) 保存分割结果（彩色 mask）
+                    if seg is not None:
+                        ps_lab_col = torch.tensor(self.val_loader.decode_segmap_tocolor(seg)).permute(2, 0, 1)
+                        save_image(ps_lab_col, root + "_label.png")
 
 
 def inference_main(cfg):

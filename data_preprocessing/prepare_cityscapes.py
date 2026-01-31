@@ -55,10 +55,13 @@ def repair_ray(files, in_dir, out_dir, res):
 
 
 if __name__ == "__main__":
-    CITYSCAPES_ROOT = "datasets/Cityscapes/"
+    # CITYSCAPES_ROOT = "datasets/Cityscapes/"
+    CITYSCAPES_ROOT = "/scratch/u5hv/shijie.u5hv/sde_seg/raw/"
     CONVERT_LIST = [
-        ("leftImg8bit_trainvaltest/leftImg8bit/", "leftImg8bit_small/", (1024, 512)),
-        ("leftImg8bit_sequence", "leftImg8bit_sequence_small", (1024, 512)),
+        # ("leftImg8bit_trainvaltest/leftImg8bit/", "leftImg8bit_small/", (1024, 512)),
+        # ("leftImg8bit_sequence", "leftImg8bit_sequence_small", (1024, 512)),
+        ("leftImg8bit/", "leftImg8bit_small/", (1024, 512)),
+        ("leftImg8bit_sequence/", "leftImg8bit_sequence_small/", (1024, 512)),
     ]
 
     # Convert files

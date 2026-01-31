@@ -7,11 +7,9 @@ class MachineConfig:
 
     def __init__(self, machine):
         if machine == "ws":
-            MachineConfig.DOWNLOAD_MODEL_DIR = "models/"
-            MachineConfig.CITYSCAPES_DIR = "datasets/Cityscapes/"
-            MachineConfig.CAMVID_DIR = "datasets/CamVid/"
-            MachineConfig.MAPILLARY_DIR = "datasets/Mapillary-Vistas/"
-            MachineConfig.GENERATED_DEPTH_DIR = "generated_depth/"
-            MachineConfig.LOG_DIR = "results/"
+            MachineConfig.DOWNLOAD_MODEL_DIR = "/scratch/u5hv/shijie.u5hv/sde_seg/models/"
+            MachineConfig.CITYSCAPES_DIR = "/scratch/u5hv/shijie.u5hv/sde_seg/raw/"
+            MachineConfig.GENERATED_DEPTH_DIR = "/scratch/u5hv/shijie.u5hv/sde_seg/generated_depth/"
+            MachineConfig.LOG_DIR = "/scratch/u5hv/shijie.u5hv/sde_seg/logs/"
         else:
             raise NotImplementedError(machine)

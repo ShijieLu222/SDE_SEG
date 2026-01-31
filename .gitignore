@@ -108,3 +108,7 @@ plots/
 *.sublime-workspace
 
 data_preprocessing/cityscapes_download.sh
+
+# ignore core dumps
+core
+

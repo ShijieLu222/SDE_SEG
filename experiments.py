@@ -112,9 +112,9 @@ def set_segmentation_args(cfg, seg_init, layers, head_inter, output_stride, head
 def subsets(dataset):
     if dataset == "cityscapes":
         return [
-            # 100,
+            100,
             372,
-            # 744,
+            744,
             # 2975
         ]
     elif dataset == "camvid":
@@ -163,18 +163,18 @@ def generate_experiment_cfgs(base_cfg, id):
                         ('scratch', 'none', 'none', False, None, True, False, False, False),
                         # (f'sel_{pres_method}_scratch', 'none', 'none', False, None, True, False, True, False),
                         # ('scratch_ema', 'none', 'none', True, None, True, False, False, False),
-                        ('scratch_classmix', 'none', 'none', True, "class", True, False, False, False),
+                        # ('scratch_classmix', 'none', 'none', True, "class", True, False, False, False),
                         # ('scratch_classmix_video', 'none', 'none', True, "class", False, False, False, True),
                         # ("scratch_classmixgt", 'none', 'none', True, "class", False, True, False, False),
                         # ("scratch_depthmixgt", 'none', 'none', True, "depthcomp", False, True, False, False),
-                        ('transfer', mono_pretrain, mono_pretrain, False, None, True, False, False, False),
+                        # ('transfer', mono_pretrain, mono_pretrain, False, None, True, False, False, False),
                         # ('transfer_ema', mono_pretrain, mono_pretrain, True, None, True, False, False, False),
                         # ('transfer_classmix', mono_pretrain, mono_pretrain, True, "class", True, False, False, False),
                         # ('transfer_classmixgtall', mono_pretrain, mono_pretrain, True, "class", False, True, False, False),
-                        (f'transfer_dcompgt{dc_m}{dc_ft}', mono_pretrain, mono_pretrain, True, "depthcomp", False, True,
-                         False, False),
-                        (f'sel_{pres_method}_transfer_dcompgt{dc_m}{dc_ft}', mono_pretrain, mono_pretrain, True, "depthcomp", False,
-                         True, True, False),
+                        # (f'transfer_dcompgt{dc_m}{dc_ft}', mono_pretrain, mono_pretrain, True, "depthcomp", False, True,
+                        #  False, False),
+                        # (f'sel_{pres_method}_transfer_dcompgt{dc_m}{dc_ft}', mono_pretrain, mono_pretrain, True, "depthcomp", False,
+                        #  True, True, False),
                     ]:
                         name = name.replace('.', '').replace(' ', '').replace(',', 'i').replace('(', 'I').replace(')',
                                                                                                                   'I')
