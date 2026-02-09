@@ -20,7 +20,7 @@ source ~/fyp/venvs/sde_seg/bin/activate
 
 cd /home/u5hv/shijie.u5hv/fyp/improving_segmentation_with_selfsupervised_depth
 
-python run_experiments.py --machine ws --exp 210 --run 2
+python run_experiments.py --machine ws --exp 210 --run 4
 
 echo "Training completed!"
 echo "End time: $(date)"

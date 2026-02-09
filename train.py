@@ -856,6 +856,10 @@ class Trainer():
 
                 if not self.cfg["model"]["disable_monodepth"]:
                     if not self.cfg["model"]["disable_pose"]:
+                        # Convert depth-related outputs to float32 for validation (AMP compatibility)
+                        for k, v in outputs.items():
+                            if "depth" in k or "cam_T_cam" in k or "disp" in k:
+                                outputs[k] = v.to(torch.float32)
                         self.monodepth_loss_calculator_val.generate_images_pred(inputs_val, outputs)
                         mono_losses = self.monodepth_loss_calculator_val.compute_losses(inputs_val, outputs)
                         val_mono_loss = mono_losses["loss"]

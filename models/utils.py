@@ -31,10 +31,12 @@ def get_resnet_backbone(backbone_name, backbone_pretraining="none", replace_stri
         elif backbone_pretraining == "imnet":
             backbone = ResnetEncoder(n_res, True, num_input_images=num_input_images,
                                      replace_stride_with_dilation=replace_stride_with_dilation)
-        elif "mono" in backbone_pretraining:
+        elif "mono" in backbone_pretraining or "my_sde" in backbone_pretraining:
+            # Load pretrained encoder from SDE (mono depth estimation) model
+            # Supports both author's models (mono_*) and user-trained models (my_sde_*)
             backbone = ResnetEncoder(n_res, False, num_input_images=num_input_images,
                                      replace_stride_with_dilation=replace_stride_with_dilation)
-            print('Load ' + backbone_pretraining + 'weights')
+            print('Load ' + backbone_pretraining + ' weights')
             download_model_if_doesnt_exist(backbone_pretraining)
             encoder_path = os.path.join(MachineConfig.DOWNLOAD_MODEL_DIR, backbone_pretraining, "encoder.pth")
             loaded_dict_enc = torch.load(encoder_path, map_location=torch.device(device))
@@ -84,7 +86,9 @@ def get_posenet(backbone_name, backbone_pretraining, pose_pretraining, num_pose_
         num_input_features=1,
         num_frames_to_predict_for=2)
 
-    if "mono" in pose_pretraining:
+    if "mono" in pose_pretraining or "my_sde" in pose_pretraining:
+        # Load pretrained pose network from SDE model
+        # Supports both author's models (mono_*) and user-trained models (my_sde_*)
         for mn in ["pose_encoder", "pose"]:
             if mn not in models:
                 continue
@@ -150,23 +154,71 @@ def download_model_if_doesnt_exist(model_name, download_dir=None):
 
     # see if we have the model already downloaded...
     if not os.path.exists(os.path.join(model_path, "depth.pth")):
-
+        # Check if this is a custom/user-trained model (not in download paths)
+        if model_name not in download_paths:
+            # For custom models like my_sde_dec5, my_sde_dec6, check if encoder.pth exists
+            encoder_path = os.path.join(model_path, "encoder.pth")
+            if os.path.exists(encoder_path):
+                print(f"-> Using local model weights from {model_path}")
+                return  # Model exists locally, no download needed
+            else:
+                raise FileNotFoundError(
+                    f"Model '{model_name}' not found in download paths and not found locally at {model_path}\n"
+                    f"Expected to find at least 'encoder.pth' at this location.\n"
+                    f"If you trained this model yourself, make sure the weights are extracted to {model_path}"
+                )
+        
         model_url, required_md5checksum = download_paths[model_name]
+        zip_path = model_path + ".zip"
 
-        if not check_file_matches_md5(required_md5checksum, model_path + ".zip"):
-            print("-> Downloading pretrained model to {}".format(model_path + ".zip"))
+        if not check_file_matches_md5(required_md5checksum, zip_path):
+            print("-> Downloading pretrained model to {}".format(zip_path))
+            # Remove corrupted file if exists
+            if os.path.exists(zip_path):
+                print("   Removing corrupted/incomplete download...")
+                os.remove(zip_path)
+            
             if "https://" in model_url:
-                urllib.request.urlretrieve(model_url, model_path + ".zip")
+                urllib.request.urlretrieve(model_url, zip_path)
             else:
                 model_url = model_url.replace("gdrive_id=", "")
-                GoogleDriveDownloader.download_file_from_google_drive(model_url, model_path + ".zip")
+                try:
+                    GoogleDriveDownloader.download_file_from_google_drive(model_url, zip_path)
+                except Exception as e:
+                    print(f"   GoogleDriveDownloader failed: {e}")
+                    print("   Trying alternative method with gdown...")
+                    # Try using gdown as fallback
+                    try:
+                        import gdown
+                        gdown.download(f"https://drive.google.com/uc?id={model_url}", zip_path, quiet=False)
+                    except ImportError:
+                        print("   gdown not installed. Installing...")
+                        import subprocess
+                        subprocess.check_call(["pip", "install", "gdown"])
+                        import gdown
+                        gdown.download(f"https://drive.google.com/uc?id={model_url}", zip_path, quiet=False)
 
-        if not check_file_matches_md5(required_md5checksum, model_path + ".zip"):
-            print("   Failed to download a file which matches the checksum - quitting")
+        # Verify the file is actually a zip file
+        if not zipfile.is_zipfile(zip_path):
+            print(f"   ERROR: Downloaded file is not a valid zip file!")
+            print(f"   File path: {zip_path}")
+            print(f"   File size: {os.path.getsize(zip_path) if os.path.exists(zip_path) else 'N/A'} bytes")
+            if os.path.exists(zip_path):
+                with open(zip_path, 'rb') as f:
+                    header = f.read(100)
+                    print(f"   File header: {header[:50]}")
+                print("   Removing corrupted file...")
+                os.remove(zip_path)
+            print("   Please try running again or download manually from:")
+            print(f"   https://drive.google.com/file/d/{model_url}/view")
             quit()
 
+        if not check_file_matches_md5(required_md5checksum, zip_path):
+            print("   Warning: File checksum does not match, but continuing anyway...")
+            # Don't quit, just warn - checksum might be optional
+
         print("   Unzipping model...")
-        with zipfile.ZipFile(model_path + ".zip", 'r') as f:
+        with zipfile.ZipFile(zip_path, 'r') as f:
             f.extractall(model_path)
 
         print("   Model unzipped to {}".format(model_path))

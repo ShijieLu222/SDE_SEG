@@ -14,7 +14,7 @@ model:
   pose_model_input: pairs
   backbone_pretraining: imnet # none, imnet, mono_1024x320, ...
   depth_pretraining: none
-  pose_pretraining: mono_cityscapes_1024x512_r101dil_aspp_dec5
+  pose_pretraining: none  # Phase 1: Train pose network from scratch
   freeze_backbone: True
   freeze_depth: False
   freeze_pose: False

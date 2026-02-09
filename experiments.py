@@ -154,7 +154,12 @@ def generate_experiment_cfgs(base_cfg, id):
                 # 25,
                 42
             ]:
-                mono_pretrain = f'mono_cityscapes_1024x512_r101dil_aspp_dec{dec}_{dec_params}'
+                # Use your own trained SDE model
+                # Phase 1 (decoder only): my_sde_dec5
+                # Phase 2 (fine-tuned encoder + decoder): my_sde_dec6
+                mono_pretrain = 'my_sde_dec6'  # Using Phase 2 fine-tuned weights
+                # To use Phase 1 weights instead: mono_pretrain = 'my_sde_dec5'
+                # To use author's pretrained model: mono_pretrain = f'mono_cityscapes_1024x512_r101dil_aspp_dec{dec}_{dec_params}'
                 for n_subset in subsets(dataset):
                     dc_ft = 0
                     dc_m = 0.03
@@ -167,7 +172,7 @@ def generate_experiment_cfgs(base_cfg, id):
                         # ('scratch_classmix_video', 'none', 'none', True, "class", False, False, False, True),
                         # ("scratch_classmixgt", 'none', 'none', True, "class", False, True, False, False),
                         # ("scratch_depthmixgt", 'none', 'none', True, "depthcomp", False, True, False, False),
-                        # ('transfer', mono_pretrain, mono_pretrain, False, None, True, False, False, False),
+                        ('transfer', mono_pretrain, mono_pretrain, False, None, True, False, False, False),
                         # ('transfer_ema', mono_pretrain, mono_pretrain, True, None, True, False, False, False),
                         # ('transfer_classmix', mono_pretrain, mono_pretrain, True, "class", True, False, False, False),
                         # ('transfer_classmixgtall', mono_pretrain, mono_pretrain, True, "class", False, True, False, False),

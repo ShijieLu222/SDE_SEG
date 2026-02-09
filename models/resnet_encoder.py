@@ -15,6 +15,17 @@ import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
 import torchvision.models as models
 
+# Fix for newer torchvision versions
+try:
+    from torchvision.models import ResNet18_Weights, ResNet50_Weights
+    RESNET_WEIGHTS = {
+        18: ResNet18_Weights.IMAGENET1K_V1,
+        50: ResNet50_Weights.IMAGENET1K_V1
+    }
+    USE_NEW_API = True
+except ImportError:
+    USE_NEW_API = False
+
 
 class ResNetMultiImageInput(models.ResNet):
     """Constructs a resnet model with varying number of input images.
@@ -54,7 +65,16 @@ def resnet_multiimage_input(num_layers, pretrained=False, num_input_images=1):
     model = ResNetMultiImageInput(block_type, blocks, num_input_images=num_input_images)
 
     if pretrained:
-        loaded = model_zoo.load_url(models.resnet.model_urls['resnet{}'.format(num_layers)])
+        if USE_NEW_API:
+            # Use new torchvision API (0.13+)
+            weights = RESNET_WEIGHTS[num_layers]
+            pretrained_model = {18: models.resnet18, 50: models.resnet50}[num_layers](weights=weights)
+            loaded = pretrained_model.state_dict()
+        else:
+            # Use old API for backward compatibility
+            loaded = model_zoo.load_url(models.resnet.model_urls['resnet{}'.format(num_layers)])
+        
+        # Adapt conv1 for multi-image input (applies to both old and new API)
         loaded['conv1.weight'] = torch.cat(
             [loaded['conv1.weight']] * num_input_images, 1) / num_input_images
         model.load_state_dict(loaded)

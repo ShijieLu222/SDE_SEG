@@ -295,8 +295,21 @@ class SequenceSegmentationLoader(data.Dataset):
         same augmentation.
         """
         if do_color_aug:
-            color_aug = transforms.ColorJitter.get_params(
-                self.brightness, self.contrast, self.saturation, self.hue)
+            # Fix for newer torchvision versions where get_params returns a tuple
+            try:
+                # Try old API (returns a callable function)
+                color_aug = transforms.ColorJitter.get_params(
+                    self.brightness, self.contrast, self.saturation, self.hue)
+                # Test if it's callable
+                if not callable(color_aug):
+                    raise TypeError("Not callable")
+            except (TypeError, AttributeError):
+                # Use new API (need to create ColorJitter instance)
+                color_aug = transforms.ColorJitter(
+                    brightness=self.brightness, 
+                    contrast=self.contrast, 
+                    saturation=self.saturation, 
+                    hue=self.hue)
         else:
             color_aug = (lambda x: x)
 

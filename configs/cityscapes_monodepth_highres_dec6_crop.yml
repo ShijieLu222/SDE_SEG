@@ -13,8 +13,12 @@ model:
     max_scale_size: [ 512, 1024 ]
   pose_model_input: pairs
   backbone_pretraining: imnet # none, imnet, mono_1024x320, ...
-  depth_pretraining: mono_cityscapes_1024x512_r101dil_aspp_dec5_posepretrain_crop512x512bs4
-  pose_pretraining: mono_cityscapes_1024x512_r101dil_aspp_dec5_posepretrain_crop512x512bs4
+  # Use your own trained Phase 1 model
+  depth_pretraining: my_sde_dec5
+  pose_pretraining: my_sde_dec5
+  # To use author's pretrained model, uncomment lines below:
+  # depth_pretraining: mono_cityscapes_1024x512_r101dil_aspp_dec5_posepretrain_crop512x512bs4
+  # pose_pretraining: mono_cityscapes_1024x512_r101dil_aspp_dec5_posepretrain_crop512x512bs4
   freeze_backbone: False
   freeze_depth: False
   freeze_pose: False
