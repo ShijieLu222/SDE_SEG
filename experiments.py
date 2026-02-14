@@ -144,9 +144,17 @@ def generate_experiment_cfgs(base_cfg, id):
         blr = 1e-3
         gclip = 10
         dataset = "cityscapes" # available: cityscapes, camvid, mapillary
-        lr_sch = "stepx"
+        # ===== TABLE 1 MODE: Use poly learning rate schedule =====
+        # Original code:
+        # lr_sch = "stepx"
+        # Modified for Table 1: poly provides smooth decay, better for convergence especially with 744 labels
+        lr_sch = "poly"  # Changed from "stepx" to "poly" for better convergence
         for dec, dec_params, crop, batch_size in [
-            (6, "lr5_fd2_crop512x512bs4", (512, 512), 2),
+            # ===== TABLE 1 MODE: Use batch_size=4 =====
+            # Original code:
+            # (6, "lr5_fd2_crop512x512bs4", (512, 512), 2),
+            # Modified for Table 1: bs=4 to match config name and avoid unstable BN statistics
+            (6, "lr5_fd2_crop512x512bs4", (512, 512), 4),  # Changed from 2 to 4
             # (6, "lr5_fd0_crop512x512bs4", (512, 512), 2), # for pretraining w/o feature distance loss
         ]:
             for seed in [
@@ -154,78 +162,103 @@ def generate_experiment_cfgs(base_cfg, id):
                 # 25,
                 42
             ]:
-                # Use your own trained SDE model
-                # Phase 1 (decoder only): my_sde_dec5
-                # Phase 2 (fine-tuned encoder + decoder): my_sde_dec6
-                mono_pretrain = 'my_sde_dec6'  # Using Phase 2 fine-tuned weights
-                # To use Phase 1 weights instead: mono_pretrain = 'my_sde_dec5'
-                # To use author's pretrained model: mono_pretrain = f'mono_cityscapes_1024x512_r101dil_aspp_dec{dec}_{dec_params}'
+                # ===== TABLE 1 MODE: Use author's pretrained SDE model =====
+                # Original code:
+                # # Use your own trained SDE model
+                # # Phase 1 (decoder only): my_sde_dec5
+                # # Phase 2 (fine-tuned encoder + decoder): my_sde_dec6
+                # mono_pretrain = 'my_sde_dec6'  # Using Phase 2 fine-tuned weights
+                # # To use Phase 1 weights instead: mono_pretrain = 'my_sde_dec5'
+                # # To use author's pretrained model: mono_pretrain = f'mono_cityscapes_1024x512_r101dil_aspp_dec{dec}_{dec_params}'
+                # Modified for Table 1: Use author's pretrained model to match paper results
+                mono_pretrain = f'mono_cityscapes_1024x512_r101dil_aspp_dec{dec}_{dec_params}'
                 for n_subset in subsets(dataset):
                     dc_ft = 0
                     dc_m = 0.03
-                    pres_method = "ds_us"  # available: "ent", "ds", "us", "ds_us"
-                    for name, seg_init, teacher_init, ema, mix_mask, only_unlabeled, mix_use_gt, preselect, mix_video in [
-                        ('scratch', 'none', 'none', False, None, True, False, False, False),
-                        # (f'sel_{pres_method}_scratch', 'none', 'none', False, None, True, False, True, False),
-                        # ('scratch_ema', 'none', 'none', True, None, True, False, False, False),
-                        # ('scratch_classmix', 'none', 'none', True, "class", True, False, False, False),
-                        # ('scratch_classmix_video', 'none', 'none', True, "class", False, False, False, True),
-                        # ("scratch_classmixgt", 'none', 'none', True, "class", False, True, False, False),
-                        # ("scratch_depthmixgt", 'none', 'none', True, "depthcomp", False, True, False, False),
-                        ('transfer', mono_pretrain, mono_pretrain, False, None, True, False, False, False),
-                        # ('transfer_ema', mono_pretrain, mono_pretrain, True, None, True, False, False, False),
-                        # ('transfer_classmix', mono_pretrain, mono_pretrain, True, "class", True, False, False, False),
-                        # ('transfer_classmixgtall', mono_pretrain, mono_pretrain, True, "class", False, True, False, False),
-                        # (f'transfer_dcompgt{dc_m}{dc_ft}', mono_pretrain, mono_pretrain, True, "depthcomp", False, True,
-                        #  False, False),
-                        # (f'sel_{pres_method}_transfer_dcompgt{dc_m}{dc_ft}', mono_pretrain, mono_pretrain, True, "depthcomp", False,
-                        #  True, True, False),
-                    ]:
-                        name = name.replace('.', '').replace(' ', '').replace(',', 'i').replace('(', 'I').replace(')',
-                                                                                                                  'I')
-                        restrict_mode = "fixed" if preselect else "random"
-                        unlab_cfg = {
-                            "consistency_weight": 1.0,
-                            "mix_mask": mix_mask,
-                            "color_jitter": True,
-                            "blur": True,
-                            "only_unlabeled": only_unlabeled,
-                            "only_labeled": False,
-                            "mix_video": mix_video,
-                            "mix_use_gt": mix_use_gt,
-                            "depthcomp_margin": dc_m,
-                            "depthcomp_foreground_threshold": dc_ft,
-                            "backward_first_pseudo_label": False,
-                            "debug_image": True
-                        } if ema else None
-                        unlab_str = "" if not ema else f"_Unlab{unlab_cfg['consistency_weight']}{unlab_cfg['mix_mask']}" + \
-                                                       ("jit" if unlab_cfg["color_jitter"] else "") + (
-                                                           "blur" if unlab_cfg["blur"] else "")
+                    # ===== TABLE 1 MODE: Loop through all selection methods =====
+                    # Original code:
+                    # pres_method = "ds_us"  # available: "ent", "ds", "us", "ds_us"
+                    # Modified for Table 1: Loop through all methods to generate all 15 experiments
+                    # Table 1: Automatic Data Selection Experiments
+                    # Run IDs: 0-2 (Random 100, 372, 744), 3-5 (Entropy 100, 372, 744), 
+                    #         6-8 (US 100, 372, 744), 9-11 (DS 100, 372, 744), 12-14 (DS+US 100, 372, 744)
+                    for pres_method in [None, "ent", "us", "ds", "ds_us"]:
+                        if pres_method is None:
+                            # Random baseline (no preselection)
+                            exp_list = [('scratch', 'none', 'none', False, None, True, False, False, False)]
+                        else:
+                            # Selected methods (ent, us, ds, ds_us)
+                            exp_list = [(f'sel_{pres_method}_scratch', 'none', 'none', False, None, True, False, True, False)]
+                        
+                        # Original code (commented out):
+                        # for name, seg_init, teacher_init, ema, mix_mask, only_unlabeled, mix_use_gt, preselect, mix_video in [
+                        #     ('scratch', 'none', 'none', False, None, True, False, False, False),
+                        #     # (f'sel_{pres_method}_scratch', 'none', 'none', False, None, True, False, True, False),
+                        #     # ('scratch_ema', 'none', 'none', True, None, True, False, False, False),
+                        #     # ('scratch_classmix', 'none', 'none', True, "class", True, False, False, False),
+                        #     # ('scratch_classmix_video', 'none', 'none', True, "class", False, False, False, True),
+                        #     # ("scratch_classmixgt", 'none', 'none', True, "class", False, True, False, False),
+                        #     # ("scratch_depthmixgt", 'none', 'none', True, "depthcomp", False, True, False, False),
+                        #     ('transfer', mono_pretrain, mono_pretrain, False, None, True, False, False, False),
+                        #     # ('transfer_ema', mono_pretrain, mono_pretrain, True, None, True, False, False, False),
+                        #     # ('transfer_classmix', mono_pretrain, mono_pretrain, True, "class", True, False, False, False),
+                        #     # ('transfer_classmixgtall', mono_pretrain, mono_pretrain, True, "class", False, True, False, False),
+                        #     # (f'transfer_dcompgt{dc_m}{dc_ft}', mono_pretrain, mono_pretrain, True, "depthcomp", False, True,
+                        #     #  False, False),
+                        #     # (f'sel_{pres_method}_transfer_dcompgt{dc_m}{dc_ft}', mono_pretrain, mono_pretrain, True, "depthcomp", False,
+                        #     #  True, True, False),
+                        # ]:
+                        # Modified for Table 1: Only use scratch experiments (no transfer learning)
+                        for name, seg_init, teacher_init, ema, mix_mask, only_unlabeled, mix_use_gt, preselect, mix_video in exp_list:
+                            name = name.replace('.', '').replace(' ', '').replace(',', 'i').replace('(', 'I').replace(')',
+                                                                                                                      'I')
+                            restrict_mode = "fixed" if preselect else "random"
+                            unlab_cfg = {
+                                "consistency_weight": 1.0,
+                                "mix_mask": mix_mask,
+                                "color_jitter": True,
+                                "blur": True,
+                                "only_unlabeled": only_unlabeled,
+                                "only_labeled": False,
+                                "mix_video": mix_video,
+                                "mix_use_gt": mix_use_gt,
+                                "depthcomp_margin": dc_m,
+                                "depthcomp_foreground_threshold": dc_ft,
+                                "backward_first_pseudo_label": False,
+                                "debug_image": True
+                            } if ema else None
+                            unlab_str = "" if not ema else f"_Unlab{unlab_cfg['consistency_weight']}{unlab_cfg['mix_mask']}" + \
+                                                           ("jit" if unlab_cfg["color_jitter"] else "") + (
+                                                               "blur" if unlab_cfg["blur"] else "")
 
-                        cfg = deepcopy(base_cfg)
-                        cfg['general'] = {
-                            'tag': tune.grid_search([
-                                f"{dataset}_{name}_D{n_subset}{restrict_mode}_S{seed}_{opt}Lr{lr}{blr}{lr_sch}_clip{gclip}_crop{crop[0]}x{crop[1]}bs{batch_size}_flip_r101_dec{dec}_{dec_params}_l{layers[0]}os{output_stride}{'hi' if head_inter else ''}{unlab_str}"])}
-                        cfg, load_backbone = decoder_variant(cfg, dec, crop)
-                        cfg['model']['backbone_pretraining'] = mono_pretrain if (
-                                load_backbone and seg_init != "none") else "imnet"
-                        cfg['model']['variant'] = name
-                        cfg['model']['depth_pretraining'] = teacher_init
-                        cfg['model']['depth_estimator_weights'] = mono_pretrain
-                        cfg = setup_optimizer(cfg, opt, lr, blr, None, None, gclip)
-                        cfg["training"]["batch_size"] = batch_size
-                        cfg = setup_dataset(cfg, dataset, crop, lr_sch)
-                        cfg['data']['restrict_to_subset']['mode'] = restrict_mode
-                        cfg['data']['restrict_to_subset']['n_subset'] = n_subset
-                        if preselect:
-                            cfg['data']['restrict_to_subset']['subset'] = preselected_labels(
-                                {7: 42, 25: 43, 42: 44}[seed], n_subset, dataset, method=pres_method,
-                            )
-                        cfg['training']['unlabeled_segmentation'] = unlab_cfg
-                        cfg['seed'] = seed
-                        cfg = set_segmentation_args(cfg, seg_init=seg_init, layers=layers, head_inter=head_inter,
-                                                    output_stride=output_stride)
-                        cfgs.append(cfg)
+                            cfg = deepcopy(base_cfg)
+                            cfg['general'] = {
+                                'tag': tune.grid_search([
+                                    f"{dataset}_{name}_D{n_subset}{restrict_mode}_S{seed}_{opt}Lr{lr}{blr}{lr_sch}_clip{gclip}_crop{crop[0]}x{crop[1]}bs{batch_size}_flip_r101_dec{dec}_{dec_params}_l{layers[0]}os{output_stride}{'hi' if head_inter else ''}{unlab_str}"])}
+                            cfg, load_backbone = decoder_variant(cfg, dec, crop)
+                            cfg['model']['backbone_pretraining'] = mono_pretrain if (
+                                    load_backbone and seg_init != "none") else "imnet"
+                            cfg['model']['variant'] = name
+                            cfg['model']['depth_pretraining'] = teacher_init
+                            cfg['model']['depth_estimator_weights'] = mono_pretrain
+                            cfg = setup_optimizer(cfg, opt, lr, blr, None, None, gclip)
+                            cfg["training"]["batch_size"] = batch_size
+                            cfg = setup_dataset(cfg, dataset, crop, lr_sch)
+                            cfg['data']['restrict_to_subset']['mode'] = restrict_mode
+                            cfg['data']['restrict_to_subset']['n_subset'] = n_subset
+                            # ===== TABLE 1 MODE: Fix preselection condition =====
+                            # Original code:
+                            # if preselect:
+                            # Modified for Table 1: Only use preselection for non-random methods
+                            if preselect and pres_method != "random":
+                                cfg['data']['restrict_to_subset']['subset'] = preselected_labels(
+                                    {7: 42, 25: 43, 42: 44}[seed], n_subset, dataset, method=pres_method,
+                                )
+                            cfg['training']['unlabeled_segmentation'] = unlab_cfg
+                            cfg['seed'] = seed
+                            cfg = set_segmentation_args(cfg, seg_init=seg_init, layers=layers, head_inter=head_inter,
+                                                        output_stride=output_stride)
+                            cfgs.append(cfg)
     # Data Selection for Annotation
     elif id == 211:
         layers = [8]
