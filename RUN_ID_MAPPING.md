@@ -1,4 +1,76 @@
-# Table 1 实验的 Run ID 映射表
+# 实验 Run ID 映射表
+
+---
+
+## Table 3: 数据混合策略 (当前配置)
+
+**选样方法**：固定 random  
+**实验 ID**：`exp 210`  
+**SLURM 脚本**：`slurm/table3_mixing_strategy/`
+
+### 论文对齐（按 paper 作者设置）
+
+| 实验 | 配置 |
+|------|------|
+| Baseline | scratch, 仅监督 |
+| Pseudo-Labels | scratch_ema, mix_mask=None, only_unlabeled=True |
+| ClassMix 372 | scratch_classmix, only_unlabeled=True |
+| ClassMix 2975 | scratch_classmixgt, only_unlabeled=False, mix_use_gt=True |
+| DepthMix | scratch_depthmixgt, only_unlabeled=False, mix_use_gt=True |
+
+### Run ID 验证（3 种子: 7, 25, 42）
+
+| Run ID | 实验 | n | 脚本 |
+|--------|------|---|------|
+| 0, 7, 14 | Baseline | 372 | train_baseline_372.slurm |
+| 1, 8, 15 | Baseline | 2975 | train_baseline_2975.slurm |
+| 2, 9, 16 | Pseudo-Labels | 372 | train_pseudo_labels_372.slurm |
+| 3, 10, 17 | ClassMix | 372 | train_classmix_372.slurm |
+| 4, 11, 18 | DepthMix | 372 | train_depthmix_372.slurm |
+| 5, 12, 19 | DepthMix | 2975 | train_depthmix_2975.slurm |
+| 6, 13, 20 | ClassMix-GT | 2975 | train_classmix_2975.slurm |
+
+### 预期 mIoU
+
+| Run ID | 实验 | 标签数量 | 预期 mIoU |
+|--------|------|----------|-----------|
+| 0 | Baseline | 372 | 59.14 ± 1.02 |
+| 1 | Baseline | 2975 | 67.77 ± 0.13 |
+| 2 | Pseudo-Labels | 372 | 62.39 ± 0.86 |
+| 3 | ClassMix | 372 | 63.16 ± 0.89 |
+| 4 | ClassMix | 2975 | 69.60 ± 0.32 |
+| 5 | DepthMix | 372 | 64.14 ± 1.34 |
+| 6 | DepthMix | 2975 | 69.83 ± 0.36 |
+
+### 运行 Table 3
+
+```bash
+# 单个实验（1 个种子）
+python run_experiments.py --machine ws --exp 210 --run 2
+
+# 单个实验（3 个种子，取 mean±std）
+python run_experiments.py --machine ws --exp 210 --run 2,9,16   # Pseudo-Labels 372
+
+# 全部 21 个 config (Run 0-20)
+python run_experiments.py --machine ws --exp 210 --run 0-21
+```
+
+### 3 个种子
+
+已配置 `seed in [7, 25, 42]`，共 21 个 config。每 SLURM 脚本跑对应实验的 3 个种子。
+
+### 代码与 Paper 对应关系
+
+| 代码配置 | Paper | 说明 |
+|----------|-------|------|
+| `scratch` | Baseline | ema=False, mix_mask=None，纯监督 |
+| `scratch_ema` | Pseudo-Labels | ema=True, mix_mask=None，均值教师 |
+| `scratch_classmix` | ClassMix | ema=True, mix_mask="class", only_unlabeled=True |
+| `scratch_depthmixgt` | DepthMix | ema=True, mix_mask="depthcomp", mix_use_gt=True |
+
+---
+
+## Table 1 实验的 Run ID 映射表
 
 ## 📋 完整的 Run ID 映射（Table 1 全部组合）
 
