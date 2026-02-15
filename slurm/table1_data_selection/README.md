@@ -21,11 +21,12 @@ Total: **15 experiments** (5 methods × 3 label amounts)
 ## Scripts
 
 ### Individual Scripts
-- `train_random_*.slurm` - Random selection (Run IDs: 0-2)
-- `train_entropy_*.slurm` - Entropy selection (Run IDs: 3-5)
-- `train_us_*.slurm` - Uncertainty Sampling (Run IDs: 6-8)
-- `train_ds_*.slurm` - Diversity Sampling (Run IDs: 9-11)
-- `train_ds_us_*.slurm` - DS+US combination (Run IDs: 12-14)
+每个脚本跑 **3 个 Run ID**（对应 seeds 7, 25, 42），用于计算 mIoU mean±std：
+- `train_random_*.slurm` - Random: RUN_IDS="0,15,30" / "1,16,31" / "2,17,32"
+- `train_entropy_*.slurm` - Entropy: RUN_IDS="3,18,33" / "4,19,34" / "5,20,35"
+- `train_us_*.slurm` - US: RUN_IDS="6,21,36" / "7,22,37" / "8,23,38"
+- `train_ds_*.slurm` - DS: RUN_IDS="9,24,39" / "10,25,40" / "11,26,41"
+- `train_ds_us_*.slurm` - DS+US: RUN_IDS="12,27,42" / "13,28,43" / "14,29,44"
 
 ### Batch Submission
 - `submit_all.sh` - Submit all 15 experiments at once
@@ -77,7 +78,7 @@ According to the paper, expected mIoU results:
 ## Notes
 
 - All experiments use experiment ID 210
-- Each experiment uses a different `--run` parameter (0-14)
+- Each script runs **3 Run IDs** (3 seeds: 7, 25, 42) to compute mIoU mean±std
 - Experiments run independently and can be submitted in parallel
 - Each job requests: 1 GPU, 8 CPUs, 64GB RAM, 24 hours
 

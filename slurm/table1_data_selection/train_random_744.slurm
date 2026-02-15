@@ -12,7 +12,7 @@ set -euo pipefail
 # ===== 实验配置信息 =====
 EXP_TYPE="Random"
 N_LABELS=744
-RUN_ID=10
+RUN_IDS="2,17,32"   # 3 seeds (7, 25, 42) -> mIoU mean±std
 SELECTION_METHOD="Random (baseline)"
 FRACTION="1/4"
 # =========================
@@ -24,7 +24,7 @@ echo "Experiment Type: ${EXP_TYPE}"
 echo "Number of Labels: ${N_LABELS}"
 echo "Selection Method: ${SELECTION_METHOD}"
 echo "Data Fraction: ${FRACTION}"
-echo "Run ID: ${RUN_ID}"
+echo "Run IDs: ${RUN_IDS} (seeds 7, 25, 42)"
 echo "=========================================="
 echo ""
 echo "Running on: $(hostname)"
@@ -39,10 +39,10 @@ source ~/fyp/venvs/sde_seg/bin/activate
 cd /home/u5hv/shijie.u5hv/fyp/improving_segmentation_with_selfsupervised_depth
 
 echo "Starting training..."
-echo "Command: python run_experiments.py --machine ws --exp 210 --run ${RUN_ID}"
+echo "Command: python run_experiments.py --machine ws --exp 210 --run ${RUN_IDS}"
 echo ""
 
-python run_experiments.py --machine ws --exp 210 --run ${RUN_ID}
+python run_experiments.py --machine ws --exp 210 --run ${RUN_IDS}
 
 echo ""
 echo "=========================================="

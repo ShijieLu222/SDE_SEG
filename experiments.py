@@ -112,10 +112,10 @@ def set_segmentation_args(cfg, seg_init, layers, head_inter, output_stride, head
 def subsets(dataset):
     if dataset == "cityscapes":
         return [
-            # 100,
+            100,
             372,
-            # 744,
-            2975,  # Table 3: Full (1/1)
+            744,
+            # 2975,
         ]
     elif dataset == "camvid":
         return [
@@ -155,59 +155,55 @@ def generate_experiment_cfgs(base_cfg, id):
                 42
             ]:
                 mono_pretrain = f'mono_cityscapes_1024x512_r101dil_aspp_dec{dec}_{dec_params}'
-                dc_ft = 0
-                dc_m = 0.03
-                pres_method = None  # Table 3: random selection
-                # ========== TABLE 3: Data Mixing Strategy (论文对齐) ==========
-                # 选样: random (preselect=False). Mixing 池: GA∪GU (labeled+pseudo-labeled)
-                # (name, seg_init, teacher_init, ema, mix_mask, only_unlabeled, mix_use_gt, preselect, mix_video), n_subset_list
-                # only_unlabeled=False -> 池 GA∪GU; mix_use_gt: 372用False(伪标签), 2975用True(全GT)
-                table3_exps = [
-                # Baseline (supervised only)
-                (('scratch', 'none', 'none', False, None, True,  False, False, False), [372, 2975]),
 
-                # Pseudo-Labels (Mean Teacher, no mixing)
-                (('scratch_ema', 'none', 'none', True,  None, True,  False, False, False), [372]),
+                # ========== TABLE 1: Data Selection Methods ==========
+                # Table 1 是纯监督对比：不启用 EMA / mixing
+                # 只改变 "标注子集选择策略" (Random / Entropy / Ours US / Ours DS / Ours DS+US)
+                # 在 #Labeled = 100 / 372 / 744 上跑 3 seeds，取 mIoU mean±std
 
-                # ClassMix (author setting: only_unlabeled=True)
-                (('scratch_classmix', 'none', 'none', True,  "class", True,  False, False, False), [372]),
-
-                # DepthMix (author setting uses mix_use_gt=True, only_unlabeled=False)
-                (('scratch_depthmixgt', 'none', 'none', True, "depthcomp", False, True, False, False), [372, 2975]),
-
-                # Full labels ClassMix-GT (used for 2975 column)
-                (('scratch_classmixgt', 'none', 'none', True, "class", False, True, False, False), [2975]),
+                table1_exps = [
+                    # Random: 运行时随机抽子集（preselect=False -> restrict_mode="random"）
+                    (('random',     'none', 'none', False, None, True, False, False, False), [100, 372, 744]),
+                    # Entropy / Ours: 用固定挑选的子集（preselect=True -> restrict_mode="fixed"）
+                    (('entropy',    'none', 'none', False, None, True, False, True,  False), [100, 372, 744]),
+                    (('ours_us',    'none', 'none', False, None, True, False, True,  False), [100, 372, 744]),
+                    (('ours_ds',    'none', 'none', False, None, True, False, True,  False), [100, 372, 744]),
+                    (('ours_ds_us', 'none', 'none', False, None, True, False, True,  False), [100, 372, 744]),
                 ]
-                for (name, seg_init, teacher_init, ema, mix_mask, only_unlabeled, mix_use_gt, preselect, mix_video), n_subset_list in table3_exps:
+
+                # preselected_labels(method=...) 的 method 字符串：与 loader/preselected_labels.py 中的 key 一致
+                pres_method_map = {
+                    'entropy': 'ent',
+                    'ours_us': 'us',
+                    'ours_ds': 'ds',
+                    'ours_ds_us': 'ds_us',
+                }
+
+                for (name, seg_init, teacher_init, ema, mix_mask, only_unlabeled, mix_use_gt, preselect, mix_video), n_subset_list in table1_exps:
                     for n_subset in n_subset_list:
-                        name = name.replace('.', '').replace(' ', '').replace(',', 'i').replace('(', 'I').replace(')',
-                                                                                                                  'I')
+                        name = name.replace('.', '').replace(' ', '').replace(',', 'i').replace('(', 'I').replace(')', 'I')
+
+                        # Table 1：random vs fixed subset
                         restrict_mode = "fixed" if preselect else "random"
-                        unlab_cfg = {
-                            "consistency_weight": 1.0,
-                            "mix_mask": mix_mask,
-                            "color_jitter": True,
-                            "blur": True,
-                            "only_unlabeled": only_unlabeled,
-                            "only_labeled": False,
-                            "mix_video": mix_video,
-                            "mix_use_gt": mix_use_gt,
-                            "depthcomp_margin": dc_m,
-                            "depthcomp_foreground_threshold": dc_ft,
-                            "backward_first_pseudo_label": False,
-                            "debug_image": True
-                        } if ema else None
-                        unlab_str = "" if not ema else f"_Unlab{unlab_cfg['consistency_weight']}{unlab_cfg['mix_mask']}" + \
-                                                       ("jit" if unlab_cfg["color_jitter"] else "") + (
-                                                           "blur" if unlab_cfg["blur"] else "")
+
+                        # Table 1：纯监督，不启用 unlabeled_segmentation
+                        unlab_cfg = None
+                        unlab_str = ""
+
+                        # 只有 preselect=True 的方法才需要 pres_method
+                        pres_method = pres_method_map.get(name, None) if preselect else None
 
                         cfg = deepcopy(base_cfg)
                         cfg['general'] = {
                             'tag': tune.grid_search([
-                                f"{dataset}_{name}_D{n_subset}{restrict_mode}_S{seed}_{opt}Lr{lr}{blr}{lr_sch}_clip{gclip}_crop{crop[0]}x{crop[1]}bs{batch_size}_flip_r101_dec{dec}_{dec_params}_l{layers[0]}os{output_stride}{'hi' if head_inter else ''}{unlab_str}"])}
+                                f"{dataset}_{name}_D{n_subset}{restrict_mode}_S{seed}_{opt}Lr{lr}{blr}{lr_sch}_clip{gclip}_crop{crop[0]}x{crop[1]}bs{batch_size}_flip_r101_dec{dec}_{dec_params}_l{layers[0]}os{output_stride}{'hi' if head_inter else ''}{unlab_str}"
+                            ])
+                        }
+
                         cfg, load_backbone = decoder_variant(cfg, dec, crop)
-                        cfg['model']['backbone_pretraining'] = mono_pretrain if (
-                                load_backbone and seg_init != "none") else "imnet"
+
+                        # Table 1：全是 scratch，不做 transfer
+                        cfg['model']['backbone_pretraining'] = "imnet"
                         cfg['model']['variant'] = name
                         cfg['model']['depth_pretraining'] = teacher_init
                         cfg['model']['depth_estimator_weights'] = mono_pretrain

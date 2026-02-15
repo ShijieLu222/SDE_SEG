@@ -13,12 +13,8 @@ echo "=========================================="
 echo ""
 
 # Array of all experiment scripts in order
-# Correct Run ID mapping:
-# Random: 0, 5, 10
-# Entropy: 1, 6, 11
-# US: 2, 7, 12
-# DS: 3, 8, 13
-# DS+US: 4, 9, 14
+# Run ID 映射（experiments.py: seed 外层循环）
+# 每个脚本跑 3 个 Run ID = 3 seeds (7, 25, 42) -> mIoU mean±std
 SCRIPTS=(
     "train_random_100.slurm"      # Run 0 - Random 100 (1/30)
     "train_entropy_100.slurm"     # Run 1 - Entropy 100 (1/30)
