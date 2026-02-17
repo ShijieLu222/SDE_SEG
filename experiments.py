@@ -112,10 +112,10 @@ def set_segmentation_args(cfg, seg_init, layers, head_inter, output_stride, head
 def subsets(dataset):
     if dataset == "cityscapes":
         return [
-            100,
+            # 100,
             372,
-            744,
-            # 2975,
+            # 744,
+            2975
         ]
     elif dataset == "camvid":
         return [
@@ -149,64 +149,77 @@ def generate_experiment_cfgs(base_cfg, id):
             (6, "lr5_fd2_crop512x512bs4", (512, 512), 2),
             # (6, "lr5_fd0_crop512x512bs4", (512, 512), 2), # for pretraining w/o feature distance loss
         ]:
+            mono_pretrain = f'mono_cityscapes_1024x512_r101dil_aspp_dec{dec}_{dec_params}'
+            mono_fd0 = f'mono_cityscapes_1024x512_r101dil_aspp_dec{dec}_lr5_fd0_crop512x512bs4'  # Table 5 Transfer (no F)
             for seed in [
                 7,
                 25,
                 42
             ]:
-                mono_pretrain = f'mono_cityscapes_1024x512_r101dil_aspp_dec{dec}_{dec_params}'
-
-                # ========== TABLE 1: Data Selection Methods ==========
-                # Table 1 是纯监督对比：不启用 EMA / mixing
-                # 只改变 "标注子集选择策略" (Random / Entropy / Ours US / Ours DS / Ours DS+US)
-                # 在 #Labeled = 100 / 372 / 744 上跑 3 seeds，取 mIoU mean±std
-
-                table1_exps = [
-                    # Random: 运行时随机抽子集（preselect=False -> restrict_mode="random"）
-                    (('random',     'none', 'none', False, None, True, False, False, False), [100, 372, 744]),
-                    # Entropy / Ours: 用固定挑选的子集（preselect=True -> restrict_mode="fixed"）
-                    (('entropy',    'none', 'none', False, None, True, False, True,  False), [100, 372, 744]),
-                    (('ours_us',    'none', 'none', False, None, True, False, True,  False), [100, 372, 744]),
-                    (('ours_ds',    'none', 'none', False, None, True, False, True,  False), [100, 372, 744]),
-                    (('ours_ds_us', 'none', 'none', False, None, True, False, True,  False), [100, 372, 744]),
-                ]
-
-                # preselected_labels(method=...) 的 method 字符串：与 loader/preselected_labels.py 中的 key 一致
-                pres_method_map = {
-                    'entropy': 'ent',
-                    'ours_us': 'us',
-                    'ours_ds': 'ds',
-                    'ours_ds_us': 'ds_us',
-                }
-
-                for (name, seg_init, teacher_init, ema, mix_mask, only_unlabeled, mix_use_gt, preselect, mix_video), n_subset_list in table1_exps:
-                    for n_subset in n_subset_list:
-                        name = name.replace('.', '').replace(' ', '').replace(',', 'i').replace('(', 'I').replace(')', 'I')
-
-                        # Table 1：random vs fixed subset
+                for n_subset in subsets(dataset):
+                    dc_ft = 0
+                    dc_m = 0.03
+                    pres_method = "ds_us"  # available: "ent", "ds", "us", "ds_us"
+                    for name, seg_init, teacher_init, ema, mix_mask, only_unlabeled, mix_use_gt, preselect, mix_video in [
+                        # Table 5: Baseline, Transfer (no F), Transfer (F=✓)
+                        ('scratch', 'none', 'none', False, None, True, False, False, False),
+                        ('transfer_noF', mono_fd0, mono_fd0, False, None, True, False, False, False),
+                        ('transfer_F', mono_pretrain, mono_pretrain, False, None, True, False, False, False),
+                        # (f'sel_{pres_method}_scratch', 'none', 'none', False, None, True, False, True, False),
+                        # ('scratch_ema', 'none', 'none', True, None, True, False, False, False),
+                        # ('scratch_classmix', 'none', 'none', True, "class", True, False, False, False),
+                        # ('scratch_classmix_video', 'none', 'none', True, "class", False, False, False, True),
+                        # ("scratch_classmixgt", 'none', 'none', True, "class", False, True, False, False),
+                        # ("scratch_depthmixgt", 'none', 'none', True, "depthcomp", False, True, False, False),
+                        # ('transfer', mono_pretrain, mono_pretrain, False, None, True, False, False, False),
+                        # ('transfer_ema', mono_pretrain, mono_pretrain, True, None, True, False, False, False),
+                        # ('transfer_classmix', mono_pretrain, mono_pretrain, True, "class", True, False, False, False),
+                        # ('transfer_classmixgtall', mono_pretrain, mono_pretrain, True, "class", False, True, False, False),
+                        # (f'transfer_dcompgt{dc_m}{dc_ft}', mono_pretrain, mono_pretrain, True, "depthcomp", False, True,
+                        #  False, False),
+                        # (f'sel_{pres_method}_transfer_dcompgt{dc_m}{dc_ft}', mono_pretrain, mono_pretrain, True, "depthcomp", False,
+                        #  True, True, False),
+                    ]:
+                        name = name.replace('.', '').replace(' ', '').replace(',', 'i').replace('(', 'I').replace(')',
+                                                                                                                  'I')
                         restrict_mode = "fixed" if preselect else "random"
-
-                        # Table 1：纯监督，不启用 unlabeled_segmentation
-                        unlab_cfg = None
-                        unlab_str = ""
-
-                        # 只有 preselect=True 的方法才需要 pres_method
-                        pres_method = pres_method_map.get(name, None) if preselect else None
+                        unlab_cfg = {
+                            "consistency_weight": 1.0,
+                            "mix_mask": mix_mask,
+                            "color_jitter": True,
+                            "blur": True,
+                            "only_unlabeled": only_unlabeled,
+                            "only_labeled": False,
+                            "mix_video": mix_video,
+                            "mix_use_gt": mix_use_gt,
+                            "depthcomp_margin": dc_m,
+                            "depthcomp_foreground_threshold": dc_ft,
+                            "backward_first_pseudo_label": False,
+                            "debug_image": True
+                        } if ema else None
+                        unlab_str = "" if not ema else f"_Unlab{unlab_cfg['consistency_weight']}{unlab_cfg['mix_mask']}" + \
+                                                       ("jit" if unlab_cfg["color_jitter"] else "") + (
+                                                           "blur" if unlab_cfg["blur"] else "")
 
                         cfg = deepcopy(base_cfg)
                         cfg['general'] = {
                             'tag': tune.grid_search([
-                                f"{dataset}_{name}_D{n_subset}{restrict_mode}_S{seed}_{opt}Lr{lr}{blr}{lr_sch}_clip{gclip}_crop{crop[0]}x{crop[1]}bs{batch_size}_flip_r101_dec{dec}_{dec_params}_l{layers[0]}os{output_stride}{'hi' if head_inter else ''}{unlab_str}"
-                            ])
-                        }
-
+                                f"{dataset}_{name}_D{n_subset}{restrict_mode}_S{seed}_{opt}Lr{lr}{blr}{lr_sch}_clip{gclip}_crop{crop[0]}x{crop[1]}bs{batch_size}_flip_r101_dec{dec}_{dec_params}_l{layers[0]}os{output_stride}{'hi' if head_inter else ''}{unlab_str}"])}
                         cfg, load_backbone = decoder_variant(cfg, dec, crop)
-
-                        # Table 1：全是 scratch，不做 transfer
-                        cfg['model']['backbone_pretraining'] = "imnet"
+                        cfg['model']['backbone_pretraining'] = (seg_init if (load_backbone and seg_init != "none") else "imnet")
                         cfg['model']['variant'] = name
                         cfg['model']['depth_pretraining'] = teacher_init
-                        cfg['model']['depth_estimator_weights'] = mono_pretrain
+                        cfg['model']['depth_estimator_weights'] = teacher_init if teacher_init != "none" else mono_pretrain
+                        # Table 5 Transfer (F=✓): F is in SDE *pretraining*, not in seg training.
+                        # transfer_F only differs from transfer_noF by init: fd2 (trained with F) vs fd0.
+                        # Seg training: CE only, no monodepth, no feat_dist.
+                        # if name == 'transfer_F':
+                        #     cfg['model']['disable_monodepth'] = False
+                        #     cfg['model']['disable_pose'] = False
+                        #     cfg['model']['pose_pretraining'] = teacher_init
+                        #     cfg['model']['enable_imnet_encoder'] = True
+                        #     cfg['training']['monodepth_lambda'] = 1.0
+                        #     cfg['training']['feat_dist_lambda'] = 1.0e-2
                         cfg = setup_optimizer(cfg, opt, lr, blr, None, None, gclip)
                         cfg["training"]["batch_size"] = batch_size
                         cfg = setup_dataset(cfg, dataset, crop, lr_sch)
@@ -332,8 +345,8 @@ def generate_experiment_cfgs(base_cfg, id):
         seg_lambda = 1
         dec, dec_params, crop, batch_size = (6, "lr5_fd2_crop512x512bs4", (512, 512), 2)
         for seed in [
-            # 7,
-            # 25,
+            7,
+            25,
             42
         ]:
             for n_subset in subsets(dataset):
@@ -341,8 +354,10 @@ def generate_experiment_cfgs(base_cfg, id):
                 dc_m = 0.03
                 pres_method = "ds_us"  # available: "ent", "ds", "us", "ds_us"
                 for name, ema, mix_mask, only_unlabeled, mix_use_gt, preselect in [
-                    (f'pad_transfer_dcompgt{dc_m}{dc_ft}', True, "depthcomp", False, True, False),
-                    (f'sel_{pres_method}_pad_transfer_dcompgt{dc_m}{dc_ft}', True, "depthcomp", False, True, True),
+                    # Table 5 Multi-Task (F=✓): seg + depth, fd2 init, supervised only
+                    ('pad_transfer', False, None, True, False, False),
+                    # (f'pad_transfer_dcompgt{dc_m}{dc_ft}', True, "depthcomp", False, True, False),
+                    # (f'sel_{pres_method}_pad_transfer_dcompgt{dc_m}{dc_ft}', True, "depthcomp", False, True, True),
                 ]:
                     name = name.replace('.', '').replace(' ', '').replace(',', 'i').replace('(', 'I').replace(')', 'I')
                     restrict_mode = "fixed" if preselect else "random"
@@ -380,6 +395,9 @@ def generate_experiment_cfgs(base_cfg, id):
                     cfg['model']['pose_pretraining'] = mono_pretrain
                     cfg['model']['disable_pose'] = mono_lambda == 0
                     cfg['model']['disable_monodepth'] = False
+                    # F=✓ means init from fd2 (SDE pretrained with F). No feat_dist in multi-task stage.
+                    # cfg['model']['enable_imnet_encoder'] = True  # Table 5: feat dist
+                    # cfg['training']['feat_dist_lambda'] = 1.0e-2  # Table 5 Multi-Task (F=✓)
                     cfg['training']['segmentation_lambda'] = seg_lambda
                     cfg['training']['monodepth_lambda'] = mono_lambda
                     cfg['training']['disable_depth_estimator'] = True
