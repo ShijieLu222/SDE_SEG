@@ -327,7 +327,14 @@ class Trainer():
 
     def create_ema_model(self, model):
         ema_cfg = deepcopy(self.cfg["model"])
-        ema_cfg["disable_pose"] = True
+        # Keep pose network if DepthMix requires online depth generation
+        require_pose_for_depth = False
+        if self.cfg["training"].get("unlabeled_segmentation") is not None:
+            unlab_cfg = self.cfg["training"]["unlabeled_segmentation"]
+            if unlab_cfg.get("depthmix_online_depth", False) or unlab_cfg.get("mix_use_gt", False):
+                require_pose_for_depth = True
+        if not require_pose_for_depth:
+            ema_cfg["disable_pose"] = True
         ema_model = get_model(ema_cfg, self.n_classes)
         if self.cfg["training"]["save_monodepth_ema"]:
             mp, mcp = self.extract_monodepth_ema_params(model, ema_model)

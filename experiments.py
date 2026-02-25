@@ -112,10 +112,10 @@ def set_segmentation_args(cfg, seg_init, layers, head_inter, output_stride, head
 def subsets(dataset):
     if dataset == "cityscapes":
         return [
-            # 100,
+            100,
             372,
-            # 744,
-            2975
+            744,
+            # 2975
         ]
     elif dataset == "camvid":
         return [
@@ -149,22 +149,18 @@ def generate_experiment_cfgs(base_cfg, id):
             (6, "lr5_fd2_crop512x512bs4", (512, 512), 2),
             # (6, "lr5_fd0_crop512x512bs4", (512, 512), 2), # for pretraining w/o feature distance loss
         ]:
-            mono_pretrain = f'mono_cityscapes_1024x512_r101dil_aspp_dec{dec}_{dec_params}'
-            mono_fd0 = f'mono_cityscapes_1024x512_r101dil_aspp_dec{dec}_lr5_fd0_crop512x512bs4'  # Table 5 Transfer (no F)
             for seed in [
                 7,
                 25,
                 42
             ]:
+                mono_pretrain = f'mono_cityscapes_1024x512_r101dil_aspp_dec{dec}_{dec_params}'
                 for n_subset in subsets(dataset):
                     dc_ft = 0
                     dc_m = 0.03
                     pres_method = "ds_us"  # available: "ent", "ds", "us", "ds_us"
                     for name, seg_init, teacher_init, ema, mix_mask, only_unlabeled, mix_use_gt, preselect, mix_video in [
-                        # Table 5: Baseline, Transfer (no F), Transfer (F=✓)
                         ('scratch', 'none', 'none', False, None, True, False, False, False),
-                        ('transfer_noF', mono_fd0, mono_fd0, False, None, True, False, False, False),
-                        ('transfer_F', mono_pretrain, mono_pretrain, False, None, True, False, False, False),
                         # (f'sel_{pres_method}_scratch', 'none', 'none', False, None, True, False, True, False),
                         # ('scratch_ema', 'none', 'none', True, None, True, False, False, False),
                         # ('scratch_classmix', 'none', 'none', True, "class", True, False, False, False),
@@ -206,20 +202,11 @@ def generate_experiment_cfgs(base_cfg, id):
                             'tag': tune.grid_search([
                                 f"{dataset}_{name}_D{n_subset}{restrict_mode}_S{seed}_{opt}Lr{lr}{blr}{lr_sch}_clip{gclip}_crop{crop[0]}x{crop[1]}bs{batch_size}_flip_r101_dec{dec}_{dec_params}_l{layers[0]}os{output_stride}{'hi' if head_inter else ''}{unlab_str}"])}
                         cfg, load_backbone = decoder_variant(cfg, dec, crop)
-                        cfg['model']['backbone_pretraining'] = (seg_init if (load_backbone and seg_init != "none") else "imnet")
+                        cfg['model']['backbone_pretraining'] = mono_pretrain if (
+                                load_backbone and seg_init != "none") else "imnet"
                         cfg['model']['variant'] = name
                         cfg['model']['depth_pretraining'] = teacher_init
-                        cfg['model']['depth_estimator_weights'] = teacher_init if teacher_init != "none" else mono_pretrain
-                        # Table 5 Transfer (F=✓): F is in SDE *pretraining*, not in seg training.
-                        # transfer_F only differs from transfer_noF by init: fd2 (trained with F) vs fd0.
-                        # Seg training: CE only, no monodepth, no feat_dist.
-                        # if name == 'transfer_F':
-                        #     cfg['model']['disable_monodepth'] = False
-                        #     cfg['model']['disable_pose'] = False
-                        #     cfg['model']['pose_pretraining'] = teacher_init
-                        #     cfg['model']['enable_imnet_encoder'] = True
-                        #     cfg['training']['monodepth_lambda'] = 1.0
-                        #     cfg['training']['feat_dist_lambda'] = 1.0e-2
+                        cfg['model']['depth_estimator_weights'] = mono_pretrain
                         cfg = setup_optimizer(cfg, opt, lr, blr, None, None, gclip)
                         cfg["training"]["batch_size"] = batch_size
                         cfg = setup_dataset(cfg, dataset, crop, lr_sch)
@@ -345,8 +332,8 @@ def generate_experiment_cfgs(base_cfg, id):
         seg_lambda = 1
         dec, dec_params, crop, batch_size = (6, "lr5_fd2_crop512x512bs4", (512, 512), 2)
         for seed in [
-            7,
-            25,
+            # 7,
+            # 25,
             42
         ]:
             for n_subset in subsets(dataset):
@@ -354,10 +341,8 @@ def generate_experiment_cfgs(base_cfg, id):
                 dc_m = 0.03
                 pres_method = "ds_us"  # available: "ent", "ds", "us", "ds_us"
                 for name, ema, mix_mask, only_unlabeled, mix_use_gt, preselect in [
-                    # Table 5 Multi-Task (F=✓): seg + depth, fd2 init, supervised only
-                    ('pad_transfer', False, None, True, False, False),
-                    # (f'pad_transfer_dcompgt{dc_m}{dc_ft}', True, "depthcomp", False, True, False),
-                    # (f'sel_{pres_method}_pad_transfer_dcompgt{dc_m}{dc_ft}', True, "depthcomp", False, True, True),
+                    (f'pad_transfer_dcompgt{dc_m}{dc_ft}', True, "depthcomp", False, True, False),
+                    (f'sel_{pres_method}_pad_transfer_dcompgt{dc_m}{dc_ft}', True, "depthcomp", False, True, True),
                 ]:
                     name = name.replace('.', '').replace(' ', '').replace(',', 'i').replace('(', 'I').replace(')', 'I')
                     restrict_mode = "fixed" if preselect else "random"
@@ -395,9 +380,6 @@ def generate_experiment_cfgs(base_cfg, id):
                     cfg['model']['pose_pretraining'] = mono_pretrain
                     cfg['model']['disable_pose'] = mono_lambda == 0
                     cfg['model']['disable_monodepth'] = False
-                    # F=✓ means init from fd2 (SDE pretrained with F). No feat_dist in multi-task stage.
-                    # cfg['model']['enable_imnet_encoder'] = True  # Table 5: feat dist
-                    # cfg['training']['feat_dist_lambda'] = 1.0e-2  # Table 5 Multi-Task (F=✓)
                     cfg['training']['segmentation_lambda'] = seg_lambda
                     cfg['training']['monodepth_lambda'] = mono_lambda
                     cfg['training']['disable_depth_estimator'] = True
@@ -421,6 +403,145 @@ def generate_experiment_cfgs(base_cfg, id):
                         'final_layer': final_layer
                     }
                     cfgs.append(cfg)
+    # Table 7: Framework component ablation (S: Data Selection, DX: DepthMix, MTL: SDE Multi-Task Learning)
+    elif id == 213:
+        dataset = "cityscapes"
+        pres_method = "ds_us"
+        dc_ft, dc_m = 0, 0.03
+        mono_pretrain = 'mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4'
+        dec, dec_params, crop, batch_size = (6, "lr5_fd2_crop512x512bs4", (512, 512), 2)
+
+        # (S, DX, MTL): (preselect, ema+DepthMix, use_mtl_arch)
+        # Table 7: 8 combinations, 372 labels for all, 2975 only for Baseline/MTL/DX/DX+MTL
+        table7_combos = [
+            (False, False, False, [372, 2975]),   # 1. Baseline
+            (False, False, True, [372, 2975]),    # 2. MTL only
+            (False, True, False, [372, 2975]),    # 3. DX only
+            (True, False, False, [372]),          # 4. S only (2975 not in table)
+            (True, False, True, [372]),           # 5. S+MTL (2975 not in table)
+            (True, True, False, [372]),           # 6. S+DX (2975 not in table)
+            (False, True, True, [372, 2975]),     # 7. DX+MTL
+            (True, True, True, [372]),            # 8. S+DX+MTL (2975 not in table)
+        ]
+
+        for combo_idx, (preselect, use_dx, use_mtl, n_subsets) in enumerate(table7_combos):
+            for n_subset in n_subsets:
+                for seed in [7, 25, 42]:
+                    restrict_mode = "fixed" if preselect else "random"
+                    # MTL experiments always use EMA (semi-supervised), non-MTL experiments use EMA only if DepthMix is enabled
+                    ema = use_mtl or use_dx  # MTL always uses EMA, DX also requires EMA
+
+                    if use_mtl:
+                        # exp 212 style: MTL (mtl_pad)
+                        final_layer, distillation_layer = 9, 7
+                        opt, lr, blr, plr, dlr = "sgd", 1e-2, 1e-3, 1e-6, 1e-3
+                        gclip, disable_depth_clip = 10, False
+                        mono_lambda, seg_lambda = 1, 1
+                        lr_sch, backward_first = "stepx", False
+
+                        mix_mask = "depthcomp" if use_dx else None
+                        unlab_cfg = {
+                            "consistency_weight": 1.0, "mix_mask": mix_mask, "depthmix_online_depth": use_dx,
+                            "backward_first_pseudo_label": backward_first, "color_jitter": True, "blur": True,
+                            "only_unlabeled": False, "mix_use_gt": use_dx, "depthcomp_margin": dc_m,
+                            "depthcomp_foreground_threshold": dc_ft, "debug_image": True
+                        } if ema else None
+                        unlab_str = "" if not ema else f"_Unlab1.0{mix_mask}FPL{backward_first}jitblur"
+
+                        name = f'sel_{pres_method}_pad_transfer_dcompgt{dc_m}{dc_ft}' if preselect else f'pad_transfer_dcompgt{dc_m}{dc_ft}'
+                        if not use_dx:
+                            name = f'sel_{pres_method}_pad_transfer' if preselect else 'pad_transfer'
+                        name = name.replace('.', '').replace(' ', '').replace(',', 'i').replace('(', 'I').replace(')', 'I')
+
+                        cfg = deepcopy(base_cfg)
+                        cfg['general'] = {
+                            'tag': tune.grid_search([
+                                f"{dataset}_{name}_D{n_subset}{restrict_mode}_S{seed}_{opt}Lr{lr:.0E}{blr:.0E}{plr:.0E}{dlr:.0E}{lr_sch}_clip{gclip}{disable_depth_clip}_m{mono_lambda}s{seg_lambda}_crop{crop[0]}x{crop[1]}bs{batch_size}_flip_dec{dec}_{dec_params}_l{final_layer}i{distillation_layer}Trueos1{unlab_str}"])}
+                        cfg['model']['segmentation_name'] = 'mtl_pad'
+                        cfg['model']['backbone_name'] = 'resnet101'
+                        cfg, _ = decoder_variant(cfg, dec, crop)
+                        cfg['model']['backbone_pretraining'] = mono_pretrain
+                        cfg['model']['variant'] = name
+                        cfg['model']['depth_estimator_weights'] = mono_pretrain
+                        cfg['model']['depth_pretraining'] = mono_pretrain
+                        cfg['model']['pose_pretraining'] = mono_pretrain
+                        cfg['model']['disable_pose'] = mono_lambda == 0
+                        cfg['model']['disable_monodepth'] = False
+                        cfg['training']['segmentation_lambda'] = seg_lambda
+                        cfg['training']['monodepth_lambda'] = mono_lambda
+                        cfg['training']['disable_depth_estimator'] = True
+                        cfg = setup_optimizer(cfg, opt, lr, blr, plr, None, gclip)
+                        cfg["training"]["disable_depth_grad_clip"] = disable_depth_clip
+                        cfg["training"]["batch_size"] = batch_size
+                        cfg = setup_dataset(cfg, dataset, crop, lr_sch)
+                        cfg['data']['restrict_to_subset']['mode'] = restrict_mode
+                        cfg['data']['restrict_to_subset']['n_subset'] = n_subset
+                        if preselect:
+                            cfg['data']['restrict_to_subset']['subset'] = preselected_labels(
+                                {7: 42, 25: 43, 42: 44}[seed], n_subset, dataset, method=pres_method
+                            )
+                        cfg['training']['unlabeled_segmentation'] = unlab_cfg
+                        cfg['seed'] = seed
+                        cfg['model']['segmentation_args'] = {
+                            'weights': mono_pretrain, 'output_stride': 1,
+                            'distillation_layer': distillation_layer, 'side_output': True, 'final_layer': final_layer
+                        }
+                        cfgs.append(cfg)
+                    else:
+                        # exp 210 style: joint_seg_depth (transfer-based, with or without DepthMix)
+                        layers, output_stride, head_inter = [9], 1, False
+                        opt, lr, blr, gclip = "sgd", 1e-2, 1e-3, 10
+                        lr_sch = "stepx"
+
+                        # Table 7 baseline and all experiments are transfer-based (not scratch)
+                        seg_init, teacher_init = mono_pretrain, mono_pretrain
+                        if use_dx:
+                            mix_mask = "depthcomp"
+                            only_unlabeled, mix_use_gt = False, True
+                            name = f'sel_{pres_method}_transfer_dcompgt{dc_m}{dc_ft}' if preselect else f'transfer_dcompgt{dc_m}{dc_ft}'
+                        else:
+                            mix_mask = None
+                            only_unlabeled, mix_use_gt = True, False
+                            name = f'sel_{pres_method}_transfer' if preselect else 'transfer'
+
+                        name = name.replace('.', '').replace(' ', '').replace(',', 'i').replace('(', 'I').replace(')', 'I')
+                        unlab_cfg = {
+                            "consistency_weight": 1.0, "mix_mask": mix_mask, "color_jitter": True, "blur": True,
+                            "only_unlabeled": only_unlabeled, "only_labeled": False, "mix_video": False,
+                            "mix_use_gt": mix_use_gt, "depthcomp_margin": dc_m, "depthcomp_foreground_threshold": dc_ft,
+                            "backward_first_pseudo_label": False, "debug_image": True,
+                            "depthmix_online_depth": use_dx,
+                        } if ema else None
+                        unlab_str = "" if not ema else f"_Unlab{1.0}{mix_mask}jitblur"
+
+                        cfg = deepcopy(base_cfg)
+                        cfg['general'] = {
+                            'tag': tune.grid_search([
+                                f"{dataset}_{name}_D{n_subset}{restrict_mode}_S{seed}_{opt}Lr{lr}{blr}{lr_sch}_clip{gclip}_crop{crop[0]}x{crop[1]}bs{batch_size}_flip_r101_dec{dec}_{dec_params}_l{layers[0]}os{output_stride}{'hi' if head_inter else ''}{unlab_str}"])}
+                        cfg, load_backbone = decoder_variant(cfg, dec, crop)
+                        cfg['model']['backbone_pretraining'] = mono_pretrain if (load_backbone and seg_init != "none") else "imnet"
+                        cfg['model']['variant'] = name
+                        cfg['model']['depth_pretraining'] = teacher_init
+                        cfg['model']['depth_estimator_weights'] = mono_pretrain
+                        if use_dx:
+                            cfg['model']['disable_monodepth'] = False
+                            cfg['model']['disable_pose'] = False
+                            cfg['model']['pose_pretraining'] = mono_pretrain
+                            cfg['training']['monodepth_lambda'] = 1
+                            cfg['training']['pseudo_depth_lambda'] = 1
+                        cfg = setup_optimizer(cfg, opt, lr, blr, None, None, gclip)
+                        cfg["training"]["batch_size"] = batch_size
+                        cfg = setup_dataset(cfg, dataset, crop, lr_sch)
+                        cfg['data']['restrict_to_subset']['mode'] = restrict_mode
+                        cfg['data']['restrict_to_subset']['n_subset'] = n_subset
+                        if preselect:
+                            cfg['data']['restrict_to_subset']['subset'] = preselected_labels(
+                                {7: 42, 25: 43, 42: 44}[seed], n_subset, dataset, method=pres_method
+                            )
+                        cfg['training']['unlabeled_segmentation'] = unlab_cfg
+                        cfg['seed'] = seed
+                        cfg = set_segmentation_args(cfg, seg_init=seg_init, layers=layers, head_inter=head_inter, output_stride=output_stride)
+                        cfgs.append(cfg)
     else:
         raise NotImplementedError("Unknown id {}".format(id))
 
