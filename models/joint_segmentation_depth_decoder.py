@@ -104,6 +104,7 @@ class PAD(nn.Module):
 
         self.sa_depth = SelfAttention(distillation_ch, distillation_ch)
         self.sa_seg = SelfAttention(distillation_ch, distillation_ch)
+        self.cross_task_proj = nn.Conv2d(distillation_ch, distillation_ch, 1)
         if self.side_output:
             self.seg_intermediate_head = nn.Sequential(
                 nn.Conv2d(distillation_ch, self.num_classes, 1)
@@ -126,6 +127,7 @@ class PAD(nn.Module):
             *self.seg_dec.parameters(),
             *self.sa_depth.parameters(),
             *self.seg_final_head.parameters(),
+            *self.cross_task_proj.parameters(),
         ]
         if self.side_output:
             params.extend(self.seg_intermediate_head.parameters())
@@ -158,6 +160,10 @@ class PAD(nn.Module):
         merged_for_seg = seg_features[intermediate_layer_name] + features_sa_depth
         merged_for_depth = depth_features[intermediate_layer_name] + features_sa_seg
 
+        # Save distillation features from first half (second half overwrites seg_features and drops this key)
+        feat_seg_distill = seg_features[intermediate_layer_name]
+        feat_depth_distill = depth_features[intermediate_layer_name]
+
         if PAD.first_iter:
             print(f"PAD run second half of decoder ({second_exec_layers}).")
         depth_features.update(self.depth_dec(encoder_features, x=merged_for_depth, exec_layer=second_exec_layers))
@@ -178,6 +184,8 @@ class PAD(nn.Module):
         out = {
             **depth_features,
             "semantics": final_seg,
+            "feat_seg_distill": feat_seg_distill,
+            "feat_depth_distill": feat_depth_distill,
         }
         if self.side_output:
             out["intermediate_semantics"] = intermediate_seg

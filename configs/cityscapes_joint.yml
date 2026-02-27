@@ -66,6 +66,9 @@ training:
   pseudo_depth_lambda: 0.0
   feat_dist_lambda: 0.0
   segmentation_lambda: 1.0
+  cross_task_lambda: 0.0
+  cross_task_type: mse
+  cross_task_detach_depth: false
   unlabeled_segmentation:
   monodepth_loss:
     min_depth: 0.1

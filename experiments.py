@@ -542,6 +542,61 @@ def generate_experiment_cfgs(base_cfg, id):
                         cfg['seed'] = seed
                         cfg = set_segmentation_args(cfg, seg_init=seg_init, layers=layers, head_inter=head_inter, output_stride=output_stride)
                         cfgs.append(cfg)
+    # Cross-task consistency loss ablation (MTL only, 372 labels, 3 seeds, 4 lambdas)
+    elif id == 214:
+        dataset = "cityscapes"
+        pres_method = "ds_us"
+        mono_pretrain = 'mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4'
+        dec, dec_params, crop, batch_size = (6, "lr5_fd2_crop512x512bs4", (512, 512), 2)
+        n_subset = 372
+        final_layer, distillation_layer = 9, 7
+        opt, lr, blr, plr, dlr = "sgd", 1e-2, 1e-3, 1e-6, 1e-3
+        gclip, disable_depth_clip = 10, False
+        mono_lambda, seg_lambda = 1, 1
+        lr_sch, backward_first = "stepx", False
+        unlab_cfg = {
+            "consistency_weight": 1.0, "mix_mask": None, "depthmix_online_depth": False,
+            "backward_first_pseudo_label": backward_first, "color_jitter": True, "blur": True,
+            "only_unlabeled": False, "mix_use_gt": False, "depthcomp_margin": 0.03,
+            "depthcomp_foreground_threshold": 0, "debug_image": True
+        }
+        unlab_str = "_Unlab1.0NoneFPLFalsejitblur"
+        for cross_task_lambda in [0.0, 0.01, 0.05, 0.1]:
+            for seed in [7, 25, 42]:
+                cfg = deepcopy(base_cfg)
+                if cfg['data'].get('restrict_to_subset') is None:
+                    cfg['data']['restrict_to_subset'] = {}
+                tag = f"{dataset}_pad_transfer_ct{cross_task_lambda}_D{n_subset}_S{seed}_{opt}Lr{lr:.0E}{blr:.0E}{plr:.0E}{dlr:.0E}{lr_sch}_clip{gclip}{disable_depth_clip}_m{mono_lambda}s{seg_lambda}_crop{crop[0]}x{crop[1]}bs{batch_size}_flip_dec{dec}_{dec_params}_l{final_layer}i{distillation_layer}Trueos1{unlab_str}"
+                cfg['general'] = {'tag': tune.grid_search([tag])}
+                cfg['model']['segmentation_name'] = 'mtl_pad'
+                cfg['model']['backbone_name'] = 'resnet101'
+                cfg, _ = decoder_variant(cfg, dec, crop)
+                cfg['model']['backbone_pretraining'] = mono_pretrain
+                cfg['model']['variant'] = 'pad_transfer_cross_task'
+                cfg['model']['depth_estimator_weights'] = mono_pretrain
+                cfg['model']['depth_pretraining'] = mono_pretrain
+                cfg['model']['pose_pretraining'] = mono_pretrain
+                cfg['model']['disable_pose'] = False
+                cfg['model']['disable_monodepth'] = False
+                cfg['training']['segmentation_lambda'] = seg_lambda
+                cfg['training']['monodepth_lambda'] = mono_lambda
+                cfg['training']['cross_task_lambda'] = cross_task_lambda
+                cfg['training']['cross_task_type'] = 'mse'
+                cfg['training']['cross_task_detach_depth'] = False
+                cfg['training']['disable_depth_estimator'] = True
+                cfg = setup_optimizer(cfg, opt, lr, blr, plr, None, gclip)
+                cfg["training"]["disable_depth_grad_clip"] = disable_depth_clip
+                cfg["training"]["batch_size"] = batch_size
+                cfg = setup_dataset(cfg, dataset, crop, lr_sch)
+                cfg['data']['restrict_to_subset']['mode'] = 'random'
+                cfg['data']['restrict_to_subset']['n_subset'] = n_subset
+                cfg['training']['unlabeled_segmentation'] = unlab_cfg
+                cfg['seed'] = seed
+                cfg['model']['segmentation_args'] = {
+                    'weights': mono_pretrain, 'output_stride': 1,
+                    'distillation_layer': distillation_layer, 'side_output': True, 'final_layer': final_layer
+                }
+                cfgs.append(cfg)
     else:
         raise NotImplementedError("Unknown id {}".format(id))
 

@@ -24,7 +24,7 @@ from loader import build_loader
 from loader import transformsgpu, transformmasks
 from loader.depth_estimator import DepthEstimator
 from loss import get_segmentation_loss_function, get_monodepth_loss
-from loss.loss import cross_entropy2d, berhu
+from loss.loss import cross_entropy2d, berhu, cross_task_consistency_loss
 from models import get_model
 from models.joint_segmentation_depth_decoder import PAD
 from utils.early_stopping import EarlyStopping
@@ -365,8 +365,6 @@ class Trainer():
         return ema_model
 
     def save_resume(self, step):
-        if self.ema_model is not None:
-            raise NotImplementedError("ema model not supported")
         state = {
             "epoch": step + 1,
             "model_state": self.model.state_dict(),
@@ -374,6 +372,8 @@ class Trainer():
             "scheduler_state": self.scheduler.state_dict(),
             "best_iou": self.best_iou,
         }
+        if self.ema_model is not None:
+            state["ema_model_state"] = self.ema_model.state_dict()
         save_path = os.path.join(
             self.writer.file_writer.get_logdir(),
             "best_model.pkl"
@@ -465,6 +465,7 @@ class Trainer():
         self.optimizer.zero_grad()
         segmentation_loss = torch.tensor(0)
         segmentation_total_loss = torch.tensor(0)
+        cross_task_loss = torch.tensor(0.0, device=self.device)
         mono_loss = torch.tensor(0)
         feat_dist_loss = torch.tensor(0)
         mono_total_loss = torch.tensor(0)
@@ -514,6 +515,19 @@ class Trainer():
                     segmentation_loss /= 2
                 segmentation_loss *= self.cfg["training"]["segmentation_lambda"]
                 segmentation_total_loss = segmentation_loss
+
+                cross_task_lambda = self.cfg["training"].get("cross_task_lambda", 0.0)
+                if cross_task_lambda > 0 and "mtl_decoder" in self.model.models and "feat_seg_distill" in outputs:
+                    feat_d = outputs["feat_depth_distill"]
+                    if self.cfg["training"].get("cross_task_detach_depth", False):
+                        feat_d = feat_d.detach()
+                    feat_d_proj = self.model.models["mtl_decoder"].cross_task_proj(feat_d)
+                    ct_type = self.cfg["training"].get("cross_task_type", "mse")
+                    L_ct = cross_task_consistency_loss(
+                        outputs["feat_seg_distill"], feat_d_proj, loss_type=ct_type
+                    )
+                    segmentation_total_loss = segmentation_total_loss + cross_task_lambda * L_ct
+                    cross_task_loss = L_ct.detach()
             self.scaler.scale(segmentation_total_loss).backward()
             if self.enable_unlabled_segmentation:
                 unlabeled_loss, unlabeled_mono_loss = self.train_step_segmentation_unlabeled(unlabeled_inputs, step)
@@ -547,6 +561,7 @@ class Trainer():
 
         return {
             'segmentation_loss': segmentation_loss.detach(),
+            'cross_task_loss': cross_task_loss.detach(),
             'mono_loss': mono_loss.detach(),
             'pseudo_depth_loss': pseudo_depth_loss.detach(),
             'feat_dist_loss': feat_dist_loss.detach(),

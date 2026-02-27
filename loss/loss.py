@@ -37,6 +37,24 @@ def cross_entropy2d(input, target, class_weight=None, pixel_weights=None):
     return loss
 
 
+def cross_task_consistency_loss(feat_seg, feat_depth_proj, loss_type="mse"):
+    """
+    L_ct = sum_p || f_seg(p) - feat_depth_proj(p) ||^2 (or l1).
+    Both tensors: (B, C, H, W). Spatial sizes must match (caller resizes if needed).
+    """
+    assert feat_seg.dim() == 4 and feat_depth_proj.dim() == 4
+    if feat_seg.shape != feat_depth_proj.shape:
+        feat_depth_proj = F.interpolate(
+            feat_depth_proj, size=feat_seg.shape[2:], mode="bilinear", align_corners=False
+        )
+    if loss_type == "mse":
+        return F.mse_loss(feat_seg, feat_depth_proj)
+    elif loss_type == "l1":
+        return F.l1_loss(feat_seg, feat_depth_proj)
+    else:
+        raise NotImplementedError("cross_task_consistency_loss type {}".format(loss_type))
+
+
 def pixel_wise_entropy(logits, normalize=False):
     assert logits.dim() == 4
     p = F.softmax(logits, dim=1)
