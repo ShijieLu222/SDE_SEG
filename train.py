@@ -517,7 +517,9 @@ class Trainer():
                 segmentation_total_loss = segmentation_loss
 
                 cross_task_lambda = self.cfg["training"].get("cross_task_lambda", 0.0)
-                if cross_task_lambda > 0 and "mtl_decoder" in self.model.models and "feat_seg_distill" in outputs:
+                cross_task_warmup = self.cfg["training"].get("cross_task_warmup_iters", 0)
+                apply_ct = cross_task_lambda > 0 and step >= cross_task_warmup
+                if apply_ct and "mtl_decoder" in self.model.models and "feat_seg_distill" in outputs:
                     feat_d = outputs["feat_depth_distill"]
                     if self.cfg["training"].get("cross_task_detach_depth", False):
                         feat_d = feat_d.detach()

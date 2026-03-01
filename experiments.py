@@ -561,7 +561,8 @@ def generate_experiment_cfgs(base_cfg, id):
             "depthcomp_foreground_threshold": 0, "debug_image": True
         }
         unlab_str = "_Unlab1.0NoneFPLFalsejitblur"
-        for cross_task_lambda in [0.0, 0.01, 0.05, 0.1]:
+        # Lambda sweep: baseline + 0.001, 0.0015, 0.002; detach_depth=True to avoid backprop to depth branch
+        for cross_task_lambda in [0.0, 0.001, 0.0015, 0.002]:
             for seed in [7, 25, 42]:
                 cfg = deepcopy(base_cfg)
                 if cfg['data'].get('restrict_to_subset') is None:
@@ -581,8 +582,9 @@ def generate_experiment_cfgs(base_cfg, id):
                 cfg['training']['segmentation_lambda'] = seg_lambda
                 cfg['training']['monodepth_lambda'] = mono_lambda
                 cfg['training']['cross_task_lambda'] = cross_task_lambda
-                cfg['training']['cross_task_type'] = 'mse'
-                cfg['training']['cross_task_detach_depth'] = False
+                cfg['training']['cross_task_type'] = 'cosine'  # cosine: direction-only, gentler than mse
+                cfg['training']['cross_task_detach_depth'] = (cross_task_lambda > 0)
+                cfg['training']['cross_task_warmup_iters'] = 5000  # wait for seg to stabilize before cross-task
                 cfg['training']['disable_depth_estimator'] = True
                 cfg = setup_optimizer(cfg, opt, lr, blr, plr, None, gclip)
                 cfg["training"]["disable_depth_grad_clip"] = disable_depth_clip

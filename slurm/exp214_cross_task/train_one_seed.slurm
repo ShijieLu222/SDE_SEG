@@ -11,7 +11,7 @@ set -euo pipefail
 
 # ===== exp 214: Cross-Task Consistency Ablation — 1 seed (seed 7 only) =====
 # Same data/config as Table 7 MTL (exp 213): 2975 frames, 372 labeled, only_sequences_with_segmentation=True
-# Run IDs: 0 (λ=0), 3 (λ=0.01), 6 (λ=0.05), 9 (λ=0.1) — 4 runs sequentially
+# Run IDs: 0 (λ=0), 3 (λ=0.001), 6 (λ=0.0015), 9 (λ=0.002) — 4 runs, seed 7 only
 RUN_IDS="0,3,6,9"
 CONFIG="configs/cityscapes_joint.yml"
 # ===========================================================================
@@ -19,7 +19,7 @@ CONFIG="configs/cityscapes_joint.yml"
 echo "=========================================="
 echo "exp 214: Cross-Task Consistency (1 seed)"
 echo "=========================================="
-echo "Run IDs: ${RUN_IDS}  =>  λ=0, 0.01, 0.05, 0.1  (seed 7 only)"
+echo "Run IDs: ${RUN_IDS}  =>  λ=0, 0.001, 0.0015, 0.002  (seed 7 only)"
 echo "Config: ${CONFIG}"
 echo "Time limit: 24h"
 echo "=========================================="

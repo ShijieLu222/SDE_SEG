@@ -39,7 +39,9 @@ def cross_entropy2d(input, target, class_weight=None, pixel_weights=None):
 
 def cross_task_consistency_loss(feat_seg, feat_depth_proj, loss_type="mse"):
     """
-    L_ct = sum_p || f_seg(p) - feat_depth_proj(p) ||^2 (or l1).
+    L_ct: consistency between seg and depth features.
+    - mse/l1: pixel-wise L2/L1
+    - cosine: 1 - mean(cos_sim) per pixel, only constrains direction
     Both tensors: (B, C, H, W). Spatial sizes must match (caller resizes if needed).
     """
     assert feat_seg.dim() == 4 and feat_depth_proj.dim() == 4
@@ -51,6 +53,13 @@ def cross_task_consistency_loss(feat_seg, feat_depth_proj, loss_type="mse"):
         return F.mse_loss(feat_seg, feat_depth_proj)
     elif loss_type == "l1":
         return F.l1_loss(feat_seg, feat_depth_proj)
+    elif loss_type == "cosine":
+        # Flatten to (N, C), 1 - mean(cos_sim) so that aligned direction -> 0 loss
+        n, c, h, w = feat_seg.shape
+        a = feat_seg.permute(0, 2, 3, 1).reshape(-1, c)
+        b_ = feat_depth_proj.permute(0, 2, 3, 1).reshape(-1, c)
+        cos_sim = F.cosine_similarity(a, b_, dim=1)
+        return (1 - cos_sim.mean()).clamp(min=0)
     else:
         raise NotImplementedError("cross_task_consistency_loss type {}".format(loss_type))
 
