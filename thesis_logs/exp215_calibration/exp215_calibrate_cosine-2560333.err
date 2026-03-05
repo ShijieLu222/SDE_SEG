@@ -1,0 +1,57 @@
+/home/u5hv/shijie.u5hv/fyp/venvs/sde_seg/lib/python3.11/site-packages/torchvision/models/_utils.py:135: UserWarning: Using 'weights' as positional parameter(s) is deprecated since 0.13 and may be removed in the future. Please use keyword parameter(s) instead.
+  warnings.warn(
+/home/u5hv/shijie.u5hv/fyp/venvs/sde_seg/lib/python3.11/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=None`.
+  warnings.warn(msg)
+/home/u5hv/shijie.u5hv/fyp/improving_segmentation_with_selfsupervised_depth/train.py:300: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler = GradScaler(enabled=self.cfg["training"]["amp"])
+INFO:segsde:Using cross_entropy with {} params
+INFO:segsde:Using No Early Stopping
+/home/u5hv/shijie.u5hv/fyp/improving_segmentation_with_selfsupervised_depth/train.py:476: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled=self.cfg["training"]["amp"]):
+/home/u5hv/shijie.u5hv/fyp/improving_segmentation_with_selfsupervised_depth/train.py:510: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled=self.cfg["training"]["amp"]):
+INFO:segsde:Iter [50/40000]  Loss: 1.6388  Time/Image: 0.1402
+INFO:segsde:Iter [100/40000]  Loss: 0.8880  Time/Image: 0.0870
+INFO:segsde:Iter [150/40000]  Loss: 0.7508  Time/Image: 0.0839
+INFO:segsde:Iter [200/40000]  Loss: 0.6482  Time/Image: 0.0952
+INFO:segsde:Iter [250/40000]  Loss: 0.5660  Time/Image: 0.1015
+INFO:segsde:Iter [300/40000]  Loss: 0.5836  Time/Image: 0.0853
+INFO:segsde:Iter [350/40000]  Loss: 0.4426  Time/Image: 0.0849
+INFO:segsde:Iter [400/40000]  Loss: 0.5359  Time/Image: 0.0869
+INFO:segsde:Iter [450/40000]  Loss: 0.4503  Time/Image: 0.0849
+INFO:segsde:Iter [500/40000]  Loss: 0.4152  Time/Image: 0.0841
+INFO:segsde:Iter [550/40000]  Loss: 0.4542  Time/Image: 0.0834
+INFO:segsde:Iter [600/40000]  Loss: 0.4079  Time/Image: 0.1070
+INFO:segsde:Iter [650/40000]  Loss: 0.4129  Time/Image: 0.0847
+INFO:segsde:Iter [700/40000]  Loss: 0.3694  Time/Image: 0.0846
+INFO:segsde:Iter [750/40000]  Loss: 0.3741  Time/Image: 0.0887
+INFO:segsde:Iter [800/40000]  Loss: 0.3747  Time/Image: 0.0981
+INFO:segsde:Iter [850/40000]  Loss: 0.3627  Time/Image: 0.0835
+INFO:segsde:Iter [900/40000]  Loss: 0.3534  Time/Image: 0.0830
+INFO:segsde:Iter [950/40000]  Loss: 0.3534  Time/Image: 0.0932
+INFO:segsde:Iter [1000/40000]  Loss: 0.3556  Time/Image: 0.0878
+INFO:segsde:Iter [1050/40000]  Loss: 0.3661  Time/Image: 0.0837
+INFO:segsde:Iter [1100/40000]  Loss: 0.3065  Time/Image: 0.0837
+INFO:segsde:Iter [1150/40000]  Loss: 0.3701  Time/Image: 0.0859
+INFO:segsde:Iter [1200/40000]  Loss: 0.3024  Time/Image: 0.0830
+INFO:segsde:Iter [1250/40000]  Loss: 0.3468  Time/Image: 0.0831
+INFO:segsde:Iter [1300/40000]  Loss: 0.2892  Time/Image: 0.0832
+INFO:segsde:Iter [1350/40000]  Loss: 0.2978  Time/Image: 0.0954
+INFO:segsde:Iter [1400/40000]  Loss: 0.2961  Time/Image: 0.0833
+INFO:segsde:Iter [1450/40000]  Loss: 0.3277  Time/Image: 0.0855
+INFO:segsde:Iter [1500/40000]  Loss: 0.3345  Time/Image: 0.0894
+INFO:segsde:Iter [1550/40000]  Loss: 0.3092  Time/Image: 0.0814
+INFO:segsde:Iter [1600/40000]  Loss: 0.3228  Time/Image: 0.0815
+INFO:segsde:Iter [1650/40000]  Loss: 0.2956  Time/Image: 0.0816
+INFO:segsde:Iter [1700/40000]  Loss: 0.2652  Time/Image: 0.0888
+INFO:segsde:Iter [1750/40000]  Loss: 0.2903  Time/Image: 0.0826
+INFO:segsde:Iter [1800/40000]  Loss: 0.2598  Time/Image: 0.0828
+INFO:segsde:Iter [1850/40000]  Loss: 0.2700  Time/Image: 0.0829
+INFO:segsde:Iter [1900/40000]  Loss: 0.2382  Time/Image: 0.0847
+INFO:segsde:Iter [1950/40000]  Loss: 0.2778  Time/Image: 0.0826
+INFO:segsde:Iter [2000/40000]  Loss: 0.2536  Time/Image: 0.0825
+INFO:segsde:Iter [2050/40000]  Loss: 0.2413  Time/Image: 0.0845
+INFO:segsde:Iter [2100/40000]  Loss: 0.2634  Time/Image: 0.0841
+INFO:segsde:Iter [2150/40000]  Loss: 0.2496  Time/Image: 0.0823
+INFO:segsde:Iter [2200/40000]  Loss: 0.2383  Time/Image: 0.0826
+slurmstepd: error: *** JOB 2560333 ON nid011133 CANCELLED AT 2026-03-03T19:40:02 ***

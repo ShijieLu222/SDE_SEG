@@ -40,8 +40,10 @@ def cross_entropy2d(input, target, class_weight=None, pixel_weights=None):
 def cross_task_consistency_loss(feat_seg, feat_depth_proj, loss_type="mse"):
     """
     L_ct: consistency between seg and depth features.
-    - mse/l1: pixel-wise L2/L1
-    - cosine: 1 - mean(cos_sim) per pixel, only constrains direction
+    - mse:    L2-normalise both along channel dim first, then MSE on unit vectors.
+              Equivalent to 2*(1 - cos_sim), range [0, 4].  Removes scale bias.
+    - l1:     pixel-wise L1 (no normalisation).
+    - cosine: 1 - mean(cos_sim) per pixel, only constrains direction, range [0, 2].
     Both tensors: (B, C, H, W). Spatial sizes must match (caller resizes if needed).
     """
     assert feat_seg.dim() == 4 and feat_depth_proj.dim() == 4
@@ -50,7 +52,11 @@ def cross_task_consistency_loss(feat_seg, feat_depth_proj, loss_type="mse"):
             feat_depth_proj, size=feat_seg.shape[2:], mode="bilinear", align_corners=False
         )
     if loss_type == "mse":
-        return F.mse_loss(feat_seg, feat_depth_proj)
+        # Normalise along channel dim before MSE to remove activation-scale bias
+        # between seg and depth branches; result is scale-invariant direction loss.
+        feat_seg_n = F.normalize(feat_seg, p=2, dim=1)
+        feat_depth_n = F.normalize(feat_depth_proj, p=2, dim=1)
+        return F.mse_loss(feat_seg_n, feat_depth_n)
     elif loss_type == "l1":
         return F.l1_loss(feat_seg, feat_depth_proj)
     elif loss_type == "cosine":

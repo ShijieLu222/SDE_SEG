@@ -542,38 +542,203 @@ def generate_experiment_cfgs(base_cfg, id):
                         cfg['seed'] = seed
                         cfg = set_segmentation_args(cfg, seg_init=seg_init, layers=layers, head_inter=head_inter, output_stride=output_stride)
                         cfgs.append(cfg)
-    # Cross-task consistency loss ablation (MTL only, 372 labels, 3 seeds, 4 lambdas)
-    elif id == 214:
+    # exp 215: Cross-Task Loss Calibration (MSE-normalised vs Cosine, λ=1, 600 iter)
+    # Run 0: mse,    λ_ct=1.0, seed 42
+    # Run 1: cosine, λ_ct=1.0, seed 42
+    elif id == 215:
         dataset = "cityscapes"
-        pres_method = "ds_us"
         mono_pretrain = 'mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4'
         dec, dec_params, crop, batch_size = (6, "lr5_fd2_crop512x512bs4", (512, 512), 2)
         n_subset = 372
         final_layer, distillation_layer = 9, 7
-        opt, lr, blr, plr, dlr = "sgd", 1e-2, 1e-3, 1e-6, 1e-3
-        gclip, disable_depth_clip = 10, False
+        opt, lr, blr, plr = "sgd", 1e-2, 1e-3, 1e-6
+        gclip = 10
         mono_lambda, seg_lambda = 1, 1
-        lr_sch, backward_first = "stepx", False
+        lr_sch = "stepx"
+        seed = 42
+        for ct_type in ["mse", "cosine"]:
+            cfg = deepcopy(base_cfg)
+            if cfg['data'].get('restrict_to_subset') is None:
+                cfg['data']['restrict_to_subset'] = {}
+            tag = f"{dataset}_pad_transfer_calibrate_{ct_type}_D{n_subset}_S{seed}"
+            cfg['general'] = {'tag': tune.grid_search([tag])}
+            cfg['model']['segmentation_name'] = 'mtl_pad'
+            cfg['model']['backbone_name'] = 'resnet101'
+            cfg, _ = decoder_variant(cfg, dec, crop)
+            cfg['model']['backbone_pretraining'] = mono_pretrain
+            cfg['model']['variant'] = f'calibrate_{ct_type}'
+            cfg['model']['depth_estimator_weights'] = mono_pretrain
+            cfg['model']['depth_pretraining'] = mono_pretrain
+            cfg['model']['pose_pretraining'] = mono_pretrain
+            cfg['model']['disable_pose'] = False
+            cfg['model']['disable_monodepth'] = False
+            cfg['training']['segmentation_lambda'] = seg_lambda
+            cfg['training']['monodepth_lambda'] = mono_lambda
+            cfg['training']['cross_task_lambda'] = 1.0
+            cfg['training']['cross_task_type'] = ct_type
+            cfg['training']['cross_task_detach_depth'] = True
+            cfg['training']['cross_task_warmup_iters'] = 0
+            cfg['training']['disable_depth_estimator'] = True
+            cfg['training']['save_model'] = False
+            cfg['training']['save_separate_monodepth_models'] = False
+            cfg = setup_optimizer(cfg, opt, lr, blr, plr, None, gclip)
+            cfg["training"]["disable_depth_grad_clip"] = False
+            cfg["training"]["batch_size"] = batch_size
+            cfg = setup_dataset(cfg, dataset, crop, lr_sch)
+            # Override AFTER setup_dataset to prevent it overwriting these values
+            cfg['training']['train_iters'] = 600
+            cfg['training']['print_interval'] = 50
+            cfg['training']['val_interval'] = {"0": 9999}
+            cfg['data']['restrict_to_subset']['mode'] = 'random'
+            cfg['data']['restrict_to_subset']['n_subset'] = n_subset
+            cfg['training']['unlabeled_segmentation'] = None
+            cfg['seed'] = seed
+            cfg['model']['segmentation_args'] = {
+                'weights': mono_pretrain, 'output_stride': 1,
+                'distillation_layer': distillation_layer, 'side_output': True, 'final_layer': final_layer
+            }
+            cfgs.append(cfg)
+    # exp 216: Cross-Task Loss Sweep — MSE(norm) vs Cosine, contribution-aligned λ, 1 seed (seed 42)
+    # Run layout (9 runs):
+    #   Run 0: baseline  λ=0.0    (ct_type=mse, λ=0 so type irrelevant)
+    #   Run 1: mse       λ=0.30   (1%)
+    #   Run 2: mse       λ=0.75   (2.5%)
+    #   Run 3: mse       λ=1.50   (5%)
+    #   Run 4: mse       λ=3.00   (10%)
+    #   Run 5: cosine    λ=0.05   (1%)
+    #   Run 6: cosine    λ=0.12   (2.5%)
+    #   Run 7: cosine    λ=0.24   (5%)
+    #   Run 8: cosine    λ=0.48   (10%)
+    # λ computed from exp 215 calibration: λ = α*(L_seg+L_depth)/L_ct(λ=1)
+    elif id == 216:
+        dataset = "cityscapes"
+        mono_pretrain = 'mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4'
+        dec, dec_params, crop, batch_size = (6, "lr5_fd2_crop512x512bs4", (512, 512), 2)
+        n_subset = 372
+        final_layer, distillation_layer = 9, 7
+        opt, lr, blr, plr = "sgd", 1e-2, 1e-3, 1e-6
+        gclip = 10
+        mono_lambda, seg_lambda = 1, 1
+        lr_sch = "stepx"
+        seed = 42
         unlab_cfg = {
             "consistency_weight": 1.0, "mix_mask": None, "depthmix_online_depth": False,
-            "backward_first_pseudo_label": backward_first, "color_jitter": True, "blur": True,
+            "backward_first_pseudo_label": False, "color_jitter": True, "blur": True,
             "only_unlabeled": False, "mix_use_gt": False, "depthcomp_margin": 0.03,
             "depthcomp_foreground_threshold": 0, "debug_image": True
         }
-        unlab_str = "_Unlab1.0NoneFPLFalsejitblur"
-        # Lambda sweep: baseline + 0.001, 0.0015, 0.002; detach_depth=True to avoid backprop to depth branch
-        for cross_task_lambda in [0.0, 0.001, 0.0015, 0.002]:
-            for seed in [7, 25, 42]:
+        # (ct_type, cross_task_lambda, contribution_label)
+        # Run  0-8 : original sweep (exp 216 batch 1)
+        # Run  9-11: cosine high-λ extension  (12.5%, 15%, 20%)
+        # Run 12-14: mse fine-grained around λ=0.30 (0.25, 0.35, 0.40)
+        sweep = [
+            ("mse",    0.0,  "baseline_0pct"),     # Run 0
+            ("mse",    0.30, "mse_1pct"),           # Run 1
+            ("mse",    0.75, "mse_2p5pct"),         # Run 2
+            ("mse",    1.50, "mse_5pct"),           # Run 3
+            ("mse",    3.00, "mse_10pct"),          # Run 4
+            ("cosine", 0.05, "cos_1pct"),           # Run 5
+            ("cosine", 0.12, "cos_2p5pct"),         # Run 6
+            ("cosine", 0.24, "cos_5pct"),           # Run 7
+            ("cosine", 0.48, "cos_10pct"),          # Run 8
+            # --- batch 2 ---
+            ("cosine", 0.60, "cos_12p5pct"),        # Run 9
+            ("cosine", 0.72, "cos_15pct"),          # Run 10
+            ("cosine", 0.96, "cos_20pct"),          # Run 11
+            ("mse",    0.25, "mse_0p25"),           # Run 12
+            ("mse",    0.35, "mse_0p35"),           # Run 13
+            ("mse",    0.40, "mse_0p40"),           # Run 14
+        ]
+        for ct_type, cross_task_lambda, label in sweep:
+            cfg = deepcopy(base_cfg)
+            if cfg['data'].get('restrict_to_subset') is None:
+                cfg['data']['restrict_to_subset'] = {}
+            tag = f"{dataset}_pad_transfer_ct_{label}_D{n_subset}_S{seed}"
+            cfg['general'] = {'tag': tune.grid_search([tag])}
+            cfg['model']['segmentation_name'] = 'mtl_pad'
+            cfg['model']['backbone_name'] = 'resnet101'
+            cfg, _ = decoder_variant(cfg, dec, crop)
+            cfg['model']['backbone_pretraining'] = mono_pretrain
+            cfg['model']['variant'] = f'ct_{label}'
+            cfg['model']['depth_estimator_weights'] = mono_pretrain
+            cfg['model']['depth_pretraining'] = mono_pretrain
+            cfg['model']['pose_pretraining'] = mono_pretrain
+            cfg['model']['disable_pose'] = False
+            cfg['model']['disable_monodepth'] = False
+            cfg['training']['segmentation_lambda'] = seg_lambda
+            cfg['training']['monodepth_lambda'] = mono_lambda
+            cfg['training']['cross_task_lambda'] = cross_task_lambda
+            cfg['training']['cross_task_type'] = ct_type
+            cfg['training']['cross_task_detach_depth'] = (cross_task_lambda > 0)
+            cfg['training']['cross_task_warmup_iters'] = 5000
+            cfg['training']['disable_depth_estimator'] = True
+            cfg = setup_optimizer(cfg, opt, lr, blr, plr, None, gclip)
+            cfg["training"]["disable_depth_grad_clip"] = False
+            cfg["training"]["batch_size"] = batch_size
+            cfg = setup_dataset(cfg, dataset, crop, lr_sch)
+            cfg['data']['restrict_to_subset']['mode'] = 'random'
+            cfg['data']['restrict_to_subset']['n_subset'] = n_subset
+            cfg['training']['unlabeled_segmentation'] = unlab_cfg
+            cfg['seed'] = seed
+            cfg['model']['segmentation_args'] = {
+                'weights': mono_pretrain, 'output_stride': 1,
+                'distillation_layer': distillation_layer, 'side_output': True, 'final_layer': final_layer
+            }
+            cfgs.append(cfg)
+    # exp 217: Multi-seed validation for best λ candidates from exp 216
+    # 5 groups × 3 seeds (7, 25, 42) = 15 runs
+    # Run  0- 2: mse    λ=0.30, seeds 7/25/42   (best MSE from exp 216)
+    # Run  3- 5: cosine λ=0.48, seeds 7/25/42   (10% contrib cosine)
+    # Run  6- 8: cosine λ=0.60, seeds 7/25/42   (12.5% contrib cosine)
+    # Run  9-11: cosine λ=0.84, seeds 7/25/42   (new point ~17.5%)
+    # Run 12-14: cosine λ=1.00, seeds 7/25/42   (new point ~20.8%)
+    # Run 15-17: cosine λ=1.25, seeds 7/25/42   (batch 2)
+    # Run 18-20: cosine λ=1.50, seeds 7/25/42   (batch 2)
+    # Run 21-23: cosine λ=1.75, seeds 7/25/42   (batch 2)
+    # Run 24-26: cosine λ=2.00, seeds 7/25/42   (batch 2)
+    # Run 27-29: cosine λ=0.00, seeds 7/25/42   (baseline)
+    elif id == 217:
+        dataset = "cityscapes"
+        mono_pretrain = 'mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4'
+        dec, dec_params, crop, batch_size = (6, "lr5_fd2_crop512x512bs4", (512, 512), 2)
+        n_subset = 372
+        final_layer, distillation_layer = 9, 7
+        opt, lr, blr, plr = "sgd", 1e-2, 1e-3, 1e-6
+        gclip = 10
+        mono_lambda, seg_lambda = 1, 1
+        lr_sch = "stepx"
+        seeds = [7, 25, 42]
+        unlab_cfg = {
+            "consistency_weight": 1.0, "mix_mask": None, "depthmix_online_depth": False,
+            "backward_first_pseudo_label": False, "color_jitter": True, "blur": True,
+            "only_unlabeled": False, "mix_use_gt": False, "depthcomp_margin": 0.03,
+            "depthcomp_foreground_threshold": 0, "debug_image": True
+        }
+        # (ct_type, cross_task_lambda, group_label)
+        groups = [
+            ("mse",    0.30, "mse_0p30"),    # Runs  0- 2
+            ("cosine", 0.48, "cos_0p48"),    # Runs  3- 5
+            ("cosine", 0.60, "cos_0p60"),    # Runs  6- 8
+            ("cosine", 0.84, "cos_0p84"),    # Runs  9-11
+            ("cosine", 1.00, "cos_1p00"),    # Runs 12-14
+            ("cosine", 1.25, "cos_1p25"),    # Runs 15-17
+            ("cosine", 1.50, "cos_1p50"),    # Runs 18-20
+            ("cosine", 1.75, "cos_1p75"),    # Runs 21-23
+            ("cosine", 2.00, "cos_2p00"),    # Runs 24-26
+            ("cosine", 0.00, "lam0"),        # Runs 27-29  ← baseline (final validation)
+        ]
+        for ct_type, cross_task_lambda, group_label in groups:
+            for seed in seeds:
                 cfg = deepcopy(base_cfg)
                 if cfg['data'].get('restrict_to_subset') is None:
                     cfg['data']['restrict_to_subset'] = {}
-                tag = f"{dataset}_pad_transfer_ct{cross_task_lambda}_D{n_subset}_S{seed}_{opt}Lr{lr:.0E}{blr:.0E}{plr:.0E}{dlr:.0E}{lr_sch}_clip{gclip}{disable_depth_clip}_m{mono_lambda}s{seg_lambda}_crop{crop[0]}x{crop[1]}bs{batch_size}_flip_dec{dec}_{dec_params}_l{final_layer}i{distillation_layer}Trueos1{unlab_str}"
+                tag = f"{dataset}_pad_ct_{group_label}_D{n_subset}_S{seed}"
                 cfg['general'] = {'tag': tune.grid_search([tag])}
                 cfg['model']['segmentation_name'] = 'mtl_pad'
                 cfg['model']['backbone_name'] = 'resnet101'
                 cfg, _ = decoder_variant(cfg, dec, crop)
                 cfg['model']['backbone_pretraining'] = mono_pretrain
-                cfg['model']['variant'] = 'pad_transfer_cross_task'
+                cfg['model']['variant'] = f'ct_{group_label}'
                 cfg['model']['depth_estimator_weights'] = mono_pretrain
                 cfg['model']['depth_pretraining'] = mono_pretrain
                 cfg['model']['pose_pretraining'] = mono_pretrain
@@ -582,12 +747,12 @@ def generate_experiment_cfgs(base_cfg, id):
                 cfg['training']['segmentation_lambda'] = seg_lambda
                 cfg['training']['monodepth_lambda'] = mono_lambda
                 cfg['training']['cross_task_lambda'] = cross_task_lambda
-                cfg['training']['cross_task_type'] = 'cosine'  # cosine: direction-only, gentler than mse
-                cfg['training']['cross_task_detach_depth'] = (cross_task_lambda > 0)
-                cfg['training']['cross_task_warmup_iters'] = 5000  # wait for seg to stabilize before cross-task
+                cfg['training']['cross_task_type'] = ct_type
+                cfg['training']['cross_task_detach_depth'] = True
+                cfg['training']['cross_task_warmup_iters'] = 5000
                 cfg['training']['disable_depth_estimator'] = True
                 cfg = setup_optimizer(cfg, opt, lr, blr, plr, None, gclip)
-                cfg["training"]["disable_depth_grad_clip"] = disable_depth_clip
+                cfg["training"]["disable_depth_grad_clip"] = False
                 cfg["training"]["batch_size"] = batch_size
                 cfg = setup_dataset(cfg, dataset, crop, lr_sch)
                 cfg['data']['restrict_to_subset']['mode'] = 'random'

@@ -1,0 +1,1767 @@
+==============================================
+exp 217: baseline λ=0 × 3 seeds (final validation)
+==============================================
+Run IDs : 27,28,29  (seeds 7 / 25 / 42)
+Config  : configs/cityscapes_joint.yml
+Time    : 24h
+==============================================
+Host    : nid010139
+Job ID  : 2629307
+Start   : Thu Mar  5 04:46:47 AM UTC 2026
+GPU     : 0
+
+Starting 3 seeds (7, 25, 42) sequentially...
+
+Start experiment cityscapes_joint_217
+Run ID: cityscapes_joint_217_2026-03-05_04-47-08
+Resolved base cfg vars {'seed': 7, ('model', 'variant'): 'ct_mse_0p30', ('training', 'cross_task_lambda'): 0.3, ('training', 'cross_task_type'): 'mse'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_mse_0p30_D372_S7', 'seed': 7, ('model', 'variant'): 'ct_mse_0p30', ('training', 'cross_task_lambda'): 0.3, ('training', 'cross_task_type'): 'mse'}
+Resolved base cfg vars {'seed': 25, ('model', 'variant'): 'ct_mse_0p30', ('training', 'cross_task_lambda'): 0.3, ('training', 'cross_task_type'): 'mse'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_mse_0p30_D372_S25', 'seed': 25, ('model', 'variant'): 'ct_mse_0p30', ('training', 'cross_task_lambda'): 0.3, ('training', 'cross_task_type'): 'mse'}
+Resolved base cfg vars {'seed': 42, ('model', 'variant'): 'ct_mse_0p30', ('training', 'cross_task_lambda'): 0.3, ('training', 'cross_task_type'): 'mse'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_mse_0p30_D372_S42', 'seed': 42, ('model', 'variant'): 'ct_mse_0p30', ('training', 'cross_task_lambda'): 0.3, ('training', 'cross_task_type'): 'mse'}
+Resolved base cfg vars {'seed': 7, ('model', 'variant'): 'ct_cos_0p48', ('training', 'cross_task_lambda'): 0.48, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_0p48_D372_S7', 'seed': 7, ('model', 'variant'): 'ct_cos_0p48', ('training', 'cross_task_lambda'): 0.48, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 25, ('model', 'variant'): 'ct_cos_0p48', ('training', 'cross_task_lambda'): 0.48, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_0p48_D372_S25', 'seed': 25, ('model', 'variant'): 'ct_cos_0p48', ('training', 'cross_task_lambda'): 0.48, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 42, ('model', 'variant'): 'ct_cos_0p48', ('training', 'cross_task_lambda'): 0.48, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_0p48_D372_S42', 'seed': 42, ('model', 'variant'): 'ct_cos_0p48', ('training', 'cross_task_lambda'): 0.48, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 7, ('model', 'variant'): 'ct_cos_0p60', ('training', 'cross_task_lambda'): 0.6, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_0p60_D372_S7', 'seed': 7, ('model', 'variant'): 'ct_cos_0p60', ('training', 'cross_task_lambda'): 0.6, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 25, ('model', 'variant'): 'ct_cos_0p60', ('training', 'cross_task_lambda'): 0.6, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_0p60_D372_S25', 'seed': 25, ('model', 'variant'): 'ct_cos_0p60', ('training', 'cross_task_lambda'): 0.6, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 42, ('model', 'variant'): 'ct_cos_0p60', ('training', 'cross_task_lambda'): 0.6, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_0p60_D372_S42', 'seed': 42, ('model', 'variant'): 'ct_cos_0p60', ('training', 'cross_task_lambda'): 0.6, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 7, ('model', 'variant'): 'ct_cos_0p84', ('training', 'cross_task_lambda'): 0.84, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_0p84_D372_S7', 'seed': 7, ('model', 'variant'): 'ct_cos_0p84', ('training', 'cross_task_lambda'): 0.84, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 25, ('model', 'variant'): 'ct_cos_0p84', ('training', 'cross_task_lambda'): 0.84, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_0p84_D372_S25', 'seed': 25, ('model', 'variant'): 'ct_cos_0p84', ('training', 'cross_task_lambda'): 0.84, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 42, ('model', 'variant'): 'ct_cos_0p84', ('training', 'cross_task_lambda'): 0.84, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_0p84_D372_S42', 'seed': 42, ('model', 'variant'): 'ct_cos_0p84', ('training', 'cross_task_lambda'): 0.84, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 7, ('model', 'variant'): 'ct_cos_1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_1p00_D372_S7', 'seed': 7, ('model', 'variant'): 'ct_cos_1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 25, ('model', 'variant'): 'ct_cos_1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_1p00_D372_S25', 'seed': 25, ('model', 'variant'): 'ct_cos_1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 42, ('model', 'variant'): 'ct_cos_1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_1p00_D372_S42', 'seed': 42, ('model', 'variant'): 'ct_cos_1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 7, ('model', 'variant'): 'ct_cos_1p25', ('training', 'cross_task_lambda'): 1.25, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_1p25_D372_S7', 'seed': 7, ('model', 'variant'): 'ct_cos_1p25', ('training', 'cross_task_lambda'): 1.25, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 25, ('model', 'variant'): 'ct_cos_1p25', ('training', 'cross_task_lambda'): 1.25, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_1p25_D372_S25', 'seed': 25, ('model', 'variant'): 'ct_cos_1p25', ('training', 'cross_task_lambda'): 1.25, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 42, ('model', 'variant'): 'ct_cos_1p25', ('training', 'cross_task_lambda'): 1.25, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_1p25_D372_S42', 'seed': 42, ('model', 'variant'): 'ct_cos_1p25', ('training', 'cross_task_lambda'): 1.25, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 7, ('model', 'variant'): 'ct_cos_1p50', ('training', 'cross_task_lambda'): 1.5, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_1p50_D372_S7', 'seed': 7, ('model', 'variant'): 'ct_cos_1p50', ('training', 'cross_task_lambda'): 1.5, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 25, ('model', 'variant'): 'ct_cos_1p50', ('training', 'cross_task_lambda'): 1.5, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_1p50_D372_S25', 'seed': 25, ('model', 'variant'): 'ct_cos_1p50', ('training', 'cross_task_lambda'): 1.5, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 42, ('model', 'variant'): 'ct_cos_1p50', ('training', 'cross_task_lambda'): 1.5, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_1p50_D372_S42', 'seed': 42, ('model', 'variant'): 'ct_cos_1p50', ('training', 'cross_task_lambda'): 1.5, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 7, ('model', 'variant'): 'ct_cos_1p75', ('training', 'cross_task_lambda'): 1.75, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_1p75_D372_S7', 'seed': 7, ('model', 'variant'): 'ct_cos_1p75', ('training', 'cross_task_lambda'): 1.75, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 25, ('model', 'variant'): 'ct_cos_1p75', ('training', 'cross_task_lambda'): 1.75, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_1p75_D372_S25', 'seed': 25, ('model', 'variant'): 'ct_cos_1p75', ('training', 'cross_task_lambda'): 1.75, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 42, ('model', 'variant'): 'ct_cos_1p75', ('training', 'cross_task_lambda'): 1.75, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_1p75_D372_S42', 'seed': 42, ('model', 'variant'): 'ct_cos_1p75', ('training', 'cross_task_lambda'): 1.75, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 7, ('model', 'variant'): 'ct_cos_2p00', ('training', 'cross_task_lambda'): 2.0, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_2p00_D372_S7', 'seed': 7, ('model', 'variant'): 'ct_cos_2p00', ('training', 'cross_task_lambda'): 2.0, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 25, ('model', 'variant'): 'ct_cos_2p00', ('training', 'cross_task_lambda'): 2.0, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_2p00_D372_S25', 'seed': 25, ('model', 'variant'): 'ct_cos_2p00', ('training', 'cross_task_lambda'): 2.0, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 42, ('model', 'variant'): 'ct_cos_2p00', ('training', 'cross_task_lambda'): 2.0, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_cos_2p00_D372_S42', 'seed': 42, ('model', 'variant'): 'ct_cos_2p00', ('training', 'cross_task_lambda'): 2.0, ('training', 'cross_task_type'): 'cosine'}
+Resolved base cfg vars {'seed': 7, ('model', 'variant'): 'ct_lam0', ('training', 'cross_task_lambda'): 0.0, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_lam0_D372_S7', 'seed': 7, ('model', 'variant'): 'ct_lam0', ('training', 'cross_task_lambda'): 0.0, ('training', 'cross_task_type'): 'cosine'}
+Dispatch job 27_tag=cityscapes_pad_ct_lam0_D372_S7
+Start 2026-03-05_04-47-0827_tag=cityscapes_pad_ct_lam0_D372_S7
+RUNDIR: /scratch/u5hv/shijie.u5hv/sde_seg/logs//cityscapes_joint_217/2026-03-05_04-47-0827_tag=cityscapes_pad_ct_lam0_D372_S7
+Restrict subset from 2975 to 372 images ...
+Use image subset [np.int64(0), np.int64(2), np.int64(24), np.int64(26), np.int64(34), np.int64(36), np.int64(60), np.int64(70), np.int64(71), np.int64(87), np.int64(99), np.int64(118), np.int64(121), np.int64(125), np.int64(131), np.int64(142), np.int64(151), np.int64(172), np.int64(180), np.int64(186), np.int64(190), np.int64(194), np.int64(203), np.int64(206), np.int64(224), np.int64(226), np.int64(241), np.int64(259), np.int64(278), np.int64(280), np.int64(296), np.int64(305), np.int64(314), np.int64(318), np.int64(325), np.int64(340), np.int64(356), np.int64(361), np.int64(372), np.int64(375), np.int64(377), np.int64(386), np.int64(400), np.int64(412), np.int64(414), np.int64(415), np.int64(419), np.int64(420), np.int64(423), np.int64(426), np.int64(427), np.int64(429), np.int64(430), np.int64(433), np.int64(450), np.int64(454), np.int64(468), np.int64(474), np.int64(502), np.int64(513), np.int64(514), np.int64(523), np.int64(526), np.int64(536), np.int64(539), np.int64(547), np.int64(561), np.int64(562), np.int64(580), np.int64(582), np.int64(584), np.int64(587), np.int64(592), np.int64(603), np.int64(619), np.int64(632), np.int64(637), np.int64(643), np.int64(658), np.int64(661), np.int64(664), np.int64(666), np.int64(672), np.int64(674), np.int64(690), np.int64(699), np.int64(701), np.int64(704), np.int64(705), np.int64(707), np.int64(716), np.int64(717), np.int64(718), np.int64(727), np.int64(729), np.int64(732), np.int64(735), np.int64(746), np.int64(752), np.int64(757), np.int64(760), np.int64(795), np.int64(802), np.int64(803), np.int64(832), np.int64(836), np.int64(840), np.int64(842), np.int64(845), np.int64(847), np.int64(858), np.int64(863), np.int64(864), np.int64(879), np.int64(890), np.int64(895), np.int64(921), np.int64(928), np.int64(939), np.int64(945), np.int64(961), np.int64(964), np.int64(977), np.int64(979), np.int64(983), np.int64(992), np.int64(997), np.int64(1002), np.int64(1039), np.int64(1054), np.int64(1057), np.int64(1061), np.int64(1070), np.int64(1084), np.int64(1104), np.int64(1109), np.int64(1123), np.int64(1135), np.int64(1140), np.int64(1141), np.int64(1144), np.int64(1151), np.int64(1153), np.int64(1165), np.int64(1167), np.int64(1171), np.int64(1181), np.int64(1209), np.int64(1210), np.int64(1222), np.int64(1224), np.int64(1227), np.int64(1228), np.int64(1235), np.int64(1251), np.int64(1263), np.int64(1267), np.int64(1281), np.int64(1283), np.int64(1292), np.int64(1294), np.int64(1303), np.int64(1308), np.int64(1313), np.int64(1324), np.int64(1332), np.int64(1338), np.int64(1351), np.int64(1354), np.int64(1363), np.int64(1364), np.int64(1365), np.int64(1381), np.int64(1396), np.int64(1420), np.int64(1421), np.int64(1428), np.int64(1434), np.int64(1443), np.int64(1448), np.int64(1455), np.int64(1458), np.int64(1470), np.int64(1476), np.int64(1477), np.int64(1483), np.int64(1487), np.int64(1490), np.int64(1495), np.int64(1496), np.int64(1512), np.int64(1524), np.int64(1533), np.int64(1538), np.int64(1545), np.int64(1559), np.int64(1578), np.int64(1584), np.int64(1587), np.int64(1611), np.int64(1617), np.int64(1647), np.int64(1670), np.int64(1675), np.int64(1678), np.int64(1681), np.int64(1682), np.int64(1695), np.int64(1697), np.int64(1703), np.int64(1705), np.int64(1714), np.int64(1715), np.int64(1730), np.int64(1731), np.int64(1751), np.int64(1755), np.int64(1761), np.int64(1766), np.int64(1769), np.int64(1777), np.int64(1782), np.int64(1792), np.int64(1795), np.int64(1805), np.int64(1813), np.int64(1830), np.int64(1853), np.int64(1854), np.int64(1863), np.int64(1875), np.int64(1876), np.int64(1879), np.int64(1898), np.int64(1914), np.int64(1915), np.int64(1939), np.int64(1958), np.int64(1979), np.int64(1982), np.int64(1992), np.int64(2008), np.int64(2014), np.int64(2043), np.int64(2047), np.int64(2052), np.int64(2081), np.int64(2085), np.int64(2087), np.int64(2092), np.int64(2099), np.int64(2106), np.int64(2112), np.int64(2114), np.int64(2116), np.int64(2130), np.int64(2132), np.int64(2134), np.int64(2146), np.int64(2159), np.int64(2160), np.int64(2165), np.int64(2194), np.int64(2196), np.int64(2202), np.int64(2203), np.int64(2205), np.int64(2208), np.int64(2211), np.int64(2212), np.int64(2218), np.int64(2224), np.int64(2234), np.int64(2237), np.int64(2240), np.int64(2248), np.int64(2253), np.int64(2263), np.int64(2271), np.int64(2282), np.int64(2284), np.int64(2285), np.int64(2288), np.int64(2293), np.int64(2335), np.int64(2350), np.int64(2360), np.int64(2361), np.int64(2369), np.int64(2385), np.int64(2402), np.int64(2417), np.int64(2426), np.int64(2430), np.int64(2437), np.int64(2443), np.int64(2444), np.int64(2455), np.int64(2461), np.int64(2465), np.int64(2489), np.int64(2503), np.int64(2510), np.int64(2522), np.int64(2535), np.int64(2547), np.int64(2548), np.int64(2555), np.int64(2556), np.int64(2559), np.int64(2561), np.int64(2568), np.int64(2582), np.int64(2591), np.int64(2592), np.int64(2599), np.int64(2607), np.int64(2611), np.int64(2620), np.int64(2623), np.int64(2625), np.int64(2628), np.int64(2629), np.int64(2643), np.int64(2645), np.int64(2653), np.int64(2665), np.int64(2671), np.int64(2679), np.int64(2690), np.int64(2698), np.int64(2700), np.int64(2701), np.int64(2703), np.int64(2706), np.int64(2724), np.int64(2729), np.int64(2734), np.int64(2741), np.int64(2742), np.int64(2744), np.int64(2747), np.int64(2755), np.int64(2762), np.int64(2768), np.int64(2781), np.int64(2787), np.int64(2790), np.int64(2795), np.int64(2798), np.int64(2802), np.int64(2809), np.int64(2817), np.int64(2825), np.int64(2830), np.int64(2835), np.int64(2841), np.int64(2843), np.int64(2844), np.int64(2868), np.int64(2885), np.int64(2887), np.int64(2890), np.int64(2925), np.int64(2928), np.int64(2936), np.int64(2949), np.int64(2961), np.int64(2970), np.int64(2971), np.int64(2972), np.int64(2973)] with class frequencies:
+Keep 372 images
+Found 372 train images
+Restrict subset from 2975 to 372 images ...
+Use image subset [np.int64(0), np.int64(2), np.int64(24), np.int64(26), np.int64(34), np.int64(36), np.int64(60), np.int64(70), np.int64(71), np.int64(87), np.int64(99), np.int64(118), np.int64(121), np.int64(125), np.int64(131), np.int64(142), np.int64(151), np.int64(172), np.int64(180), np.int64(186), np.int64(190), np.int64(194), np.int64(203), np.int64(206), np.int64(224), np.int64(226), np.int64(241), np.int64(259), np.int64(278), np.int64(280), np.int64(296), np.int64(305), np.int64(314), np.int64(318), np.int64(325), np.int64(340), np.int64(356), np.int64(361), np.int64(372), np.int64(375), np.int64(377), np.int64(386), np.int64(400), np.int64(412), np.int64(414), np.int64(415), np.int64(419), np.int64(420), np.int64(423), np.int64(426), np.int64(427), np.int64(429), np.int64(430), np.int64(433), np.int64(450), np.int64(454), np.int64(468), np.int64(474), np.int64(502), np.int64(513), np.int64(514), np.int64(523), np.int64(526), np.int64(536), np.int64(539), np.int64(547), np.int64(561), np.int64(562), np.int64(580), np.int64(582), np.int64(584), np.int64(587), np.int64(592), np.int64(603), np.int64(619), np.int64(632), np.int64(637), np.int64(643), np.int64(658), np.int64(661), np.int64(664), np.int64(666), np.int64(672), np.int64(674), np.int64(690), np.int64(699), np.int64(701), np.int64(704), np.int64(705), np.int64(707), np.int64(716), np.int64(717), np.int64(718), np.int64(727), np.int64(729), np.int64(732), np.int64(735), np.int64(746), np.int64(752), np.int64(757), np.int64(760), np.int64(795), np.int64(802), np.int64(803), np.int64(832), np.int64(836), np.int64(840), np.int64(842), np.int64(845), np.int64(847), np.int64(858), np.int64(863), np.int64(864), np.int64(879), np.int64(890), np.int64(895), np.int64(921), np.int64(928), np.int64(939), np.int64(945), np.int64(961), np.int64(964), np.int64(977), np.int64(979), np.int64(983), np.int64(992), np.int64(997), np.int64(1002), np.int64(1039), np.int64(1054), np.int64(1057), np.int64(1061), np.int64(1070), np.int64(1084), np.int64(1104), np.int64(1109), np.int64(1123), np.int64(1135), np.int64(1140), np.int64(1141), np.int64(1144), np.int64(1151), np.int64(1153), np.int64(1165), np.int64(1167), np.int64(1171), np.int64(1181), np.int64(1209), np.int64(1210), np.int64(1222), np.int64(1224), np.int64(1227), np.int64(1228), np.int64(1235), np.int64(1251), np.int64(1263), np.int64(1267), np.int64(1281), np.int64(1283), np.int64(1292), np.int64(1294), np.int64(1303), np.int64(1308), np.int64(1313), np.int64(1324), np.int64(1332), np.int64(1338), np.int64(1351), np.int64(1354), np.int64(1363), np.int64(1364), np.int64(1365), np.int64(1381), np.int64(1396), np.int64(1420), np.int64(1421), np.int64(1428), np.int64(1434), np.int64(1443), np.int64(1448), np.int64(1455), np.int64(1458), np.int64(1470), np.int64(1476), np.int64(1477), np.int64(1483), np.int64(1487), np.int64(1490), np.int64(1495), np.int64(1496), np.int64(1512), np.int64(1524), np.int64(1533), np.int64(1538), np.int64(1545), np.int64(1559), np.int64(1578), np.int64(1584), np.int64(1587), np.int64(1611), np.int64(1617), np.int64(1647), np.int64(1670), np.int64(1675), np.int64(1678), np.int64(1681), np.int64(1682), np.int64(1695), np.int64(1697), np.int64(1703), np.int64(1705), np.int64(1714), np.int64(1715), np.int64(1730), np.int64(1731), np.int64(1751), np.int64(1755), np.int64(1761), np.int64(1766), np.int64(1769), np.int64(1777), np.int64(1782), np.int64(1792), np.int64(1795), np.int64(1805), np.int64(1813), np.int64(1830), np.int64(1853), np.int64(1854), np.int64(1863), np.int64(1875), np.int64(1876), np.int64(1879), np.int64(1898), np.int64(1914), np.int64(1915), np.int64(1939), np.int64(1958), np.int64(1979), np.int64(1982), np.int64(1992), np.int64(2008), np.int64(2014), np.int64(2043), np.int64(2047), np.int64(2052), np.int64(2081), np.int64(2085), np.int64(2087), np.int64(2092), np.int64(2099), np.int64(2106), np.int64(2112), np.int64(2114), np.int64(2116), np.int64(2130), np.int64(2132), np.int64(2134), np.int64(2146), np.int64(2159), np.int64(2160), np.int64(2165), np.int64(2194), np.int64(2196), np.int64(2202), np.int64(2203), np.int64(2205), np.int64(2208), np.int64(2211), np.int64(2212), np.int64(2218), np.int64(2224), np.int64(2234), np.int64(2237), np.int64(2240), np.int64(2248), np.int64(2253), np.int64(2263), np.int64(2271), np.int64(2282), np.int64(2284), np.int64(2285), np.int64(2288), np.int64(2293), np.int64(2335), np.int64(2350), np.int64(2360), np.int64(2361), np.int64(2369), np.int64(2385), np.int64(2402), np.int64(2417), np.int64(2426), np.int64(2430), np.int64(2437), np.int64(2443), np.int64(2444), np.int64(2455), np.int64(2461), np.int64(2465), np.int64(2489), np.int64(2503), np.int64(2510), np.int64(2522), np.int64(2535), np.int64(2547), np.int64(2548), np.int64(2555), np.int64(2556), np.int64(2559), np.int64(2561), np.int64(2568), np.int64(2582), np.int64(2591), np.int64(2592), np.int64(2599), np.int64(2607), np.int64(2611), np.int64(2620), np.int64(2623), np.int64(2625), np.int64(2628), np.int64(2629), np.int64(2643), np.int64(2645), np.int64(2653), np.int64(2665), np.int64(2671), np.int64(2679), np.int64(2690), np.int64(2698), np.int64(2700), np.int64(2701), np.int64(2703), np.int64(2706), np.int64(2724), np.int64(2729), np.int64(2734), np.int64(2741), np.int64(2742), np.int64(2744), np.int64(2747), np.int64(2755), np.int64(2762), np.int64(2768), np.int64(2781), np.int64(2787), np.int64(2790), np.int64(2795), np.int64(2798), np.int64(2802), np.int64(2809), np.int64(2817), np.int64(2825), np.int64(2830), np.int64(2835), np.int64(2841), np.int64(2843), np.int64(2844), np.int64(2868), np.int64(2885), np.int64(2887), np.int64(2890), np.int64(2925), np.int64(2928), np.int64(2936), np.int64(2949), np.int64(2961), np.int64(2970), np.int64(2971), np.int64(2972), np.int64(2973)] with class frequencies:
+Keep 2975 images
+Found 2975 train images
+Found 500 val images
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4 weights
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4depth weights
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4depth weights
+Create segmentation ema model.
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4 weights
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4depth weights
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4depth weights
+PAD run first half of decoder ([4, 3, 2]).
+bottleneck shape torch.Size([2, 2048, 32, 32])
+upconv4-0 shape: torch.Size([2, 256, 32, 32])
+concatenated features shape: torch.Size([2, 1280, 32, 32])
+upconv4-1 shape: torch.Size([2, 256, 32, 32])
+upconv3-0 shape: torch.Size([2, 256, 32, 32])
+concatenated features shape: torch.Size([2, 768, 64, 64])
+upconv3-1 shape: torch.Size([2, 256, 64, 64])
+disp3 shape: torch.Size([2, 1, 64, 64]), expected [64 64]
+upconv2-0 shape: torch.Size([2, 128, 64, 64])
+concatenated features shape: torch.Size([2, 384, 128, 128])
+upconv2-1 shape: torch.Size([2, 128, 128, 128])
+disp2 shape: torch.Size([2, 1, 128, 128]), expected [128 128]
+bottleneck shape torch.Size([2, 2048, 32, 32])
+upconv4-0 shape: torch.Size([2, 256, 32, 32])
+concatenated features shape: torch.Size([2, 1280, 32, 32])
+upconv4-1 shape: torch.Size([2, 256, 32, 32])
+upconv3-0 shape: torch.Size([2, 256, 32, 32])
+concatenated features shape: torch.Size([2, 768, 64, 64])
+upconv3-1 shape: torch.Size([2, 256, 64, 64])
+upconv2-0 shape: torch.Size([2, 128, 64, 64])
+concatenated features shape: torch.Size([2, 384, 128, 128])
+upconv2-1 shape: torch.Size([2, 128, 128, 128])
+PAD self attention for ('upconv', 2) with shape torch.Size([2, 128, 128, 128]).
+PAD run second half of decoder ([1, 0]).
+bottleneck shape torch.Size([2, 128, 128, 128])
+upconv1-0 shape: torch.Size([2, 128, 128, 128])
+concatenated features shape: torch.Size([2, 192, 256, 256])
+upconv1-1 shape: torch.Size([2, 128, 256, 256])
+disp1 shape: torch.Size([2, 1, 256, 256]), expected [256 256]
+upconv0-0 shape: torch.Size([2, 64, 256, 256])
+concatenated features shape: torch.Size([2, 64, 512, 512])
+upconv0-1 shape: torch.Size([2, 64, 512, 512])
+disp0 shape: torch.Size([2, 1, 512, 512]), expected [512 512]
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.8167515939157431
+Mean Acc : 	 0.2633087980658926
+FreqW Acc : 	 0.6888500401478644
+Mean IoU : 	 0.2176896121847354
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9170457941100834
+Mean Acc : 	 0.5880447399472098
+FreqW Acc : 	 0.8570250501778535
+Mean IoU : 	 0.48815524303717545
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9261596280444262
+Mean Acc : 	 0.6226503174308247
+FreqW Acc : 	 0.869973945110833
+Mean IoU : 	 0.5254330677777246
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9305979173433677
+Mean Acc : 	 0.6602154177814764
+FreqW Acc : 	 0.8784985088733855
+Mean IoU : 	 0.5564552955994027
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9325791283103618
+Mean Acc : 	 0.6590320313624652
+FreqW Acc : 	 0.8802900234385728
+Mean IoU : 	 0.5693834836647459
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9307032245642503
+Mean Acc : 	 0.6610021208459285
+FreqW Acc : 	 0.8780195471420185
+Mean IoU : 	 0.5632308229868539
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9332177245593491
+Mean Acc : 	 0.6699226279446198
+FreqW Acc : 	 0.8814043733992304
+Mean IoU : 	 0.5779428434591299
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.931958238855474
+Mean Acc : 	 0.6816690924447348
+FreqW Acc : 	 0.8802224676144776
+Mean IoU : 	 0.5772221314357919
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9342720400390094
+Mean Acc : 	 0.6694360331828317
+FreqW Acc : 	 0.8820894280199734
+Mean IoU : 	 0.5831415738884331
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9321892560259909
+Mean Acc : 	 0.6951692185966383
+FreqW Acc : 	 0.8802349767878722
+Mean IoU : 	 0.5870576969727839
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.93584718130195
+Mean Acc : 	 0.6920785002634002
+FreqW Acc : 	 0.8851914965949724
+Mean IoU : 	 0.6016402064315285
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9342744349712491
+Mean Acc : 	 0.6842906390730578
+FreqW Acc : 	 0.8815618410738797
+Mean IoU : 	 0.5968410601203432
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9343446252439913
+Mean Acc : 	 0.6771691888225159
+FreqW Acc : 	 0.8829537402654729
+Mean IoU : 	 0.58503011943277
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9374211316423015
+Mean Acc : 	 0.6936901323985558
+FreqW Acc : 	 0.8875160131152589
+Mean IoU : 	 0.6057633808756316
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9373636096450124
+Mean Acc : 	 0.6990532846386135
+FreqW Acc : 	 0.8875828531616812
+Mean IoU : 	 0.6073017755442801
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9377320235110105
+Mean Acc : 	 0.7001840369012273
+FreqW Acc : 	 0.8884263241962211
+Mean IoU : 	 0.6082170852888511
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9375596756368337
+Mean Acc : 	 0.7019126331480158
+FreqW Acc : 	 0.8880590057785283
+Mean IoU : 	 0.6087252601904815
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9376201509476496
+Mean Acc : 	 0.7026017900979497
+FreqW Acc : 	 0.8881067026795426
+Mean IoU : 	 0.6085325498069504
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9371130491294437
+Mean Acc : 	 0.6932194745981882
+FreqW Acc : 	 0.8871031657650191
+Mean IoU : 	 0.6040696378299062
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9375969737618771
+Mean Acc : 	 0.7042778836242399
+FreqW Acc : 	 0.8879931252247381
+Mean IoU : 	 0.6115597478599449
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9376077662251937
+Mean Acc : 	 0.7025961523786988
+FreqW Acc : 	 0.8880744874829171
+Mean IoU : 	 0.6109170062691277
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9371995415183599
+Mean Acc : 	 0.6984945628845276
+FreqW Acc : 	 0.887412737684947
+Mean IoU : 	 0.605952194691058
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.937711681855212
+Mean Acc : 	 0.707183787184144
+FreqW Acc : 	 0.8884348164452448
+Mean IoU : 	 0.6122192718600222
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9374938957037895
+Mean Acc : 	 0.7040634505740555
+FreqW Acc : 	 0.888058063554078
+Mean IoU : 	 0.60971215322295
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.937931304557587
+Mean Acc : 	 0.7018348837871342
+FreqW Acc : 	 0.8885597574837588
+Mean IoU : 	 0.612456563268132
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9372283330534811
+Mean Acc : 	 0.7012361904092503
+FreqW Acc : 	 0.8875955894240872
+Mean IoU : 	 0.6096447351387249
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9376590064330017
+Mean Acc : 	 0.7095391931288921
+FreqW Acc : 	 0.8888140325334146
+Mean IoU : 	 0.6122131217543797
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9379952304902636
+Mean Acc : 	 0.7021977010815877
+FreqW Acc : 	 0.8888816560630122
+Mean IoU : 	 0.61112234887382
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9372710535843055
+Mean Acc : 	 0.700602092950887
+FreqW Acc : 	 0.8875473011914403
+Mean IoU : 	 0.6084295412112644
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9377646233810045
+Mean Acc : 	 0.7064084989640479
+FreqW Acc : 	 0.8886410205413979
+Mean IoU : 	 0.6124787339821255
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9376448200584239
+Mean Acc : 	 0.7064680509848996
+FreqW Acc : 	 0.888108834595816
+Mean IoU : 	 0.6127568404744674
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.937820941368643
+Mean Acc : 	 0.7068254155544167
+FreqW Acc : 	 0.8887720745003325
+Mean IoU : 	 0.6135296287986439
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.937739443874835
+Mean Acc : 	 0.6980935627470025
+FreqW Acc : 	 0.888316301646828
+Mean IoU : 	 0.608906487433996
+Resolved base cfg vars {'seed': 25, ('model', 'variant'): 'ct_lam0', ('training', 'cross_task_lambda'): 0.0, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_lam0_D372_S25', 'seed': 25, ('model', 'variant'): 'ct_lam0', ('training', 'cross_task_lambda'): 0.0, ('training', 'cross_task_type'): 'cosine'}
+Dispatch job 28_tag=cityscapes_pad_ct_lam0_D372_S25
+Start 2026-03-05_08-23-2428_tag=cityscapes_pad_ct_lam0_D372_S25
+RUNDIR: /scratch/u5hv/shijie.u5hv/sde_seg/logs//cityscapes_joint_217/2026-03-05_08-23-2428_tag=cityscapes_pad_ct_lam0_D372_S25
+Restrict subset from 2975 to 372 images ...
+Use image subset [np.int64(7), np.int64(27), np.int64(35), np.int64(45), np.int64(48), np.int64(51), np.int64(55), np.int64(64), np.int64(81), np.int64(85), np.int64(103), np.int64(109), np.int64(111), np.int64(118), np.int64(123), np.int64(134), np.int64(135), np.int64(137), np.int64(166), np.int64(172), np.int64(176), np.int64(181), np.int64(182), np.int64(199), np.int64(201), np.int64(208), np.int64(241), np.int64(252), np.int64(256), np.int64(263), np.int64(273), np.int64(281), np.int64(289), np.int64(298), np.int64(302), np.int64(311), np.int64(314), np.int64(328), np.int64(329), np.int64(330), np.int64(335), np.int64(345), np.int64(346), np.int64(347), np.int64(349), np.int64(363), np.int64(365), np.int64(373), np.int64(387), np.int64(395), np.int64(399), np.int64(406), np.int64(408), np.int64(414), np.int64(431), np.int64(443), np.int64(444), np.int64(448), np.int64(450), np.int64(455), np.int64(462), np.int64(465), np.int64(477), np.int64(478), np.int64(484), np.int64(508), np.int64(510), np.int64(514), np.int64(522), np.int64(541), np.int64(556), np.int64(559), np.int64(568), np.int64(577), np.int64(586), np.int64(615), np.int64(617), np.int64(618), np.int64(629), np.int64(636), np.int64(638), np.int64(642), np.int64(646), np.int64(653), np.int64(670), np.int64(675), np.int64(682), np.int64(691), np.int64(698), np.int64(699), np.int64(700), np.int64(718), np.int64(725), np.int64(730), np.int64(731), np.int64(732), np.int64(746), np.int64(760), np.int64(769), np.int64(791), np.int64(800), np.int64(806), np.int64(819), np.int64(827), np.int64(831), np.int64(839), np.int64(844), np.int64(863), np.int64(867), np.int64(868), np.int64(875), np.int64(887), np.int64(899), np.int64(906), np.int64(919), np.int64(924), np.int64(939), np.int64(942), np.int64(946), np.int64(949), np.int64(967), np.int64(973), np.int64(975), np.int64(987), np.int64(993), np.int64(999), np.int64(1000), np.int64(1006), np.int64(1017), np.int64(1020), np.int64(1024), np.int64(1035), np.int64(1038), np.int64(1044), np.int64(1054), np.int64(1058), np.int64(1064), np.int64(1070), np.int64(1076), np.int64(1082), np.int64(1090), np.int64(1094), np.int64(1104), np.int64(1110), np.int64(1115), np.int64(1117), np.int64(1118), np.int64(1147), np.int64(1152), np.int64(1162), np.int64(1166), np.int64(1169), np.int64(1172), np.int64(1180), np.int64(1190), np.int64(1194), np.int64(1204), np.int64(1207), np.int64(1217), np.int64(1219), np.int64(1226), np.int64(1235), np.int64(1261), np.int64(1275), np.int64(1280), np.int64(1293), np.int64(1296), np.int64(1299), np.int64(1303), np.int64(1305), np.int64(1338), np.int64(1340), np.int64(1371), np.int64(1380), np.int64(1384), np.int64(1396), np.int64(1404), np.int64(1413), np.int64(1433), np.int64(1449), np.int64(1452), np.int64(1463), np.int64(1474), np.int64(1488), np.int64(1492), np.int64(1510), np.int64(1520), np.int64(1531), np.int64(1532), np.int64(1533), np.int64(1557), np.int64(1560), np.int64(1566), np.int64(1577), np.int64(1595), np.int64(1597), np.int64(1602), np.int64(1608), np.int64(1624), np.int64(1627), np.int64(1629), np.int64(1640), np.int64(1644), np.int64(1648), np.int64(1657), np.int64(1686), np.int64(1705), np.int64(1711), np.int64(1713), np.int64(1720), np.int64(1724), np.int64(1730), np.int64(1760), np.int64(1766), np.int64(1769), np.int64(1770), np.int64(1779), np.int64(1794), np.int64(1797), np.int64(1803), np.int64(1810), np.int64(1818), np.int64(1827), np.int64(1831), np.int64(1832), np.int64(1837), np.int64(1844), np.int64(1845), np.int64(1849), np.int64(1851), np.int64(1860), np.int64(1876), np.int64(1883), np.int64(1890), np.int64(1901), np.int64(1905), np.int64(1907), np.int64(1908), np.int64(1911), np.int64(1918), np.int64(1926), np.int64(1946), np.int64(1947), np.int64(1950), np.int64(1953), np.int64(1959), np.int64(1971), np.int64(1976), np.int64(1980), np.int64(1981), np.int64(1986), np.int64(1989), np.int64(1999), np.int64(2015), np.int64(2021), np.int64(2022), np.int64(2029), np.int64(2042), np.int64(2043), np.int64(2055), np.int64(2057), np.int64(2080), np.int64(2100), np.int64(2107), np.int64(2109), np.int64(2116), np.int64(2117), np.int64(2124), np.int64(2136), np.int64(2139), np.int64(2151), np.int64(2153), np.int64(2156), np.int64(2160), np.int64(2171), np.int64(2187), np.int64(2188), np.int64(2207), np.int64(2218), np.int64(2223), np.int64(2230), np.int64(2239), np.int64(2245), np.int64(2247), np.int64(2257), np.int64(2267), np.int64(2272), np.int64(2280), np.int64(2284), np.int64(2287), np.int64(2290), np.int64(2291), np.int64(2293), np.int64(2301), np.int64(2302), np.int64(2306), np.int64(2314), np.int64(2326), np.int64(2338), np.int64(2342), np.int64(2355), np.int64(2362), np.int64(2365), np.int64(2373), np.int64(2385), np.int64(2402), np.int64(2404), np.int64(2405), np.int64(2438), np.int64(2444), np.int64(2452), np.int64(2462), np.int64(2468), np.int64(2507), np.int64(2508), np.int64(2510), np.int64(2527), np.int64(2528), np.int64(2546), np.int64(2553), np.int64(2554), np.int64(2558), np.int64(2570), np.int64(2571), np.int64(2580), np.int64(2606), np.int64(2618), np.int64(2625), np.int64(2629), np.int64(2636), np.int64(2649), np.int64(2655), np.int64(2663), np.int64(2679), np.int64(2680), np.int64(2683), np.int64(2695), np.int64(2700), np.int64(2704), np.int64(2711), np.int64(2715), np.int64(2720), np.int64(2722), np.int64(2728), np.int64(2734), np.int64(2738), np.int64(2752), np.int64(2758), np.int64(2759), np.int64(2775), np.int64(2777), np.int64(2782), np.int64(2791), np.int64(2799), np.int64(2809), np.int64(2830), np.int64(2839), np.int64(2843), np.int64(2852), np.int64(2854), np.int64(2856), np.int64(2859), np.int64(2871), np.int64(2890), np.int64(2892), np.int64(2901), np.int64(2921), np.int64(2923), np.int64(2925), np.int64(2950), np.int64(2960), np.int64(2969)] with class frequencies:
+Keep 372 images
+Found 372 train images
+Restrict subset from 2975 to 372 images ...
+Use image subset [np.int64(7), np.int64(27), np.int64(35), np.int64(45), np.int64(48), np.int64(51), np.int64(55), np.int64(64), np.int64(81), np.int64(85), np.int64(103), np.int64(109), np.int64(111), np.int64(118), np.int64(123), np.int64(134), np.int64(135), np.int64(137), np.int64(166), np.int64(172), np.int64(176), np.int64(181), np.int64(182), np.int64(199), np.int64(201), np.int64(208), np.int64(241), np.int64(252), np.int64(256), np.int64(263), np.int64(273), np.int64(281), np.int64(289), np.int64(298), np.int64(302), np.int64(311), np.int64(314), np.int64(328), np.int64(329), np.int64(330), np.int64(335), np.int64(345), np.int64(346), np.int64(347), np.int64(349), np.int64(363), np.int64(365), np.int64(373), np.int64(387), np.int64(395), np.int64(399), np.int64(406), np.int64(408), np.int64(414), np.int64(431), np.int64(443), np.int64(444), np.int64(448), np.int64(450), np.int64(455), np.int64(462), np.int64(465), np.int64(477), np.int64(478), np.int64(484), np.int64(508), np.int64(510), np.int64(514), np.int64(522), np.int64(541), np.int64(556), np.int64(559), np.int64(568), np.int64(577), np.int64(586), np.int64(615), np.int64(617), np.int64(618), np.int64(629), np.int64(636), np.int64(638), np.int64(642), np.int64(646), np.int64(653), np.int64(670), np.int64(675), np.int64(682), np.int64(691), np.int64(698), np.int64(699), np.int64(700), np.int64(718), np.int64(725), np.int64(730), np.int64(731), np.int64(732), np.int64(746), np.int64(760), np.int64(769), np.int64(791), np.int64(800), np.int64(806), np.int64(819), np.int64(827), np.int64(831), np.int64(839), np.int64(844), np.int64(863), np.int64(867), np.int64(868), np.int64(875), np.int64(887), np.int64(899), np.int64(906), np.int64(919), np.int64(924), np.int64(939), np.int64(942), np.int64(946), np.int64(949), np.int64(967), np.int64(973), np.int64(975), np.int64(987), np.int64(993), np.int64(999), np.int64(1000), np.int64(1006), np.int64(1017), np.int64(1020), np.int64(1024), np.int64(1035), np.int64(1038), np.int64(1044), np.int64(1054), np.int64(1058), np.int64(1064), np.int64(1070), np.int64(1076), np.int64(1082), np.int64(1090), np.int64(1094), np.int64(1104), np.int64(1110), np.int64(1115), np.int64(1117), np.int64(1118), np.int64(1147), np.int64(1152), np.int64(1162), np.int64(1166), np.int64(1169), np.int64(1172), np.int64(1180), np.int64(1190), np.int64(1194), np.int64(1204), np.int64(1207), np.int64(1217), np.int64(1219), np.int64(1226), np.int64(1235), np.int64(1261), np.int64(1275), np.int64(1280), np.int64(1293), np.int64(1296), np.int64(1299), np.int64(1303), np.int64(1305), np.int64(1338), np.int64(1340), np.int64(1371), np.int64(1380), np.int64(1384), np.int64(1396), np.int64(1404), np.int64(1413), np.int64(1433), np.int64(1449), np.int64(1452), np.int64(1463), np.int64(1474), np.int64(1488), np.int64(1492), np.int64(1510), np.int64(1520), np.int64(1531), np.int64(1532), np.int64(1533), np.int64(1557), np.int64(1560), np.int64(1566), np.int64(1577), np.int64(1595), np.int64(1597), np.int64(1602), np.int64(1608), np.int64(1624), np.int64(1627), np.int64(1629), np.int64(1640), np.int64(1644), np.int64(1648), np.int64(1657), np.int64(1686), np.int64(1705), np.int64(1711), np.int64(1713), np.int64(1720), np.int64(1724), np.int64(1730), np.int64(1760), np.int64(1766), np.int64(1769), np.int64(1770), np.int64(1779), np.int64(1794), np.int64(1797), np.int64(1803), np.int64(1810), np.int64(1818), np.int64(1827), np.int64(1831), np.int64(1832), np.int64(1837), np.int64(1844), np.int64(1845), np.int64(1849), np.int64(1851), np.int64(1860), np.int64(1876), np.int64(1883), np.int64(1890), np.int64(1901), np.int64(1905), np.int64(1907), np.int64(1908), np.int64(1911), np.int64(1918), np.int64(1926), np.int64(1946), np.int64(1947), np.int64(1950), np.int64(1953), np.int64(1959), np.int64(1971), np.int64(1976), np.int64(1980), np.int64(1981), np.int64(1986), np.int64(1989), np.int64(1999), np.int64(2015), np.int64(2021), np.int64(2022), np.int64(2029), np.int64(2042), np.int64(2043), np.int64(2055), np.int64(2057), np.int64(2080), np.int64(2100), np.int64(2107), np.int64(2109), np.int64(2116), np.int64(2117), np.int64(2124), np.int64(2136), np.int64(2139), np.int64(2151), np.int64(2153), np.int64(2156), np.int64(2160), np.int64(2171), np.int64(2187), np.int64(2188), np.int64(2207), np.int64(2218), np.int64(2223), np.int64(2230), np.int64(2239), np.int64(2245), np.int64(2247), np.int64(2257), np.int64(2267), np.int64(2272), np.int64(2280), np.int64(2284), np.int64(2287), np.int64(2290), np.int64(2291), np.int64(2293), np.int64(2301), np.int64(2302), np.int64(2306), np.int64(2314), np.int64(2326), np.int64(2338), np.int64(2342), np.int64(2355), np.int64(2362), np.int64(2365), np.int64(2373), np.int64(2385), np.int64(2402), np.int64(2404), np.int64(2405), np.int64(2438), np.int64(2444), np.int64(2452), np.int64(2462), np.int64(2468), np.int64(2507), np.int64(2508), np.int64(2510), np.int64(2527), np.int64(2528), np.int64(2546), np.int64(2553), np.int64(2554), np.int64(2558), np.int64(2570), np.int64(2571), np.int64(2580), np.int64(2606), np.int64(2618), np.int64(2625), np.int64(2629), np.int64(2636), np.int64(2649), np.int64(2655), np.int64(2663), np.int64(2679), np.int64(2680), np.int64(2683), np.int64(2695), np.int64(2700), np.int64(2704), np.int64(2711), np.int64(2715), np.int64(2720), np.int64(2722), np.int64(2728), np.int64(2734), np.int64(2738), np.int64(2752), np.int64(2758), np.int64(2759), np.int64(2775), np.int64(2777), np.int64(2782), np.int64(2791), np.int64(2799), np.int64(2809), np.int64(2830), np.int64(2839), np.int64(2843), np.int64(2852), np.int64(2854), np.int64(2856), np.int64(2859), np.int64(2871), np.int64(2890), np.int64(2892), np.int64(2901), np.int64(2921), np.int64(2923), np.int64(2925), np.int64(2950), np.int64(2960), np.int64(2969)] with class frequencies:
+Keep 2975 images
+Found 2975 train images
+Found 500 val images
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4 weights
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4depth weights
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4depth weights
+Create segmentation ema model.
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4 weights
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4depth weights
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4depth weights
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.8328178594311143
+Mean Acc : 	 0.26696028856715703
+FreqW Acc : 	 0.7171273854080863
+Mean IoU : 	 0.22278035624110176
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9150388845168167
+Mean Acc : 	 0.5106135946906376
+FreqW Acc : 	 0.8502416724285361
+Mean IoU : 	 0.4281580773092583
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9255611305516258
+Mean Acc : 	 0.5870075584309666
+FreqW Acc : 	 0.8683185935499128
+Mean IoU : 	 0.4996578446709233
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9298260468232461
+Mean Acc : 	 0.633280130752631
+FreqW Acc : 	 0.8753153208588086
+Mean IoU : 	 0.5463000789041689
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9312354230039035
+Mean Acc : 	 0.6472728575182578
+FreqW Acc : 	 0.878600783843201
+Mean IoU : 	 0.5545460249522585
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9337625040273796
+Mean Acc : 	 0.6733645578272062
+FreqW Acc : 	 0.8835533916651147
+Mean IoU : 	 0.5729679250500379
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9364898258152695
+Mean Acc : 	 0.7150473243541547
+FreqW Acc : 	 0.8870123256005268
+Mean IoU : 	 0.6146518265997023
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9363469500034076
+Mean Acc : 	 0.7008989215873802
+FreqW Acc : 	 0.8867773393278486
+Mean IoU : 	 0.6011173180971819
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.935678598139108
+Mean Acc : 	 0.714495273883242
+FreqW Acc : 	 0.8864033575113058
+Mean IoU : 	 0.6077803402559879
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9358330472756178
+Mean Acc : 	 0.719078685407766
+FreqW Acc : 	 0.8868292055387068
+Mean IoU : 	 0.6130242764567834
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9379735932153846
+Mean Acc : 	 0.7232890874069439
+FreqW Acc : 	 0.8896807203662841
+Mean IoU : 	 0.6220120149698903
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9375201396242878
+Mean Acc : 	 0.7127856221130964
+FreqW Acc : 	 0.8881862134902563
+Mean IoU : 	 0.6220549980195458
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9370526174421658
+Mean Acc : 	 0.7034735319819684
+FreqW Acc : 	 0.8881964135720678
+Mean IoU : 	 0.6115934040250753
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9382942960178039
+Mean Acc : 	 0.7197928260130457
+FreqW Acc : 	 0.8901613055788894
+Mean IoU : 	 0.6223624610531029
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9390393555114325
+Mean Acc : 	 0.725296114999206
+FreqW Acc : 	 0.8913943599747289
+Mean IoU : 	 0.6261645468653224
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9386981191096473
+Mean Acc : 	 0.7268051535509946
+FreqW Acc : 	 0.8908444689107471
+Mean IoU : 	 0.6254342978709935
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9393125348314866
+Mean Acc : 	 0.7231452730603479
+FreqW Acc : 	 0.8917154291786056
+Mean IoU : 	 0.6279616751267723
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9385507893345493
+Mean Acc : 	 0.7251034651220776
+FreqW Acc : 	 0.8906884443489195
+Mean IoU : 	 0.6231383834397439
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9389603489216477
+Mean Acc : 	 0.7253899219968709
+FreqW Acc : 	 0.8911168393306773
+Mean IoU : 	 0.6279973059700762
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9392368654423636
+Mean Acc : 	 0.728156846701829
+FreqW Acc : 	 0.8916153532989514
+Mean IoU : 	 0.6284785400759215
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9390537905401773
+Mean Acc : 	 0.7278246881016988
+FreqW Acc : 	 0.891317392077017
+Mean IoU : 	 0.6277915173074391
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9386334297650546
+Mean Acc : 	 0.7250102862313864
+FreqW Acc : 	 0.8904879936683429
+Mean IoU : 	 0.6258251175739553
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.939246222691278
+Mean Acc : 	 0.7257827971489171
+FreqW Acc : 	 0.8916040043904492
+Mean IoU : 	 0.6277520259142647
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9391290106068583
+Mean Acc : 	 0.7235634130681448
+FreqW Acc : 	 0.8914009175547055
+Mean IoU : 	 0.627227535112664
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.938946991394293
+Mean Acc : 	 0.7207536708683597
+FreqW Acc : 	 0.8909867285454869
+Mean IoU : 	 0.6255764037713295
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9391357068199508
+Mean Acc : 	 0.7251201907329686
+FreqW Acc : 	 0.8913703704593229
+Mean IoU : 	 0.6270563191104465
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9392142815367087
+Mean Acc : 	 0.725771891616006
+FreqW Acc : 	 0.8913659191747876
+Mean IoU : 	 0.6283790259581558
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9388865597070153
+Mean Acc : 	 0.7242474702060948
+FreqW Acc : 	 0.8910140797102314
+Mean IoU : 	 0.6264495332080322
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9386351921559923
+Mean Acc : 	 0.7222470075949438
+FreqW Acc : 	 0.8906453314107352
+Mean IoU : 	 0.623349104239988
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9389900740004834
+Mean Acc : 	 0.7256547909176222
+FreqW Acc : 	 0.8910214151499712
+Mean IoU : 	 0.6260911732452257
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9388172244556189
+Mean Acc : 	 0.7228651461950654
+FreqW Acc : 	 0.8906984622878052
+Mean IoU : 	 0.6258284328922219
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9387088592247183
+Mean Acc : 	 0.7249171440867399
+FreqW Acc : 	 0.8911584844431997
+Mean IoU : 	 0.6250603518092952
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9390655339966237
+Mean Acc : 	 0.725755161009692
+FreqW Acc : 	 0.8911596677325738
+Mean IoU : 	 0.6271364620451741
+Resolved base cfg vars {'seed': 42, ('model', 'variant'): 'ct_lam0', ('training', 'cross_task_lambda'): 0.0, ('training', 'cross_task_type'): 'cosine'}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_lam0_D372_S42', 'seed': 42, ('model', 'variant'): 'ct_lam0', ('training', 'cross_task_lambda'): 0.0, ('training', 'cross_task_type'): 'cosine'}
+Dispatch job 29_tag=cityscapes_pad_ct_lam0_D372_S42
+Start 2026-03-05_12-00-4629_tag=cityscapes_pad_ct_lam0_D372_S42
+RUNDIR: /scratch/u5hv/shijie.u5hv/sde_seg/logs//cityscapes_joint_217/2026-03-05_12-00-4629_tag=cityscapes_pad_ct_lam0_D372_S42
+Restrict subset from 2975 to 372 images ...
+Use image subset [np.int64(0), np.int64(30), np.int64(32), np.int64(44), np.int64(45), np.int64(51), np.int64(52), np.int64(56), np.int64(63), np.int64(67), np.int64(70), np.int64(73), np.int64(80), np.int64(88), np.int64(93), np.int64(102), np.int64(108), np.int64(120), np.int64(124), np.int64(141), np.int64(144), np.int64(162), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(184), np.int64(192), np.int64(194), np.int64(196), np.int64(203), np.int64(211), np.int64(233), np.int64(239), np.int64(246), np.int64(251), np.int64(256), np.int64(289), np.int64(296), np.int64(298), np.int64(309), np.int64(313), np.int64(318), np.int64(321), np.int64(322), np.int64(324), np.int64(331), np.int64(332), np.int64(354), np.int64(368), np.int64(387), np.int64(393), np.int64(402), np.int64(410), np.int64(411), np.int64(414), np.int64(420), np.int64(432), np.int64(439), np.int64(457), np.int64(463), np.int64(471), np.int64(478), np.int64(479), np.int64(485), np.int64(486), np.int64(495), np.int64(506), np.int64(507), np.int64(527), np.int64(528), np.int64(532), np.int64(533), np.int64(535), np.int64(543), np.int64(555), np.int64(557), np.int64(567), np.int64(572), np.int64(594), np.int64(599), np.int64(601), np.int64(602), np.int64(612), np.int64(637), np.int64(642), np.int64(644), np.int64(651), np.int64(676), np.int64(680), np.int64(685), np.int64(691), np.int64(693), np.int64(700), np.int64(705), np.int64(718), np.int64(727), np.int64(729), np.int64(741), np.int64(744), np.int64(748), np.int64(755), np.int64(759), np.int64(772), np.int64(783), np.int64(790), np.int64(798), np.int64(809), np.int64(811), np.int64(834), np.int64(857), np.int64(859), np.int64(862), np.int64(869), np.int64(879), np.int64(889), np.int64(912), np.int64(926), np.int64(929), np.int64(930), np.int64(942), np.int64(944), np.int64(952), np.int64(962), np.int64(965), np.int64(969), np.int64(999), np.int64(1001), np.int64(1005), np.int64(1018), np.int64(1023), np.int64(1025), np.int64(1027), np.int64(1047), np.int64(1048), np.int64(1055), np.int64(1071), np.int64(1089), np.int64(1090), np.int64(1091), np.int64(1097), np.int64(1106), np.int64(1149), np.int64(1151), np.int64(1159), np.int64(1173), np.int64(1177), np.int64(1188), np.int64(1196), np.int64(1208), np.int64(1210), np.int64(1222), np.int64(1225), np.int64(1229), np.int64(1230), np.int64(1235), np.int64(1255), np.int64(1263), np.int64(1264), np.int64(1268), np.int64(1269), np.int64(1270), np.int64(1272), np.int64(1286), np.int64(1313), np.int64(1321), np.int64(1322), np.int64(1326), np.int64(1330), np.int64(1337), np.int64(1340), np.int64(1343), np.int64(1370), np.int64(1376), np.int64(1385), np.int64(1399), np.int64(1402), np.int64(1407), np.int64(1410), np.int64(1421), np.int64(1422), np.int64(1426), np.int64(1427), np.int64(1431), np.int64(1432), np.int64(1436), np.int64(1453), np.int64(1461), np.int64(1474), np.int64(1487), np.int64(1488), np.int64(1494), np.int64(1505), np.int64(1507), np.int64(1509), np.int64(1517), np.int64(1518), np.int64(1538), np.int64(1544), np.int64(1554), np.int64(1562), np.int64(1567), np.int64(1575), np.int64(1586), np.int64(1590), np.int64(1596), np.int64(1598), np.int64(1608), np.int64(1610), np.int64(1613), np.int64(1618), np.int64(1620), np.int64(1624), np.int64(1641), np.int64(1655), np.int64(1656), np.int64(1662), np.int64(1690), np.int64(1691), np.int64(1697), np.int64(1702), np.int64(1706), np.int64(1711), np.int64(1716), np.int64(1718), np.int64(1727), np.int64(1731), np.int64(1747), np.int64(1760), np.int64(1762), np.int64(1767), np.int64(1771), np.int64(1775), np.int64(1777), np.int64(1788), np.int64(1795), np.int64(1797), np.int64(1805), np.int64(1807), np.int64(1814), np.int64(1840), np.int64(1850), np.int64(1869), np.int64(1872), np.int64(1877), np.int64(1880), np.int64(1882), np.int64(1891), np.int64(1896), np.int64(1916), np.int64(1922), np.int64(1936), np.int64(1940), np.int64(1941), np.int64(1949), np.int64(1956), np.int64(1957), np.int64(1963), np.int64(1966), np.int64(1979), np.int64(1983), np.int64(1993), np.int64(1999), np.int64(2001), np.int64(2003), np.int64(2013), np.int64(2015), np.int64(2023), np.int64(2033), np.int64(2046), np.int64(2051), np.int64(2064), np.int64(2073), np.int64(2092), np.int64(2113), np.int64(2114), np.int64(2119), np.int64(2124), np.int64(2131), np.int64(2144), np.int64(2149), np.int64(2154), np.int64(2159), np.int64(2185), np.int64(2186), np.int64(2204), np.int64(2215), np.int64(2227), np.int64(2233), np.int64(2241), np.int64(2247), np.int64(2257), np.int64(2261), np.int64(2263), np.int64(2270), np.int64(2287), np.int64(2315), np.int64(2321), np.int64(2332), np.int64(2335), np.int64(2349), np.int64(2356), np.int64(2383), np.int64(2392), np.int64(2395), np.int64(2397), np.int64(2401), np.int64(2403), np.int64(2404), np.int64(2420), np.int64(2424), np.int64(2436), np.int64(2459), np.int64(2462), np.int64(2466), np.int64(2469), np.int64(2478), np.int64(2480), np.int64(2482), np.int64(2496), np.int64(2501), np.int64(2517), np.int64(2519), np.int64(2528), np.int64(2534), np.int64(2539), np.int64(2546), np.int64(2573), np.int64(2578), np.int64(2586), np.int64(2595), np.int64(2608), np.int64(2622), np.int64(2626), np.int64(2632), np.int64(2636), np.int64(2644), np.int64(2645), np.int64(2646), np.int64(2654), np.int64(2655), np.int64(2658), np.int64(2683), np.int64(2686), np.int64(2733), np.int64(2753), np.int64(2754), np.int64(2756), np.int64(2766), np.int64(2769), np.int64(2787), np.int64(2792), np.int64(2798), np.int64(2810), np.int64(2811), np.int64(2815), np.int64(2822), np.int64(2823), np.int64(2838), np.int64(2848), np.int64(2864), np.int64(2865), np.int64(2872), np.int64(2897), np.int64(2898), np.int64(2910), np.int64(2931), np.int64(2932), np.int64(2936), np.int64(2947), np.int64(2956), np.int64(2958)] with class frequencies:
+Keep 372 images
+Found 372 train images
+Restrict subset from 2975 to 372 images ...
+Use image subset [np.int64(0), np.int64(30), np.int64(32), np.int64(44), np.int64(45), np.int64(51), np.int64(52), np.int64(56), np.int64(63), np.int64(67), np.int64(70), np.int64(73), np.int64(80), np.int64(88), np.int64(93), np.int64(102), np.int64(108), np.int64(120), np.int64(124), np.int64(141), np.int64(144), np.int64(162), np.int64(174), np.int64(175), np.int64(177), np.int64(178), np.int64(184), np.int64(192), np.int64(194), np.int64(196), np.int64(203), np.int64(211), np.int64(233), np.int64(239), np.int64(246), np.int64(251), np.int64(256), np.int64(289), np.int64(296), np.int64(298), np.int64(309), np.int64(313), np.int64(318), np.int64(321), np.int64(322), np.int64(324), np.int64(331), np.int64(332), np.int64(354), np.int64(368), np.int64(387), np.int64(393), np.int64(402), np.int64(410), np.int64(411), np.int64(414), np.int64(420), np.int64(432), np.int64(439), np.int64(457), np.int64(463), np.int64(471), np.int64(478), np.int64(479), np.int64(485), np.int64(486), np.int64(495), np.int64(506), np.int64(507), np.int64(527), np.int64(528), np.int64(532), np.int64(533), np.int64(535), np.int64(543), np.int64(555), np.int64(557), np.int64(567), np.int64(572), np.int64(594), np.int64(599), np.int64(601), np.int64(602), np.int64(612), np.int64(637), np.int64(642), np.int64(644), np.int64(651), np.int64(676), np.int64(680), np.int64(685), np.int64(691), np.int64(693), np.int64(700), np.int64(705), np.int64(718), np.int64(727), np.int64(729), np.int64(741), np.int64(744), np.int64(748), np.int64(755), np.int64(759), np.int64(772), np.int64(783), np.int64(790), np.int64(798), np.int64(809), np.int64(811), np.int64(834), np.int64(857), np.int64(859), np.int64(862), np.int64(869), np.int64(879), np.int64(889), np.int64(912), np.int64(926), np.int64(929), np.int64(930), np.int64(942), np.int64(944), np.int64(952), np.int64(962), np.int64(965), np.int64(969), np.int64(999), np.int64(1001), np.int64(1005), np.int64(1018), np.int64(1023), np.int64(1025), np.int64(1027), np.int64(1047), np.int64(1048), np.int64(1055), np.int64(1071), np.int64(1089), np.int64(1090), np.int64(1091), np.int64(1097), np.int64(1106), np.int64(1149), np.int64(1151), np.int64(1159), np.int64(1173), np.int64(1177), np.int64(1188), np.int64(1196), np.int64(1208), np.int64(1210), np.int64(1222), np.int64(1225), np.int64(1229), np.int64(1230), np.int64(1235), np.int64(1255), np.int64(1263), np.int64(1264), np.int64(1268), np.int64(1269), np.int64(1270), np.int64(1272), np.int64(1286), np.int64(1313), np.int64(1321), np.int64(1322), np.int64(1326), np.int64(1330), np.int64(1337), np.int64(1340), np.int64(1343), np.int64(1370), np.int64(1376), np.int64(1385), np.int64(1399), np.int64(1402), np.int64(1407), np.int64(1410), np.int64(1421), np.int64(1422), np.int64(1426), np.int64(1427), np.int64(1431), np.int64(1432), np.int64(1436), np.int64(1453), np.int64(1461), np.int64(1474), np.int64(1487), np.int64(1488), np.int64(1494), np.int64(1505), np.int64(1507), np.int64(1509), np.int64(1517), np.int64(1518), np.int64(1538), np.int64(1544), np.int64(1554), np.int64(1562), np.int64(1567), np.int64(1575), np.int64(1586), np.int64(1590), np.int64(1596), np.int64(1598), np.int64(1608), np.int64(1610), np.int64(1613), np.int64(1618), np.int64(1620), np.int64(1624), np.int64(1641), np.int64(1655), np.int64(1656), np.int64(1662), np.int64(1690), np.int64(1691), np.int64(1697), np.int64(1702), np.int64(1706), np.int64(1711), np.int64(1716), np.int64(1718), np.int64(1727), np.int64(1731), np.int64(1747), np.int64(1760), np.int64(1762), np.int64(1767), np.int64(1771), np.int64(1775), np.int64(1777), np.int64(1788), np.int64(1795), np.int64(1797), np.int64(1805), np.int64(1807), np.int64(1814), np.int64(1840), np.int64(1850), np.int64(1869), np.int64(1872), np.int64(1877), np.int64(1880), np.int64(1882), np.int64(1891), np.int64(1896), np.int64(1916), np.int64(1922), np.int64(1936), np.int64(1940), np.int64(1941), np.int64(1949), np.int64(1956), np.int64(1957), np.int64(1963), np.int64(1966), np.int64(1979), np.int64(1983), np.int64(1993), np.int64(1999), np.int64(2001), np.int64(2003), np.int64(2013), np.int64(2015), np.int64(2023), np.int64(2033), np.int64(2046), np.int64(2051), np.int64(2064), np.int64(2073), np.int64(2092), np.int64(2113), np.int64(2114), np.int64(2119), np.int64(2124), np.int64(2131), np.int64(2144), np.int64(2149), np.int64(2154), np.int64(2159), np.int64(2185), np.int64(2186), np.int64(2204), np.int64(2215), np.int64(2227), np.int64(2233), np.int64(2241), np.int64(2247), np.int64(2257), np.int64(2261), np.int64(2263), np.int64(2270), np.int64(2287), np.int64(2315), np.int64(2321), np.int64(2332), np.int64(2335), np.int64(2349), np.int64(2356), np.int64(2383), np.int64(2392), np.int64(2395), np.int64(2397), np.int64(2401), np.int64(2403), np.int64(2404), np.int64(2420), np.int64(2424), np.int64(2436), np.int64(2459), np.int64(2462), np.int64(2466), np.int64(2469), np.int64(2478), np.int64(2480), np.int64(2482), np.int64(2496), np.int64(2501), np.int64(2517), np.int64(2519), np.int64(2528), np.int64(2534), np.int64(2539), np.int64(2546), np.int64(2573), np.int64(2578), np.int64(2586), np.int64(2595), np.int64(2608), np.int64(2622), np.int64(2626), np.int64(2632), np.int64(2636), np.int64(2644), np.int64(2645), np.int64(2646), np.int64(2654), np.int64(2655), np.int64(2658), np.int64(2683), np.int64(2686), np.int64(2733), np.int64(2753), np.int64(2754), np.int64(2756), np.int64(2766), np.int64(2769), np.int64(2787), np.int64(2792), np.int64(2798), np.int64(2810), np.int64(2811), np.int64(2815), np.int64(2822), np.int64(2823), np.int64(2838), np.int64(2848), np.int64(2864), np.int64(2865), np.int64(2872), np.int64(2897), np.int64(2898), np.int64(2910), np.int64(2931), np.int64(2932), np.int64(2936), np.int64(2947), np.int64(2956), np.int64(2958)] with class frequencies:
+Keep 2975 images
+Found 2975 train images
+Found 500 val images
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4 weights
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4depth weights
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4depth weights
+Create segmentation ema model.
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4 weights
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4depth weights
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4depth weights
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.8216990135274105
+Mean Acc : 	 0.27082936773290117
+FreqW Acc : 	 0.7066389051411576
+Mean IoU : 	 0.2184496693623342
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9148865772960257
+Mean Acc : 	 0.5262713899401108
+FreqW Acc : 	 0.8514008298837634
+Mean IoU : 	 0.44054810163966307
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9259012283790676
+Mean Acc : 	 0.6138169689531137
+FreqW Acc : 	 0.8701534524862666
+Mean IoU : 	 0.5174886909917626
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9298359842652166
+Mean Acc : 	 0.6473356025696418
+FreqW Acc : 	 0.87677684176808
+Mean IoU : 	 0.5544033341988385
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9275087295825428
+Mean Acc : 	 0.6689993907087496
+FreqW Acc : 	 0.8751292452793401
+Mean IoU : 	 0.5566113483047694
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9314636700797534
+Mean Acc : 	 0.6820835746464005
+FreqW Acc : 	 0.8797215162790613
+Mean IoU : 	 0.5758103776175661
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9353847543490738
+Mean Acc : 	 0.6928498317654327
+FreqW Acc : 	 0.885241765399776
+Mean IoU : 	 0.5995319092564104
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9352158876332343
+Mean Acc : 	 0.6960269986002429
+FreqW Acc : 	 0.8855414609039692
+Mean IoU : 	 0.5991965415668209
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9259729149391654
+Mean Acc : 	 0.6940558117141724
+FreqW Acc : 	 0.8711213305441021
+Mean IoU : 	 0.5871161424985528
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9356841994013952
+Mean Acc : 	 0.7081897530358029
+FreqW Acc : 	 0.885642317856494
+Mean IoU : 	 0.6106509535047383
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.936642839737377
+Mean Acc : 	 0.6865138529716355
+FreqW Acc : 	 0.8858980908096198
+Mean IoU : 	 0.6053261594239977
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9360464841602955
+Mean Acc : 	 0.7137796500404778
+FreqW Acc : 	 0.8857083511051662
+Mean IoU : 	 0.6176730170096589
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9367417081240416
+Mean Acc : 	 0.7003324881024042
+FreqW Acc : 	 0.8866314388351019
+Mean IoU : 	 0.6160574458890443
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.938945822283473
+Mean Acc : 	 0.7251101919291946
+FreqW Acc : 	 0.8906437999033445
+Mean IoU : 	 0.6315506046600049
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.938507388276531
+Mean Acc : 	 0.7226412610421589
+FreqW Acc : 	 0.8899126516027946
+Mean IoU : 	 0.6277139066888543
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9391856426839708
+Mean Acc : 	 0.7348038912633443
+FreqW Acc : 	 0.8912384772657009
+Mean IoU : 	 0.6347124604128652
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9392112497008134
+Mean Acc : 	 0.7305409720316323
+FreqW Acc : 	 0.8911141871570981
+Mean IoU : 	 0.6328117728588591
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9391427171225174
+Mean Acc : 	 0.7302502248823457
+FreqW Acc : 	 0.8910699977899896
+Mean IoU : 	 0.6336828810397456
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9390110961834757
+Mean Acc : 	 0.7272397743957683
+FreqW Acc : 	 0.8908499279010196
+Mean IoU : 	 0.6286697323654274
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9387119783076897
+Mean Acc : 	 0.7309393720834308
+FreqW Acc : 	 0.8905690484290651
+Mean IoU : 	 0.6342865899284119
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9394384192752732
+Mean Acc : 	 0.7298378451092322
+FreqW Acc : 	 0.8917364615795826
+Mean IoU : 	 0.6333149654663586
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9394888917088113
+Mean Acc : 	 0.732893043868058
+FreqW Acc : 	 0.8918088692181179
+Mean IoU : 	 0.6352407689824098
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9394857682634861
+Mean Acc : 	 0.7341749928530815
+FreqW Acc : 	 0.8918369543990763
+Mean IoU : 	 0.6372510103981279
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9395034052599247
+Mean Acc : 	 0.7302669622772802
+FreqW Acc : 	 0.8915524958328
+Mean IoU : 	 0.6350419598358253
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9393784979833907
+Mean Acc : 	 0.7296722573928666
+FreqW Acc : 	 0.891549807279314
+Mean IoU : 	 0.6337198829235003
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9394403430733017
+Mean Acc : 	 0.7348207723595835
+FreqW Acc : 	 0.8917421092379888
+Mean IoU : 	 0.6382396570518667
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9395719596499896
+Mean Acc : 	 0.7289444342061966
+FreqW Acc : 	 0.891822394095639
+Mean IoU : 	 0.6360548733593545
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.939408388831671
+Mean Acc : 	 0.7282101197803383
+FreqW Acc : 	 0.8914486428685345
+Mean IoU : 	 0.6354505081966033
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9391085991533988
+Mean Acc : 	 0.727117188688983
+FreqW Acc : 	 0.8911062182667882
+Mean IoU : 	 0.6352619430849856
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9395314377454835
+Mean Acc : 	 0.7316579890585164
+FreqW Acc : 	 0.8919160282039303
+Mean IoU : 	 0.6385431208032136
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9393946081559972
+Mean Acc : 	 0.7362620236126137
+FreqW Acc : 	 0.8918295285008865
+Mean IoU : 	 0.6364517785940071
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9397536822224961
+Mean Acc : 	 0.7364876166373805
+FreqW Acc : 	 0.8923147412368744
+Mean IoU : 	 0.6366119036307829
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9393130975751276
+Mean Acc : 	 0.7249505851474286
+FreqW Acc : 	 0.8913162973903148
+Mean IoU : 	 0.6325935097526788
+
+==============================================
+Done!  End: Thu Mar  5 03:38:20 PM UTC 2026
+==============================================

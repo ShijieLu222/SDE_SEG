@@ -796,11 +796,15 @@ class Trainer():
                 train_loss_meter.update(losses)
 
                 if (step + 1) % self.cfg["training"]["print_interval"] == 0:
-                    fmt_str = "Iter [{}/{}]  Loss: {:.4f}  Time/Image: {:.4f}"
+                    avgs = train_loss_meter.avgs
+                    fmt_str = "Iter [{}/{}]  Loss: {:.4f}  seg: {:.4f}  depth: {:.4f}  ct: {:.6f}  Time/Image: {:.4f}"
                     print_str = fmt_str.format(
                         step + 1,
                         self.cfg["training"]["train_iters"],
-                        train_loss_meter.avgs["total_loss"],
+                        avgs["total_loss"],
+                        avgs["segmentation_loss"],
+                        avgs["mono_loss"],
+                        avgs["cross_task_loss"],
                         time_meter.avg / self.cfg["training"]["batch_size"],
                     )
 
