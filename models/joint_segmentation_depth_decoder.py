@@ -79,7 +79,8 @@ class PAD(nn.Module):
     first_iter = True
 
     def __init__(self, num_ch_enc, num_ch_dec, num_classes, final_layer=9,
-                 weights=None, output_stride=1, depth_args=None, distillation_layer=7, side_output=True):
+                 weights=None, output_stride=1, depth_args=None, distillation_layer=7, side_output=True,
+                 projection_mode="single"):
         super(PAD, self).__init__()
         self.output_stride = output_stride
         self.num_ch_enc = num_ch_enc
@@ -94,6 +95,8 @@ class PAD(nn.Module):
         self.dec_n_upconv = depth_args.get("n_upconv", 4)
         distillation_ch = self.layer_channels(self.distillation_layer)
         final_ch = self.layer_channels(self.final_layer)
+        # single: 只把 depth 特征投影到 seg 空间再比较；dual: 两边都投影到 shared alignment space 再比较（无 detach）
+        self.projection_mode = projection_mode
 
         num_scales = 4
         self.depth_dec = get_depth_decoder(weights, num_ch_enc, range(num_scales), **depth_args)
@@ -104,7 +107,11 @@ class PAD(nn.Module):
 
         self.sa_depth = SelfAttention(distillation_ch, distillation_ch)
         self.sa_seg = SelfAttention(distillation_ch, distillation_ch)
+        # depth 分支投影（single/dual 都用）
         self.cross_task_proj = nn.Conv2d(distillation_ch, distillation_ch, 1)
+        # dual 时 seg 分支也投影到 shared space
+        if projection_mode == "dual":
+            self.cross_task_proj_seg = nn.Conv2d(distillation_ch, distillation_ch, 1)
         if self.side_output:
             self.seg_intermediate_head = nn.Sequential(
                 nn.Conv2d(distillation_ch, self.num_classes, 1)
@@ -129,6 +136,8 @@ class PAD(nn.Module):
             *self.seg_final_head.parameters(),
             *self.cross_task_proj.parameters(),
         ]
+        if getattr(self, "projection_mode", "single") == "dual" and hasattr(self, "cross_task_proj_seg"):
+            params.extend(self.cross_task_proj_seg.parameters())
         if self.side_output:
             params.extend(self.seg_intermediate_head.parameters())
         return params

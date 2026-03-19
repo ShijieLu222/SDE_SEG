@@ -68,7 +68,6 @@ training:
   segmentation_lambda: 1.0
   cross_task_lambda: 0.0
   cross_task_type: mse
-  cross_task_detach_depth: true
   cross_task_warmup_iters: 5000
   unlabeled_segmentation:
   monodepth_loss:

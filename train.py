@@ -520,14 +520,21 @@ class Trainer():
                 cross_task_warmup = self.cfg["training"].get("cross_task_warmup_iters", 0)
                 apply_ct = cross_task_lambda > 0 and step >= cross_task_warmup
                 if apply_ct and "mtl_decoder" in self.model.models and "feat_seg_distill" in outputs:
+                    mtl_dec = self.model.models["mtl_decoder"]
+                    feat_s = outputs["feat_seg_distill"]
                     feat_d = outputs["feat_depth_distill"]
-                    if self.cfg["training"].get("cross_task_detach_depth", False):
-                        feat_d = feat_d.detach()
-                    feat_d_proj = self.model.models["mtl_decoder"].cross_task_proj(feat_d)
+                    # 不再使用 detach：L_ct 对 seg 与 depth 两边都回传梯度（exp218 消融表明 no-detach 更优）
+                    if getattr(mtl_dec, "projection_mode", "single") == "dual":
+                        # dual: 两边都投影到 shared alignment space 再比较
+                        z_seg = mtl_dec.cross_task_proj_seg(feat_s)
+                        z_dep = mtl_dec.cross_task_proj(feat_d)
+                        left, right = z_seg, z_dep
+                    else:
+                        # single: 仅把 depth 投影到 segmentation 空间，与 feat_seg 比较
+                        z_dep = mtl_dec.cross_task_proj(feat_d)
+                        left, right = feat_s, z_dep
                     ct_type = self.cfg["training"].get("cross_task_type", "mse")
-                    L_ct = cross_task_consistency_loss(
-                        outputs["feat_seg_distill"], feat_d_proj, loss_type=ct_type
-                    )
+                    L_ct = cross_task_consistency_loss(left, right, loss_type=ct_type)
                     segmentation_total_loss = segmentation_total_loss + cross_task_lambda * L_ct
                     cross_task_loss = L_ct.detach()
             self.scaler.scale(segmentation_total_loss).backward()
