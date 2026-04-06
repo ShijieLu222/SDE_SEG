@@ -6,6 +6,11 @@ from PIL import Image
 
 from utils.utils import np_local_seed
 
+try:
+    RESAMPLE_LANCZOS = Image.Resampling.LANCZOS  # Pillow>=10
+except AttributeError:
+    RESAMPLE_LANCZOS = Image.LANCZOS  # Pillow<10
+
 
 def _build_size(orig_img, width, height):
     size = [width, height]
@@ -30,7 +35,7 @@ def _load(_path, is_segmentation, resize, width, height):
                 if resize: _img = _img.resize(_build_size(_img, width, height), Image.NEAREST)
             else:
                 _img = _img.convert('RGB')
-                if resize: _img = _img.resize(_build_size(_img, width, height), Image.ANTIALIAS)
+                if resize: _img = _img.resize(_build_size(_img, width, height), RESAMPLE_LANCZOS)
     # print(np.asarray(_img).nbytes/1e6)
     return _img
 

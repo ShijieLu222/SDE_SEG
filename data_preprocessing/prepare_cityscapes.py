@@ -1,9 +1,17 @@
+import argparse
 import glob
 import os
 
 import ray
 from PIL import Image
 from tqdm import tqdm
+
+try:
+    # Pillow>=10
+    RESAMPLE_LANCZOS = Image.Resampling.LANCZOS
+except AttributeError:
+    # Pillow<10
+    RESAMPLE_LANCZOS = Image.LANCZOS
 
 
 def process_images(fs, in_dir, out_dir, res, replace=False):
@@ -21,7 +29,7 @@ def process_images(fs, in_dir, out_dir, res, replace=False):
 
         with open(f, 'rb') as fp:
             with Image.open(fp) as img:
-                img = img.resize(res, Image.ANTIALIAS)
+                img = img.resize(res, RESAMPLE_LANCZOS)
                 # almost no compression artifacts when visually
                 # compared with downscaled png
                 img.save(new_f, subsampling=0, quality=98)
@@ -55,14 +63,26 @@ def repair_ray(files, in_dir, out_dir, res):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Downscale Cityscapes PNGs to 1024x512 JPG (_small dirs).")
+    parser.add_argument(
+        "--only",
+        choices=("all", "main", "sequence"),
+        default="all",
+        help="all: main + sequence; main: leftImg8bit -> leftImg8bit_small only; "
+        "sequence: leftImg8bit_sequence -> leftImg8bit_sequence_small only.",
+    )
+    args = parser.parse_args()
+
     # CITYSCAPES_ROOT = "datasets/Cityscapes/"
-    CITYSCAPES_ROOT = "/scratch/u5hv/shijie.u5hv/sde_seg/raw/"
-    CONVERT_LIST = [
-        # ("leftImg8bit_trainvaltest/leftImg8bit/", "leftImg8bit_small/", (1024, 512)),
-        # ("leftImg8bit_sequence", "leftImg8bit_sequence_small", (1024, 512)),
-        ("leftImg8bit/", "leftImg8bit_small/", (1024, 512)),
-        ("leftImg8bit_sequence/", "leftImg8bit_sequence_small/", (1024, 512)),
-    ]
+    CITYSCAPES_ROOT = os.environ.get("CITYSCAPES_ROOT", "/scratch/u5hv/shijie.u5hv/sde_seg/raw/")
+    _MAIN = ("leftImg8bit/", "leftImg8bit_small/", (1024, 512))
+    _SEQ = ("leftImg8bit_sequence/", "leftImg8bit_sequence_small/", (1024, 512))
+    if args.only == "main":
+        CONVERT_LIST = [_MAIN]
+    elif args.only == "sequence":
+        CONVERT_LIST = [_SEQ]
+    else:
+        CONVERT_LIST = [_MAIN, _SEQ]
 
     # Convert files
     ray.shutdown()

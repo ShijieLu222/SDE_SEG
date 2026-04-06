@@ -1015,7 +1015,7 @@ if __name__ == "__main__":
         "--machine",
         type=str,
         default="",
-        choices=["ws", "slurm", "dgx", ""]
+        choices=["ws", "slurm", "dgx", "bp1", ""]
     )
     args = parser.parse_args()
     with open(args.config) as fp:

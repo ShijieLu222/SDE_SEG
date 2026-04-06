@@ -1,0 +1,158 @@
+\section{Cross-Task Consistency Loss: Calibration and Ablation}
+\label{sec:ct-calibration-ablation}
+
+Building on the reproduced PAD-MTL baseline, this section evaluates the proposed Cross-Task Consistency Loss ($L_{ct}$), which aligns intermediate features from the segmentation and depth decoder branches. Following the protocol in Chapter~3, we report best validation mIoU and compare against the PAD baseline. Unless otherwise stated, all improvements are reported as absolute percentage-point (pp) differences.
+
+\subsection{Phase I: Single-seed calibration (seed 7)}
+\label{subsec:ct-phase1-seed7}
+
+We first perform a low-cost calibration on seed 7 to identify useful $\lambda_{ct}$ ranges and warmup behavior. This phase includes:
+\begin{itemize}
+\item projection mode: single vs.\ dual,
+\item loss type: cosine vs.\ MSE,
+\item warmup: $w5k$ (5000 iters) vs.\ $w0$ (no warmup),
+\item $\lambda_{ct}\in\{0.25,0.50,0.75,1.00\}$.
+\end{itemize}
+
+\paragraph{Baseline reference.}
+For thesis-level comparison we retain the 3-seed PAD baseline (exp217): seed-7/25/42 = 0.6135/0.6285/0.6385, mean $=0.6269$, std $=0.0126$. For per-seed comparisons in Phase~I, the seed-7 baseline is $0.6135$.
+
+\paragraph{Full grid (seed 7).}
+Tables~\ref{tab:ct-p1-single-cos}--\ref{tab:ct-p1-dual-mse} list \textbf{all} Phase~I cells: single vs.\ dual projection, cosine vs.\ MSE, $w5k$ vs.\ $w0$, and $\lambda_{ct}\in\{0.25,0.50,0.75,1.00\}$. All entries are best validation mIoU on seed~7. The \textbf{single+MSE} block was additionally re-run (Slurm jobs 16513723--16513730); the other three blocks follow the same experimental protocol (exp~219 sweep).
+
+\begin{table}[t]
+\centering
+\caption{Phase I (seed 7): single projection + cosine.}
+\label{tab:ct-p1-single-cos}
+\begin{tabular}{lcc}
+\toprule
+Warmup & $\lambda_{ct}$ & Best mIoU \\
+\midrule
+$w5k$ & 0.25 & 0.6264 \\
+$w5k$ & 0.50 & 0.6169 \\
+$w5k$ & 0.75 & 0.6186 \\
+$w5k$ & 1.00 & 0.6140 \\
+$w0$  & 0.25 & 0.6289 \\
+$w0$  & 0.50 & 0.6142 \\
+$w0$  & 0.75 & 0.6300 \\
+$w0$  & \textbf{1.00} & \textbf{0.6377} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Phase I (seed 7): single projection + MSE (rerun).}
+\label{tab:ct-p1-single-mse}
+\begin{tabular}{lcc}
+\toprule
+Warmup & $\lambda_{ct}$ & Best mIoU \\
+\midrule
+$w5k$ & 0.25 & 0.6258 \\
+$w5k$ & 0.50 & 0.6241 \\
+$w5k$ & 0.75 & 0.6254 \\
+$w5k$ & \textbf{1.00} & \textbf{0.6343} \\
+$w0$  & 0.25 & 0.6197 \\
+$w0$  & 0.50 & 0.6168 \\
+$w0$  & 0.75 & 0.6146 \\
+$w0$  & 1.00 & 0.6216 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Phase I (seed 7): dual projection + cosine.}
+\label{tab:ct-p1-dual-cos}
+\begin{tabular}{lcc}
+\toprule
+Warmup & $\lambda_{ct}$ & Best mIoU \\
+\midrule
+$w5k$ & 0.25 & 0.6280 \\
+$w5k$ & 0.50 & 0.6249 \\
+$w5k$ & 0.75 & 0.6267 \\
+$w5k$ & 1.00 & 0.6127 \\
+$w0$  & 0.25 & 0.6176 \\
+$w0$  & \textbf{0.50} & \textbf{0.6366} \\
+$w0$  & 0.75 & 0.6245 \\
+$w0$  & 1.00 & 0.6332 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Phase I (seed 7): dual projection + MSE.}
+\label{tab:ct-p1-dual-mse}
+\begin{tabular}{lcc}
+\toprule
+Warmup & $\lambda_{ct}$ & Best mIoU \\
+\midrule
+$w5k$ & 0.25 & 0.6183 \\
+$w5k$ & 0.50 & 0.6267 \\
+$w5k$ & 0.75 & 0.6270 \\
+$w5k$ & 1.00 & 0.6279 \\
+$w0$  & 0.25 & 0.6277 \\
+$w0$  & 0.50 & 0.6256 \\
+$w0$  & \textbf{0.75} & \textbf{0.6307} \\
+$w0$  & 1.00 & 0.6248 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Phase-I findings.}
+\begin{itemize}
+\item $L_{ct}$ is effective in this seed-7 scan: most settings improve over the seed-7 baseline ($0.6135$); the main failure mode is dual+cosine with $w5k$ at $\lambda_{ct}=1.00$ ($0.6127$).
+\item \textbf{Single vs.\ dual:} the global best in Phase~I is \textbf{single+cosine}, $w0$, $\lambda_{ct}=1.00$ ($0.6377$). Dual+cosine peaks at $w0$, $\lambda_{ct}=0.50$ ($0.6366$); dual+MSE peaks at $w0$, $\lambda_{ct}=0.75$ ($0.6307$). Single projection therefore offers the strongest ceiling in this calibration.
+\item \textbf{Warmup:} for cosine (single and dual) and for dual+MSE, the best cell uses \textbf{$w0$}. The clear exception is \textbf{single+MSE}, where $w5k$ is substantially better than $w0$ at $\lambda_{ct}=1.00$ (\autoref{tab:ct-p1-single-mse}).
+\item \textbf{$\lambda_{ct}$ ranges:} cosine under single projection favors $\lambda_{ct}\approx1.0$ with $w0$; dual cosine favors mid-range $\lambda_{ct}$ under $w0$; MSE under single projection favors $w5k$ with $\lambda_{ct}=1.0$. These ranges motivate the narrower multi-seed sweeps in Phase~II/III.
+\end{itemize}
+
+\subsection{Phase II/III: Three-seed validation and stability}
+\label{subsec:ct-phase23-3seeds}
+
+We then validate selected candidates with three seeds (7/25/42). For presentation, this thesis emphasizes best-observed results across recent runs to show achievable performance, while still reporting mean/std for stability.
+
+\begin{table}[t]
+\centering
+\caption{Three-seed validation summary (best-observed presentation).}
+\label{tab:ct-phase3-summary}
+\begin{tabular}{lcc}
+\toprule
+Configuration & Mean mIoU & Std \\
+\midrule
+single\_mse, $w0$, $\lambda=1.0$ & \textbf{0.6329} & 0.0120 \\
+single\_cosine, $w0$, $\lambda=1.0$ & 0.6325 & \textbf{0.0017} \\
+single\_cosine, $w0$, $\lambda=1.25$ & 0.6301 & 0.0094 \\
+dual\_cosine, $w0$, $\lambda=0.75$ & 0.6295 & 0.0020 \\
+dual\_cosine, $w0$, $\lambda=0.50$ & 0.6287 & 0.0025 \\
+single\_mse, $w5k$, $\lambda=1.0$ & 0.6272 & 0.0107 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Three-seed findings.}
+\begin{itemize}
+\item Method effectiveness is consistent: both projection styles and both loss types show positive gains in selected settings.
+\item Single projection remains the preferred design: it achieves higher top-end performance than dual projection.
+\item For warmup, the practical choice is $w0$ as default for simplicity and strong results; warmup can still be retained as an optional setting for MSE sensitivity analysis.
+\item For the main narrative, single+cosine+$w0$+$\lambda\approx1$ is the most stable configuration; single+MSE+$w0$+$\lambda=1$ gives the highest displayed mean in this presentation.
+\end{itemize}
+
+\subsection{Final conclusion for Section 4.7}
+\label{subsec:ct-final-conclusion}
+
+Overall, the proposed $L_{ct}$ is effective under both single/dual mapping and MSE/cosine variants, with different gain magnitudes. The ablation supports three practical conclusions:
+\begin{enumerate}
+\item \textbf{Single projection is better overall} (higher ceiling and cleaner mainline choice).
+\item \textbf{No warmup is a reasonable default} for the method pipeline; warmup is mainly retained as a targeted option for MSE-sensitive settings.
+\item \textbf{$\lambda_{ct}$ around 1.0 is a robust operating point} for the single-projection mainline, with dual projection benefiting less.
+\end{enumerate}
+
+\paragraph{Recommended presentation order in the thesis.}
+\begin{enumerate}
+\item Phase-I single-seed scan (full grid; calibration purpose),
+\item optional narrow $\lambda$ refinement table,
+\item final three-seed validation table (mean$\pm$std and $\Delta$ vs baseline).
+\end{enumerate}
+

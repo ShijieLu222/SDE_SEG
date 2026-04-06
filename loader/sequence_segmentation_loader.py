@@ -10,6 +10,13 @@ from torchvision import transforms
 
 from loader.loader_utils import pil_loader, restrict_to_subset
 
+try:
+    # Pillow>=10
+    RESAMPLE_LANCZOS = Image.Resampling.LANCZOS
+except AttributeError:
+    # Pillow<10
+    RESAMPLE_LANCZOS = Image.LANCZOS
+
 
 class SequenceSegmentationLoader(data.Dataset):
     def __init__(
@@ -96,10 +103,10 @@ class SequenceSegmentationLoader(data.Dataset):
         for i in range(self.num_scales):
             s = 2 ** i
             self.resize[i] = transforms.Resize((self.crop_h // s, self.crop_w // s),
-                                               interpolation=Image.ANTIALIAS)
+                                               interpolation=RESAMPLE_LANCZOS)
         s = 2 ** color_full_scale
         self.resize_full = transforms.Resize((self.height // s, self.width // s),
-                                             interpolation=Image.ANTIALIAS)
+                                             interpolation=RESAMPLE_LANCZOS)
         self.to_tensor = transforms.ToTensor()
 
         self._prepare_filenames()
