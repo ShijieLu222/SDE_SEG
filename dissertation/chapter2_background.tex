@@ -1,0 +1,401 @@
+\chapter{Background}
+\label{chap:technical}
+
+This chapter introduces the technical background for this project. The
+content is organised from foundational to specific: starting with semantic
+segmentation, then covering deep learning fundamentals, semi-supervised
+learning, self-supervised depth estimation, multi-task learning and PAD-Net,
+and finally SDE-guided data selection, geometry-aware mixing, and cross-task
+consistency learning. Together these concepts form the foundation for the
+reproduction experiments and architectural extensions described in later
+chapters.
+
+% -----------------------------------------------------------------------------
+\section{Semantic Segmentation}
+\label{sec:semseg}
+
+\subsection{Task Definition}
+
+Semantic segmentation assigns a categorical class label to every pixel in
+an image, producing a dense prediction map of the same size as the input.
+Unlike image-level classification, which only answers ``what is in this
+image'', segmentation answers ``what is at every location in this image''.
+This pixel-level understanding is necessary in many real-world applications.
+An autonomous driving system, for example, needs to know which regions are
+drivable road, which are pedestrians, and which are obstacles, rather than
+simply knowing that a car and a person appear somewhere in the
+scene~\cite{cordts2016cityscapes}.
+
+This level of detail also directly determines how difficult and expensive
+annotation is. Image-level classification only requires a single label per
+image, which takes a few seconds. Semantic segmentation requires a human
+annotator to carefully outline every object at the pixel level. In complex
+urban scenes with dozens of object categories, this takes around 1.5 hours
+per image on average~\cite{cordts2016cityscapes}, adding up to over 4,460
+working hours for the full Cityscapes training set. This high annotation
+cost is precisely what motivates research into training strong segmentation
+models under limited annotation budgets.
+
+\subsection{Evaluation Metric}
+
+Segmentation performance is measured by mean Intersection-over-Union
+(mIoU). Intuitively, IoU measures the overlap between the predicted region
+and the ground truth region for a given class, with higher values indicating
+more accurate predictions. For class $c$:
+\[
+\mathrm{IoU}_c = \frac{TP_c}{TP_c + FP_c + FN_c},
+\]
+where $TP_c$ is the number of pixels correctly predicted as class $c$,
+$FP_c$ is the number of pixels incorrectly predicted as class $c$, and
+$FN_c$ is the number of pixels that belong to class $c$ but were predicted
+as something else. The final mIoU is the arithmetic mean across all classes.
+
+The reason for using mIoU rather than simple pixel accuracy is that class
+frequencies in urban driving scenes are highly imbalanced. Road and sky
+pixels are far more common than pedestrians or traffic lights. A model that
+predicts road for most pixels would achieve high pixel accuracy while
+completely failing on rare but important classes. Because mIoU computes a
+separate score for each class before averaging, rare and common classes
+contribute equally, giving a fairer picture of overall model performance.
+
+\subsection{The Encoder--Decoder Paradigm}
+
+Most modern segmentation models follow an encoder--decoder structure. The
+encoder, also called the backbone, extracts hierarchical features from the
+input image by progressively reducing spatial resolution. As the network
+goes deeper, each feature map location captures increasingly rich semantic
+information at the cost of spatial detail. The decoder reverses this
+process, gradually restoring spatial resolution while fusing high-level
+semantic features with low-level detail features from the encoder through
+skip connections, which helps to produce sharp and accurate boundary
+predictions.
+
+In DeepLab-style models~\cite{chen2018deeplabv3plus}, two components play
+a key role. Atrous convolution, also known as dilated convolution, inserts
+gaps between convolution kernel elements to expand the receptive field
+without increasing the number of parameters or reducing spatial resolution.
+This allows each pixel to take into account a larger context when making its
+prediction. Atrous Spatial Pyramid Pooling (ASPP) runs multiple atrous
+convolutions in parallel at different dilation rates, capturing semantic
+information at multiple scales simultaneously. This is particularly useful
+for recognising objects that vary greatly in size, such as distant
+pedestrians and nearby buildings.
+
+\subsection{The Cityscapes Dataset}
+
+All experiments in this project are conducted on the Cityscapes
+dataset~\cite{cordts2016cityscapes}. Cityscapes contains 2,975 training
+images and 500 validation images from European urban driving scenes, with
+pixel-level annotations across 19 semantic categories including road,
+building, vehicle, and pedestrian classes. In addition, Cityscapes provides
+30 unlabelled video frames surrounding each annotated image. These
+unlabelled frames are not used for segmentation training but are used in
+this project for self-supervised depth estimation, as described in
+Section~\ref{sec:sde}.
+
+% -----------------------------------------------------------------------------
+\section{Deep Learning Fundamentals}
+\label{sec:backbones}
+
+\subsection{Convolutional Neural Networks}
+
+Convolutional neural networks (CNNs) are the foundation of modern computer
+vision. Unlike fully connected networks, CNNs use convolutional operations
+to extract features from local regions of an image. Shared convolutional
+filters allow the network to detect the same patterns, such as edges,
+textures, and object parts, at different locations in the image. As the
+network goes deeper, shallow features gradually combine into higher-level
+semantic representations such as the shapes of vehicles and pedestrians.
+This hierarchical feature extraction is what makes CNNs effective for image
+understanding tasks.
+
+\subsection{ResNet-101}
+
+As CNNs became deeper, a fundamental problem emerged: gradients computed
+during backpropagation tend to shrink as they pass through many layers,
+making it very difficult to update the weights of early layers. This is
+known as the vanishing gradient problem. ResNet~\cite{he2016resnet} addresses
+this by introducing residual connections, also called shortcut connections.
+Each residual block has two paths: a standard convolutional path and a
+shortcut that adds the block's input directly to its output. This means the
+network can at minimum learn the identity mapping, and gradients can flow
+directly through the shortcut to earlier layers, making it possible to
+train very deep networks stably.
+
+This project uses ResNet-101~\cite{he2016resnet} as the encoder backbone
+throughout. With 101 layers, it provides strong general-purpose visual
+feature extraction and is a standard choice in semantic segmentation
+frameworks.
+
+\subsection{ImageNet Pretraining and Transfer Learning}
+
+Training a deep neural network from scratch requires large amounts of data
+and long training times, and the results are often unstable. Transfer
+learning addresses this by first training the network on a large dataset,
+then reusing the learned weights as a starting point for a different but
+related task. ImageNet~\cite{deng2009imagenet} is a large-scale image
+classification dataset with over one million images across 1,000 categories.
+Networks pretrained on ImageNet have already learned to detect a wide range
+of general visual features such as edges, textures, and object parts.
+
+In this project, the ResNet-101 encoder is initialised with ImageNet
+pretrained weights before any task-specific training. Compared to training
+from scratch, this leads to faster convergence and better performance,
+especially when the amount of labelled data is limited.
+
+% -----------------------------------------------------------------------------
+\section{Semi-Supervised Learning}
+\label{sec:ssl}
+
+\subsection{Problem Setup}
+
+Semi-supervised learning (SSL) aims to train a model using both a small
+amount of labelled data and a much larger pool of unlabelled data. In the
+context of semantic segmentation, only a small subset of images has
+pixel-level human annotations, while the rest remain unlabelled. The model
+needs to extract semantic knowledge from the labelled samples while also
+exploiting the structural information contained in the unlabelled ones to
+improve generalisation.
+
+\subsection{Pseudo-Labels and Confirmation Bias}
+
+Pseudo-labelling is one of the most widely used strategies in SSL. The idea
+is straightforward: use the current model to generate predictions for
+unlabelled images, treat those predictions as labels, and continue training
+on the combined labelled and pseudo-labelled data. This process can be
+repeated iteratively, with pseudo-label quality improving as the model gets
+better.
+
+However, pseudo-labelling carries a fundamental risk known as confirmation
+bias. When the model's initial performance is poor, the pseudo-labels it
+generates will contain many errors. If the model is trained on these
+incorrect labels, it reinforces its own mistakes rather than correcting
+them, causing performance to stagnate or even degrade. This problem is
+especially severe when labelled data is extremely scarce, since the model's
+starting predictions are less reliable and the proportion of incorrect
+pseudo-labels is higher.
+
+\subsection{Mean Teacher}
+
+To reduce confirmation bias, this project uses the Mean Teacher
+framework~\cite{hoyer2023ijcv_sde} to generate pseudo-labels. Mean Teacher
+maintains two networks: a student network that is updated through normal
+gradient-based training, and a teacher network whose weights are not updated
+by gradients but instead through an exponential moving average (EMA) of the
+student's weights:
+\[
+\theta_T \leftarrow \alpha\,\theta_T + (1 - \alpha)\,\theta_S,
+\]
+where $\theta_T$ and $\theta_S$ are the teacher and student weights
+respectively, and $\alpha$ is a smoothing coefficient close to 1 (set to
+0.99 in this project). Because the teacher's weights are a running average
+of the student's historical weights, the teacher effectively acts as a
+temporal ensemble of the student, producing more stable and reliable
+predictions. These stable predictions are then used as pseudo-labels for the
+unlabelled data, reducing the noise that would otherwise cause confirmation
+bias.
+
+\subsection{Consistency Regularisation and Data Mixing}
+
+Consistency regularisation is another key idea in SSL: apply different
+augmentations to the same image and require the model to produce consistent
+predictions for both versions. This encourages the model to learn
+representations that are robust to various perturbations.
+
+Data mixing is a particularly effective augmentation strategy. It combines
+the pixels and corresponding labels of two images according to a binary
+mask, creating a new synthetic training sample that contains regions from
+both images. This forces the model to recognise the same class in different
+contexts, improving generalisation. ClassMix~\cite{olsson2021classmix} is
+one such method that constructs the mixing mask based on class segments.
+However, it ignores the geometric structure of the scene and can produce
+physically implausible images, for example pasting a distant building in
+front of a nearby car. This issue is addressed by DepthMix, which is
+described in Section~\ref{sec:data-selection-mixing}.
+
+% -----------------------------------------------------------------------------
+\section{Self-Supervised Monocular Depth Estimation}
+\label{sec:sde}
+
+\subsection{Motivation}
+
+Depth information is a natural complement to semantic segmentation. Objects
+in a scene tend to have consistent depth profiles, and semantic boundaries
+frequently coincide with depth discontinuities. However, obtaining
+ground-truth depth annotations requires expensive equipment such as LiDAR
+sensors and is difficult to scale. Self-supervised depth estimation (SDE)
+offers an alternative: it learns to predict depth purely from unlabelled
+video sequences, using the geometric relationships between consecutive frames
+as the supervision signal, with no manual annotation required.
+
+\subsection{View Synthesis and Photometric Loss}
+
+The core idea behind SDE is view synthesis. If the depth of every pixel in
+an image is known, along with the camera motion between two frames, it is
+possible to transform one frame into the appearance of another through a
+geometric warp. Conversely, if the synthesised frame closely matches the
+real target frame, the predicted depth and camera motion must be accurate.
+
+In practice, SDE uses two networks: a depth network that predicts a dense
+depth map from a single image, and a pose network that estimates the
+relative camera motion between adjacent frames. During training, the source
+frame is warped into the target view using the predicted depth and pose, and
+the photometric reprojection error between the synthesised and real target
+frames is minimised. This loss combines an $\ell_1$ pixel intensity term
+with a Structural Similarity (SSIM) term~\cite{godard2017unsupervised} that
+captures local structural consistency. Because the entire process requires
+no annotations, SDE can be trained on large quantities of easily accessible
+unlabelled video data, building up rich geometric priors that can later
+benefit semantic segmentation.
+
+\subsection{Depth Pretraining Variants: fd0 and fd2}
+
+Within the framework of Hoyer et al.~\cite{hoyer2023ijcv_sde}, SDE
+pretraining produces two encoder weight variants. \textbf{fd0} is standard
+depth pretraining that optimises the encoder purely for depth estimation.
+The risk is that the encoder's representations drift away from the ImageNet
+feature space, causing it to forget semantic features that are useful for
+segmentation. \textbf{fd2} adds a feature-distance regularisation term that
+penalises large deviations from the ImageNet-initialised feature space
+during depth pretraining. This retains useful semantic knowledge while still
+incorporating geometric cues from SDE, making it a better starting point
+for the segmentation task.
+
+% -----------------------------------------------------------------------------
+\section{Multi-Task Learning and PAD-Net}
+\label{sec:mtl}
+
+\subsection{Multi-Task Learning}
+
+Multi-task learning (MTL) trains a single model on multiple related tasks
+simultaneously by sharing representations across tasks. In this project,
+semantic segmentation and depth estimation are trained jointly. The shared
+encoder receives gradient signals from both tasks and is encouraged to learn
+features that are useful for both geometry and semantics. Compared to
+transfer learning, where SDE-pretrained weights are used only to initialise
+the segmentation model, MTL maintains the depth supervision signal
+throughout the entire training process, providing a continuous source of
+geometric supervision that is especially valuable when labelled segmentation
+data is scarce.
+
+\subsection{Attention Mechanism}
+
+The attention mechanism is a way of letting a model dynamically focus on
+the most relevant parts of its input. Self-attention allows every position
+in a feature map to interact with every other position, computing a weighted
+representation where the weights reflect the relevance between different
+locations. This enables the network to capture long-range dependencies, for
+example relating the appearance of a distant vehicle to nearby road markings.
+In the context of multi-task learning, attention can be used to selectively
+transfer relevant information between task-specific feature
+representations.
+
+\subsection{PAD-Net}
+
+The multi-task architecture used in this project is based on
+PAD-Net~\cite{xu2018padnet}, which stands for Prediction-and-Distillation
+Network. PAD-Net maintains two parallel decoder branches for depth
+estimation and semantic segmentation on top of a shared ResNet-101 encoder.
+At an intermediate decoder layer, the two branches exchange information
+through an attention-guided distillation module. Each branch first applies
+its own self-attention module to its features, then incorporates the other
+branch's attended features via element-wise addition:
+\[
+    \tilde{f}_\text{seg}   = f_\text{seg}   +
+        \mathrm{SA}_\text{depth}(f_\text{depth}),
+    \qquad
+    \tilde{f}_\text{depth} = f_\text{depth} +
+        \mathrm{SA}_\text{seg}(f_\text{seg}),
+\]
+where $\mathrm{SA}_\text{seg}(\cdot)$ and $\mathrm{SA}_\text{depth}(\cdot)$
+are the self-attention modules of the segmentation and depth branches
+respectively, and $f_\text{seg}$, $f_\text{depth}$ are the branch features
+at the distillation layer. The updated features $\tilde{f}$ are passed
+through the remaining decoder layers to produce the final predictions. This
+design allows each task to selectively absorb geometric or semantic cues
+from the other branch without directly coupling the final prediction heads.
+The specific configuration used in this project is described in
+Chapter~\ref{chap:execution}.
+
+% -----------------------------------------------------------------------------
+\section{SDE-Guided Data Selection and Geometry-Aware Mixing}
+\label{sec:data-selection-mixing}
+
+\subsection{Active Learning and SDE-Guided Data Selection}
+
+When annotation budgets are limited, randomly choosing which images to label
+is not the most efficient strategy, since different images contribute very
+differently to model training. Active learning addresses this by iteratively
+selecting the most informative samples for annotation based on the model's
+current state, rather than selecting all samples upfront at random. This
+allows a given annotation budget to go further.
+
+Traditional active learning for segmentation relies on the segmentation
+model's own prediction uncertainty to guide selection, which still requires
+a human annotator in the loop for each selected sample. Hoyer et
+al.~\cite{hoyer2023ijcv_sde} replace the human annotator with SDE as a
+proxy task. Diversity sampling (DS) uses SDE features to select images that
+cover a diverse range of scene content, while uncertainty sampling (US)
+selects images where the current depth model is least confident. Because
+depth estimation and semantic segmentation share similar notions of sample
+difficulty, SDE-based selection signals transfer well to the segmentation
+task while requiring no human involvement. Combining both criteria (DS+US)
+consistently outperforms using either alone.
+
+\subsection{DepthMix}
+
+Once pseudo-labels are available from the teacher network, data mixing uses
+them to build synthetic training samples. As described in
+Section~\ref{sec:ssl}, ClassMix~\cite{olsson2021classmix} constructs mixing
+masks from class segments but ignores scene geometry, which can produce
+physically implausible composites where distant objects appear in front of
+nearby ones.
+
+DepthMix~\cite{hoyer2023ijcv_sde} resolves this by using SDE-predicted
+depth to enforce geometrically consistent composition. When combining two
+images, a pixel from the first image is only copied to the composite if its
+predicted depth is smaller than that of the corresponding pixel in the
+second image. In other words, only objects that are closer to the camera can
+occlude objects that are further away, consistent with how the real world
+works. This produces synthetic samples that are more physically realistic
+and better suited for learning accurate object boundaries.
+
+The three components, data selection (S), DepthMix (DX), and multi-task
+learning (MTL), target distinct stages of the learning pipeline: data
+quality, augmentation robustness, and representation learning respectively.
+Because they address complementary bottlenecks, combining them has the
+potential to yield improvements beyond what any single component achieves on
+its own. Their individual and joint contributions are quantified in
+Chapter~\ref{chap:execution}.
+
+% -----------------------------------------------------------------------------
+\section{Cross-Task Consistency Learning}
+\label{sec:cross-task}
+
+In multi-task learning, different task decoders share an encoder but learn
+their own task-specific feature representations independently, with no
+direct constraint on how their intermediate features relate to each other.
+Cross-task consistency learning addresses this by explicitly encouraging
+features from different tasks to reflect compatible structural information,
+given that they are extracted from the same scene.
+
+Zamir et al.~\cite{zamir2020crosstask} formalise this idea through
+inference-path invariance: predictions obtained by different combinations of
+tasks should remain geometrically consistent with each other. Nakano et
+al.~\cite{nakano2021crosstask} apply a similar principle to multi-task
+learning by directly constraining intermediate features across tasks to
+improve performance. Li et al.~\cite{li2022mtl} further extend this to
+settings with partial annotations, where different tasks may have access to
+different amounts of labelled data.
+
+This last point is particularly relevant here. The depth decoder receives
+self-supervised training signals from all available unlabelled frames,
+while the segmentation decoder is only supervised on the small labelled
+subset. This asymmetry means the depth branch accumulates richer geometric
+representations than the segmentation branch. By explicitly aligning their
+intermediate features, the depth decoder can act as a continuously available,
+label-free teacher for the segmentation branch, transferring geometric
+knowledge into the segmentation feature space without requiring any
+additional annotations. This is the core motivation behind the Cross-Task
+Consistency Loss $\mathcal{L}_\text{ct}$ proposed in this project, whose
+design is described in detail in Chapter~\ref{chap:design}.

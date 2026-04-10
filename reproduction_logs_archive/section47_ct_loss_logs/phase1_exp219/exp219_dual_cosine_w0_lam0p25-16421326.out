@@ -1,0 +1,652 @@
+exp 219 run 20: dual_cosine_w0_lam0p25 (1 seed, 24h)
+Start experiment cityscapes_joint_219
+Run ID: cityscapes_joint_219_2026-03-21_17-21-15
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_cosine_w5k_lam0p25', ('training', 'cross_task_lambda'): 0.25, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_single_cosine_w5k_lam0p25_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_cosine_w5k_lam0p25', ('training', 'cross_task_lambda'): 0.25, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_cosine_w5k_lam0p50', ('training', 'cross_task_lambda'): 0.5, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_single_cosine_w5k_lam0p50_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_cosine_w5k_lam0p50', ('training', 'cross_task_lambda'): 0.5, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_cosine_w5k_lam0p75', ('training', 'cross_task_lambda'): 0.75, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_single_cosine_w5k_lam0p75_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_cosine_w5k_lam0p75', ('training', 'cross_task_lambda'): 0.75, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_cosine_w5k_lam1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_single_cosine_w5k_lam1p00_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_cosine_w5k_lam1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_cosine_w0_lam0p25', ('training', 'cross_task_lambda'): 0.25, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 0}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_single_cosine_w0_lam0p25_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_cosine_w0_lam0p25', ('training', 'cross_task_lambda'): 0.25, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 0}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_cosine_w0_lam0p50', ('training', 'cross_task_lambda'): 0.5, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 0}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_single_cosine_w0_lam0p50_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_cosine_w0_lam0p50', ('training', 'cross_task_lambda'): 0.5, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 0}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_cosine_w0_lam0p75', ('training', 'cross_task_lambda'): 0.75, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 0}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_single_cosine_w0_lam0p75_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_cosine_w0_lam0p75', ('training', 'cross_task_lambda'): 0.75, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 0}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_cosine_w0_lam1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 0}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_single_cosine_w0_lam1p00_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_cosine_w0_lam1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 0}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_mse_w5k_lam0p25', ('training', 'cross_task_lambda'): 0.25, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_single_mse_w5k_lam0p25_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_mse_w5k_lam0p25', ('training', 'cross_task_lambda'): 0.25, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_mse_w5k_lam0p50', ('training', 'cross_task_lambda'): 0.5, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_single_mse_w5k_lam0p50_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_mse_w5k_lam0p50', ('training', 'cross_task_lambda'): 0.5, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_mse_w5k_lam0p75', ('training', 'cross_task_lambda'): 0.75, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_single_mse_w5k_lam0p75_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_mse_w5k_lam0p75', ('training', 'cross_task_lambda'): 0.75, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_mse_w5k_lam1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_single_mse_w5k_lam1p00_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_mse_w5k_lam1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_mse_w0_lam0p25', ('training', 'cross_task_lambda'): 0.25, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 0}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_single_mse_w0_lam0p25_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_mse_w0_lam0p25', ('training', 'cross_task_lambda'): 0.25, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 0}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_mse_w0_lam0p50', ('training', 'cross_task_lambda'): 0.5, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 0}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_single_mse_w0_lam0p50_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_mse_w0_lam0p50', ('training', 'cross_task_lambda'): 0.5, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 0}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_mse_w0_lam0p75', ('training', 'cross_task_lambda'): 0.75, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 0}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_single_mse_w0_lam0p75_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_mse_w0_lam0p75', ('training', 'cross_task_lambda'): 0.75, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 0}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_mse_w0_lam1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 0}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_single_mse_w0_lam1p00_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'single', ('model', 'variant'): 'ct_single_mse_w0_lam1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 0}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_cosine_w5k_lam0p25', ('training', 'cross_task_lambda'): 0.25, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_dual_cosine_w5k_lam0p25_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_cosine_w5k_lam0p25', ('training', 'cross_task_lambda'): 0.25, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_cosine_w5k_lam0p50', ('training', 'cross_task_lambda'): 0.5, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_dual_cosine_w5k_lam0p50_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_cosine_w5k_lam0p50', ('training', 'cross_task_lambda'): 0.5, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_cosine_w5k_lam0p75', ('training', 'cross_task_lambda'): 0.75, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_dual_cosine_w5k_lam0p75_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_cosine_w5k_lam0p75', ('training', 'cross_task_lambda'): 0.75, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_cosine_w5k_lam1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_dual_cosine_w5k_lam1p00_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_cosine_w5k_lam1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_cosine_w0_lam0p25', ('training', 'cross_task_lambda'): 0.25, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 0}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_dual_cosine_w0_lam0p25_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_cosine_w0_lam0p25', ('training', 'cross_task_lambda'): 0.25, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 0}
+Dispatch job 20_tag=cityscapes_pad_ct_dual_cosine_w0_lam0p25_D372_S7
+Start 2026-03-21_17-21-1620_tag=cityscapes_pad_ct_dual_cosine_w0_lam0p25_D372_S7
+RUNDIR: /user/work/ig23200/sde_seg/logs//cityscapes_joint_219/2026-03-21_17-21-1620_tag=cityscapes_pad_ct_dual_cosine_w0_lam0p25_D372_S7
+Restrict subset from 2975 to 372 images ...
+Use image subset [0, 2, 24, 26, 34, 36, 60, 70, 71, 87, 99, 118, 121, 125, 131, 142, 151, 172, 180, 186, 190, 194, 203, 206, 224, 226, 241, 259, 278, 280, 296, 305, 314, 318, 325, 340, 356, 361, 372, 375, 377, 386, 400, 412, 414, 415, 419, 420, 423, 426, 427, 429, 430, 433, 450, 454, 468, 474, 502, 513, 514, 523, 526, 536, 539, 547, 561, 562, 580, 582, 584, 587, 592, 603, 619, 632, 637, 643, 658, 661, 664, 666, 672, 674, 690, 699, 701, 704, 705, 707, 716, 717, 718, 727, 729, 732, 735, 746, 752, 757, 760, 795, 802, 803, 832, 836, 840, 842, 845, 847, 858, 863, 864, 879, 890, 895, 921, 928, 939, 945, 961, 964, 977, 979, 983, 992, 997, 1002, 1039, 1054, 1057, 1061, 1070, 1084, 1104, 1109, 1123, 1135, 1140, 1141, 1144, 1151, 1153, 1165, 1167, 1171, 1181, 1209, 1210, 1222, 1224, 1227, 1228, 1235, 1251, 1263, 1267, 1281, 1283, 1292, 1294, 1303, 1308, 1313, 1324, 1332, 1338, 1351, 1354, 1363, 1364, 1365, 1381, 1396, 1420, 1421, 1428, 1434, 1443, 1448, 1455, 1458, 1470, 1476, 1477, 1483, 1487, 1490, 1495, 1496, 1512, 1524, 1533, 1538, 1545, 1559, 1578, 1584, 1587, 1611, 1617, 1647, 1670, 1675, 1678, 1681, 1682, 1695, 1697, 1703, 1705, 1714, 1715, 1730, 1731, 1751, 1755, 1761, 1766, 1769, 1777, 1782, 1792, 1795, 1805, 1813, 1830, 1853, 1854, 1863, 1875, 1876, 1879, 1898, 1914, 1915, 1939, 1958, 1979, 1982, 1992, 2008, 2014, 2043, 2047, 2052, 2081, 2085, 2087, 2092, 2099, 2106, 2112, 2114, 2116, 2130, 2132, 2134, 2146, 2159, 2160, 2165, 2194, 2196, 2202, 2203, 2205, 2208, 2211, 2212, 2218, 2224, 2234, 2237, 2240, 2248, 2253, 2263, 2271, 2282, 2284, 2285, 2288, 2293, 2335, 2350, 2360, 2361, 2369, 2385, 2402, 2417, 2426, 2430, 2437, 2443, 2444, 2455, 2461, 2465, 2489, 2503, 2510, 2522, 2535, 2547, 2548, 2555, 2556, 2559, 2561, 2568, 2582, 2591, 2592, 2599, 2607, 2611, 2620, 2623, 2625, 2628, 2629, 2643, 2645, 2653, 2665, 2671, 2679, 2690, 2698, 2700, 2701, 2703, 2706, 2724, 2729, 2734, 2741, 2742, 2744, 2747, 2755, 2762, 2768, 2781, 2787, 2790, 2795, 2798, 2802, 2809, 2817, 2825, 2830, 2835, 2841, 2843, 2844, 2868, 2885, 2887, 2890, 2925, 2928, 2936, 2949, 2961, 2970, 2971, 2972, 2973] with class frequencies:
+Keep 372 images
+Found 372 train images
+Restrict subset from 2975 to 372 images ...
+Use image subset [0, 2, 24, 26, 34, 36, 60, 70, 71, 87, 99, 118, 121, 125, 131, 142, 151, 172, 180, 186, 190, 194, 203, 206, 224, 226, 241, 259, 278, 280, 296, 305, 314, 318, 325, 340, 356, 361, 372, 375, 377, 386, 400, 412, 414, 415, 419, 420, 423, 426, 427, 429, 430, 433, 450, 454, 468, 474, 502, 513, 514, 523, 526, 536, 539, 547, 561, 562, 580, 582, 584, 587, 592, 603, 619, 632, 637, 643, 658, 661, 664, 666, 672, 674, 690, 699, 701, 704, 705, 707, 716, 717, 718, 727, 729, 732, 735, 746, 752, 757, 760, 795, 802, 803, 832, 836, 840, 842, 845, 847, 858, 863, 864, 879, 890, 895, 921, 928, 939, 945, 961, 964, 977, 979, 983, 992, 997, 1002, 1039, 1054, 1057, 1061, 1070, 1084, 1104, 1109, 1123, 1135, 1140, 1141, 1144, 1151, 1153, 1165, 1167, 1171, 1181, 1209, 1210, 1222, 1224, 1227, 1228, 1235, 1251, 1263, 1267, 1281, 1283, 1292, 1294, 1303, 1308, 1313, 1324, 1332, 1338, 1351, 1354, 1363, 1364, 1365, 1381, 1396, 1420, 1421, 1428, 1434, 1443, 1448, 1455, 1458, 1470, 1476, 1477, 1483, 1487, 1490, 1495, 1496, 1512, 1524, 1533, 1538, 1545, 1559, 1578, 1584, 1587, 1611, 1617, 1647, 1670, 1675, 1678, 1681, 1682, 1695, 1697, 1703, 1705, 1714, 1715, 1730, 1731, 1751, 1755, 1761, 1766, 1769, 1777, 1782, 1792, 1795, 1805, 1813, 1830, 1853, 1854, 1863, 1875, 1876, 1879, 1898, 1914, 1915, 1939, 1958, 1979, 1982, 1992, 2008, 2014, 2043, 2047, 2052, 2081, 2085, 2087, 2092, 2099, 2106, 2112, 2114, 2116, 2130, 2132, 2134, 2146, 2159, 2160, 2165, 2194, 2196, 2202, 2203, 2205, 2208, 2211, 2212, 2218, 2224, 2234, 2237, 2240, 2248, 2253, 2263, 2271, 2282, 2284, 2285, 2288, 2293, 2335, 2350, 2360, 2361, 2369, 2385, 2402, 2417, 2426, 2430, 2437, 2443, 2444, 2455, 2461, 2465, 2489, 2503, 2510, 2522, 2535, 2547, 2548, 2555, 2556, 2559, 2561, 2568, 2582, 2591, 2592, 2599, 2607, 2611, 2620, 2623, 2625, 2628, 2629, 2643, 2645, 2653, 2665, 2671, 2679, 2690, 2698, 2700, 2701, 2703, 2706, 2724, 2729, 2734, 2741, 2742, 2744, 2747, 2755, 2762, 2768, 2781, 2787, 2790, 2795, 2798, 2802, 2809, 2817, 2825, 2830, 2835, 2841, 2843, 2844, 2868, 2885, 2887, 2890, 2925, 2928, 2936, 2949, 2961, 2970, 2971, 2972, 2973] with class frequencies:
+Keep 2975 images
+Found 2975 train images
+Found 500 val images
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4 weights
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4depth weights
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4depth weights
+Create segmentation ema model.
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4 weights
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4depth weights
+Load mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4depth weights
+PAD run first half of decoder ([4, 3, 2]).
+bottleneck shape torch.Size([2, 2048, 32, 32])
+upconv4-0 shape: torch.Size([2, 256, 32, 32])
+concatenated features shape: torch.Size([2, 1280, 32, 32])
+upconv4-1 shape: torch.Size([2, 256, 32, 32])
+upconv3-0 shape: torch.Size([2, 256, 32, 32])
+concatenated features shape: torch.Size([2, 768, 64, 64])
+upconv3-1 shape: torch.Size([2, 256, 64, 64])
+disp3 shape: torch.Size([2, 1, 64, 64]), expected [64 64]
+upconv2-0 shape: torch.Size([2, 128, 64, 64])
+concatenated features shape: torch.Size([2, 384, 128, 128])
+upconv2-1 shape: torch.Size([2, 128, 128, 128])
+disp2 shape: torch.Size([2, 1, 128, 128]), expected [128 128]
+bottleneck shape torch.Size([2, 2048, 32, 32])
+upconv4-0 shape: torch.Size([2, 256, 32, 32])
+concatenated features shape: torch.Size([2, 1280, 32, 32])
+upconv4-1 shape: torch.Size([2, 256, 32, 32])
+upconv3-0 shape: torch.Size([2, 256, 32, 32])
+concatenated features shape: torch.Size([2, 768, 64, 64])
+upconv3-1 shape: torch.Size([2, 256, 64, 64])
+upconv2-0 shape: torch.Size([2, 128, 64, 64])
+concatenated features shape: torch.Size([2, 384, 128, 128])
+upconv2-1 shape: torch.Size([2, 128, 128, 128])
+PAD self attention for ('upconv', 2) with shape torch.Size([2, 128, 128, 128]).
+PAD run second half of decoder ([1, 0]).
+bottleneck shape torch.Size([2, 128, 128, 128])
+upconv1-0 shape: torch.Size([2, 128, 128, 128])
+concatenated features shape: torch.Size([2, 192, 256, 256])
+upconv1-1 shape: torch.Size([2, 128, 256, 256])
+disp1 shape: torch.Size([2, 1, 256, 256]), expected [256 256]
+upconv0-0 shape: torch.Size([2, 64, 256, 256])
+concatenated features shape: torch.Size([2, 64, 512, 512])
+upconv0-1 shape: torch.Size([2, 64, 512, 512])
+disp0 shape: torch.Size([2, 1, 512, 512]), expected [512 512]
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.7903021367554905
+Mean Acc : 	 0.2540176063671094
+FreqW Acc : 	 0.6757477474947031
+Mean IoU : 	 0.19522032038851145
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9164664996987381
+Mean Acc : 	 0.5667171047444493
+FreqW Acc : 	 0.8529887006944886
+Mean IoU : 	 0.48483853067207
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9248885777406107
+Mean Acc : 	 0.6329003400244521
+FreqW Acc : 	 0.869204121187799
+Mean IoU : 	 0.5253428815052278
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9299962440569963
+Mean Acc : 	 0.6367552199853771
+FreqW Acc : 	 0.8751603822465082
+Mean IoU : 	 0.5530853949650341
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.930551894510712
+Mean Acc : 	 0.6343975908854378
+FreqW Acc : 	 0.8758841046556165
+Mean IoU : 	 0.5531320606531801
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9335503976606128
+Mean Acc : 	 0.6706135946138158
+FreqW Acc : 	 0.8810156168815055
+Mean IoU : 	 0.5757967147572405
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9336758982172644
+Mean Acc : 	 0.6748103603787009
+FreqW Acc : 	 0.8820012055229977
+Mean IoU : 	 0.5797452020748612
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9336059129751509
+Mean Acc : 	 0.6858905190383332
+FreqW Acc : 	 0.8822195369203394
+Mean IoU : 	 0.5868573084430099
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9338350674205925
+Mean Acc : 	 0.6809290908152195
+FreqW Acc : 	 0.8809011836641768
+Mean IoU : 	 0.5912314312181737
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9340243019663532
+Mean Acc : 	 0.685630672668534
+FreqW Acc : 	 0.8816138702013041
+Mean IoU : 	 0.5949071054731667
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.936880090711483
+Mean Acc : 	 0.7025313389223339
+FreqW Acc : 	 0.8866049456723056
+Mean IoU : 	 0.612780650014295
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9352071498385605
+Mean Acc : 	 0.6648391145955437
+FreqW Acc : 	 0.8846842208634553
+Mean IoU : 	 0.578137477555796
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9371193701801089
+Mean Acc : 	 0.6958946463925805
+FreqW Acc : 	 0.8877699276046529
+Mean IoU : 	 0.6061874808637453
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9379492294693769
+Mean Acc : 	 0.6929891457275013
+FreqW Acc : 	 0.8887069454371387
+Mean IoU : 	 0.6075600478315116
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.937969937562895
+Mean Acc : 	 0.6946898568817307
+FreqW Acc : 	 0.8886876745580249
+Mean IoU : 	 0.6096014052090585
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9386458668357561
+Mean Acc : 	 0.7074701311135508
+FreqW Acc : 	 0.8901129778313728
+Mean IoU : 	 0.617573069671638
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9383632691938344
+Mean Acc : 	 0.7004104294318022
+FreqW Acc : 	 0.8895270595217271
+Mean IoU : 	 0.6128648263365524
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9386470228595148
+Mean Acc : 	 0.6968980899458788
+FreqW Acc : 	 0.890005344636462
+Mean IoU : 	 0.6091700690004108
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9383028113324338
+Mean Acc : 	 0.6938904398359639
+FreqW Acc : 	 0.8894429830146086
+Mean IoU : 	 0.6075373658160901
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9384199928803768
+Mean Acc : 	 0.7099394238226225
+FreqW Acc : 	 0.8898234159157002
+Mean IoU : 	 0.6168303461590735
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.938742724177316
+Mean Acc : 	 0.7006805704729105
+FreqW Acc : 	 0.8899918204035118
+Mean IoU : 	 0.6132019483477106
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9379118222854884
+Mean Acc : 	 0.6973353541725967
+FreqW Acc : 	 0.8887735049477709
+Mean IoU : 	 0.6085941187486387
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9383244093461284
+Mean Acc : 	 0.7055417197780283
+FreqW Acc : 	 0.8896468772572182
+Mean IoU : 	 0.6152656994644058
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9379518468816606
+Mean Acc : 	 0.6960954899838875
+FreqW Acc : 	 0.888707000138309
+Mean IoU : 	 0.608488620614785
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9384513887407203
+Mean Acc : 	 0.7012957834833745
+FreqW Acc : 	 0.8894372591391121
+Mean IoU : 	 0.6141553927217746
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9382670662053454
+Mean Acc : 	 0.694410847589924
+FreqW Acc : 	 0.8891236847345726
+Mean IoU : 	 0.6093619246565801
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.938341505410695
+Mean Acc : 	 0.6976738331146021
+FreqW Acc : 	 0.8893610361064018
+Mean IoU : 	 0.6087991849354425
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9379719573327073
+Mean Acc : 	 0.6898775107105778
+FreqW Acc : 	 0.888516260669829
+Mean IoU : 	 0.6065886662147039
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9380810510766937
+Mean Acc : 	 0.6964812458565004
+FreqW Acc : 	 0.8892754865407904
+Mean IoU : 	 0.6077664251333227
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9388158634012314
+Mean Acc : 	 0.7045830263501506
+FreqW Acc : 	 0.8903843068328621
+Mean IoU : 	 0.6144443742199976
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9383001851954423
+Mean Acc : 	 0.7031661308310941
+FreqW Acc : 	 0.8892959090725179
+Mean IoU : 	 0.6133710239151021
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9386823492006378
+Mean Acc : 	 0.7036431098406445
+FreqW Acc : 	 0.8901467337371817
+Mean IoU : 	 0.6153125848906139
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+WARN get_lr: optimizer has more than one param group
+Overall Acc: 	 0.9383433594110627
+Mean Acc : 	 0.6982430957896889
+FreqW Acc : 	 0.8894320821057861
+Mean IoU : 	 0.6104338530524998
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_cosine_w0_lam0p50', ('training', 'cross_task_lambda'): 0.5, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 0}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_dual_cosine_w0_lam0p50_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_cosine_w0_lam0p50', ('training', 'cross_task_lambda'): 0.5, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 0}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_cosine_w0_lam0p75', ('training', 'cross_task_lambda'): 0.75, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 0}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_dual_cosine_w0_lam0p75_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_cosine_w0_lam0p75', ('training', 'cross_task_lambda'): 0.75, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 0}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_cosine_w0_lam1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 0}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_dual_cosine_w0_lam1p00_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_cosine_w0_lam1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'cosine', ('training', 'cross_task_warmup_iters'): 0}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_mse_w5k_lam0p25', ('training', 'cross_task_lambda'): 0.25, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_dual_mse_w5k_lam0p25_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_mse_w5k_lam0p25', ('training', 'cross_task_lambda'): 0.25, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_mse_w5k_lam0p50', ('training', 'cross_task_lambda'): 0.5, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_dual_mse_w5k_lam0p50_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_mse_w5k_lam0p50', ('training', 'cross_task_lambda'): 0.5, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_mse_w5k_lam0p75', ('training', 'cross_task_lambda'): 0.75, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_dual_mse_w5k_lam0p75_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_mse_w5k_lam0p75', ('training', 'cross_task_lambda'): 0.75, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_mse_w5k_lam1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_dual_mse_w5k_lam1p00_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_mse_w5k_lam1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 5000}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_mse_w0_lam0p25', ('training', 'cross_task_lambda'): 0.25, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 0}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_dual_mse_w0_lam0p25_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_mse_w0_lam0p25', ('training', 'cross_task_lambda'): 0.25, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 0}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_mse_w0_lam0p50', ('training', 'cross_task_lambda'): 0.5, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 0}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_dual_mse_w0_lam0p50_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_mse_w0_lam0p50', ('training', 'cross_task_lambda'): 0.5, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 0}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_mse_w0_lam0p75', ('training', 'cross_task_lambda'): 0.75, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 0}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_dual_mse_w0_lam0p75_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_mse_w0_lam0p75', ('training', 'cross_task_lambda'): 0.75, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 0}
+Resolved base cfg vars {('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_mse_w0_lam1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 0}
+Resolved vars {('config', 'general', 'tag'): 'cityscapes_pad_ct_dual_mse_w0_lam1p00_D372_S7', ('model', 'segmentation_args', 'projection_mode'): 'dual', ('model', 'variant'): 'ct_dual_mse_w0_lam1p00', ('training', 'cross_task_lambda'): 1.0, ('training', 'cross_task_type'): 'mse', ('training', 'cross_task_warmup_iters'): 0}

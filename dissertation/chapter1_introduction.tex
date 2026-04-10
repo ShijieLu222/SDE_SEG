@@ -1,0 +1,175 @@
+\chapter{Introduction}
+\label{chap:context}
+
+% -----------------------------------------------------------------------------
+\section{Context}
+
+Semantic segmentation assigns a semantic class label to every pixel in an
+image, and is fundamental to many perception systems including autonomous
+driving, robotic navigation, and medical image analysis. Unlike image-level
+classification, it requires fine-grained spatial understanding, especially
+when distinguishing object boundaries and subtle structures that determine
+whether a model can correctly separate adjacent objects and identify key
+regions in a scene. Despite significant progress in recent years, modern
+segmentation models still depend heavily on large-scale pixel-level
+annotations. Collecting such dense labels is expensive and time-consuming:
+annotating a single image from the Cityscapes urban driving dataset takes
+around 1.5 hours on average~\cite{cordts2016cityscapes}, which adds up to
+over 4,460 working hours for the full training set. Building effective
+segmentation systems under limited annotation budgets therefore remains a
+key challenge in computer vision.
+
+To reduce this dependence on dense annotations, Hoyer et al.~\cite{hoyer2023ijcv_sde}
+proposed a framework for annotation-efficient semantic segmentation, built
+around three progressive stages.
+
+\textbf{Stage (a): Standard supervised pipeline.}
+This is the baseline for the whole framework, representing the simplest
+possible training setup: a subset of images is manually selected from an
+unlabelled pool, annotated, and used for supervised training with standard
+data augmentation. No SDE components are involved at this stage, and it
+serves as the reference point for measuring the improvements introduced in
+later stages.
+
+\textbf{Stage (b): SDE-enhanced semi-supervised learning pipeline.}
+This stage builds on the standard pipeline by incorporating self-supervised
+depth estimation (SDE) as an auxiliary signal at three points in the
+training process. First, an automatic data selection strategy based on SDE
+features picks the most informative samples for annotation from the
+unlabelled pool, using diversity and uncertainty criteria, without requiring
+any human involvement in the active learning loop. Second, the DepthMix
+augmentation scheme uses depth estimates from SDE to generate
+geometrically consistent mixed training samples, combined with a Mean
+Teacher mechanism to make use of unlabelled data through pseudo-labels.
+Third, multi-task learning trains semantic segmentation jointly with SDE as
+an auxiliary task, or alternatively transfers weights from the depth branch
+to initialise the segmentation branch, so that the geometric knowledge
+learned by SDE can benefit the segmentation network when labelled data is
+limited.
+
+\textbf{Stage (c): Semi-supervised domain adaptation pipeline.}
+This extends the Stage~(b) setup to handle cross-domain transfer from
+synthetic source domains such as GTA5 and SYNTHIA to real target domains
+like Cityscapes. Two new components, Cross-Domain DepthMix and Matching
+Geometry Sampling, are added to use SDE for aligning the geometric
+distributions between source and target domains.
+
+This project focuses on reproducing Stages~(a) and~(b) on Cityscapes,
+which provides the foundation for the architectural extensions introduced
+later. Stage~(c) is outside the scope of this work, as it tackles a
+different problem that requires additional datasets, domain-specific
+pipelines, and alignment strategies that are not directly relevant to the
+contributions here. This project instead looks at improving multi-task
+feature use within the same domain, where the relationship between depth
+and segmentation representations can be examined more directly.
+
+% -----------------------------------------------------------------------------
+\section{Motivation}
+
+Most semi-supervised segmentation methods rely on pseudo-labelling and
+consistency regularisation. When labels are extremely scarce, two problems
+tend to arise. First, initial pseudo-labels are often unreliable, which can
+lead to confirmation bias where the model keeps reinforcing its own mistakes
+and gradually degrades in performance. Second, conventional mixing
+augmentations like ClassMix~\cite{olsson2021classmix} tend to ignore the
+underlying geometric structure of a scene, producing synthetic images that
+look unrealistic and confuse the model when it tries to learn object
+boundaries.
+
+A key observation is that scene depth is closely linked to semantic
+boundaries. Road surfaces, for example, are consistently flat and sit at
+ground level. Self-supervised depth estimation (SDE) can extract these depth
+cues from unlabelled video sequences through geometric and photometric
+consistency, with no manual annotation required~\cite{godard2017unsupervised}.
+Hoyer et al.~\cite{hoyer2023ijcv_sde} showed that SDE can provide a stable
+geometric signal throughout the training pipeline, enabling
+geometry-consistent data mixing and better feature transfer.
+
+That said, while PAD-Net~\cite{hoyer2023ijcv_sde} already enables some
+implicit cross-task interaction through its attention mechanism, where depth
+and segmentation features modulate each other's self-attention outputs, this
+interaction is indirect. It operates on attention-enhanced features rather
+than placing any constraint on the representations themselves. More
+importantly, the depth decoder receives self-supervised training signals
+from all available unlabelled frames, while the segmentation decoder is only
+supervised on the small labelled subset. This asymmetry means the depth
+branch ends up with much richer geometric representations, yet there is no
+explicit mechanism to pass that geometric knowledge into the segmentation
+feature space.
+
+Inspired by work on cross-task consistency
+learning~\cite{nakano2021crosstask,zamir2020crosstask} and multi-task
+learning with partial annotations~\cite{li2022mtl}, we propose a
+\textbf{Cross-Task Consistency Loss} $\mathcal{L}_\text{ct}$. The idea is
+fairly straightforward: features extracted from the same scene by both
+decoders should reflect compatible structural information, since pixels in
+the same semantic region tend to share consistent depth values, and sharp
+depth changes usually coincide with semantic boundaries. Rather than letting
+the two decoders learn entirely independently, we explicitly encourage their
+intermediate features to stay aligned. This way, the depth decoder can act
+as a continuously available, label-free teacher for the segmentation branch,
+providing extra geometric supervision precisely when labelled data is most
+limited.
+
+In terms of implementation, we explore two loss formulations: a normalised
+MSE computed after $\ell_2$ normalisation, and a cosine similarity loss that
+directly constrains feature directions. A lightweight $1{\times}1$ projection
+layer maps depth features into the segmentation feature space, and a
+stop-gradient is applied on the depth side so that $\mathcal{L}_\text{ct}$
+only updates the segmentation branch and the projection layer, leaving the
+depth training objective untouched. A warmup period of 5{,}000 iterations is
+also applied before $\mathcal{L}_\text{ct}$ is activated, giving both
+decoders time to develop meaningful representations before alignment is
+enforced.
+
+We evaluate the proposed loss against three hypotheses: (H1) it improves
+segmentation accuracy compared to the reproduced Stage~(b) MTL baseline;
+(H2) the improvement holds consistently across different random seeds; and
+(H3) a suitable $\lambda_\text{ct}$ can be identified through a systematic
+loss-scale calibration procedure.
+
+% -----------------------------------------------------------------------------
+\section{Aims and Objectives}
+
+This project has two main goals: to reproduce the SDE-enhanced segmentation
+framework proposed by Hoyer et al.~\cite{hoyer2023ijcv_sde}, and to extend
+the multi-task architecture with an explicit cross-task feature alignment
+loss. The specific objectives are as follows.
+
+\begin{enumerate}
+
+\item \textbf{Reproduce Stage~(a).} Set up and verify the original codebase,
+establishing a reproducible training and evaluation pipeline on
+Cityscapes~\cite{cordts2016cityscapes}. This involves reproducing the fully
+supervised baseline using a shared ResNet101~\cite{he2016resnet} encoder
+with an ASPP~\cite{chen2018deeplabv3plus} decoder and
+U-Net~\cite{ronneberger2015unet} upsampling blocks, which serves as the
+reference point for all subsequent experiments.
+
+\item \textbf{Reproduce Stage~(b).} Building on Stage~(a), reproduce four
+sets of experiments in sequence: the automatic data selection for annotation
+comparison, the mixing augmentation comparison, the SDE transfer and
+multi-task learning comparison, and the full framework ablation study, which
+measures the individual and combined performance contributions of data
+selection~(S), DepthMix~(DX), and multi-task learning~(MTL).
+
+\item \textbf{Design, implement, and evaluate a Cross-Task Consistency
+Loss.} Inspired by cross-task consistency
+learning~\cite{nakano2021crosstask,zamir2020crosstask} and multi-task
+learning with partial annotations~\cite{li2022mtl}, propose and implement
+$\mathcal{L}_\text{ct}$ within the PAD-Net~\cite{hoyer2023ijcv_sde}
+multi-task architecture. Two loss formulations are investigated: normalised
+MSE and cosine similarity. A loss-scale calibration procedure followed by a
+$\lambda$ sweep is used to identify the best candidates, and three
+independent random seeds are used to verify whether the mIoU improvements
+over the Stage~(b) MTL baseline are stable and reproducible.
+
+\item \textbf{Evaluate the full combined framework.} Integrate
+$\mathcal{L}_\text{ct}$ into three configurations: MTL with DepthMix, MTL
+with automatic data selection, and MTL with both DepthMix and automatic
+data selection, to assess how well the proposed loss combines with the
+existing framework components and measure the overall performance of the
+complete system.
+
+\end{enumerate}
+% -----------------------------------------------------------------------------

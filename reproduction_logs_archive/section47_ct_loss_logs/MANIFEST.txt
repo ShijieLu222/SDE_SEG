@@ -1,0 +1,64 @@
+# Section 4.7: Cross-Task Consistency Loss — Log Archive
+# Generated: 2026-04-06
+# Cluster: bp1 (University of Bristol BluePebble HPC)
+# GPU: Single A100/V100 per job (SLURM, gres=gpu:1)
+# Source: /user/work/ig23200/sde_seg/logs/
+
+====================================================================
+DIRECTORY STRUCTURE
+====================================================================
+phase1_exp219/   — Phase I single-seed sweep (seed=7, N=372, 40k iter)
+                   exp219_single_mse_*  : single projection + MSE  (Slurm jobs 16421325, 16513723–16513730)
+                   exp219_dual_cosine_* : dual projection + cosine  (Slurm jobs 16421326–16421333)
+                   exp219_dual_mse_*    : dual projection + MSE     (Slurm jobs 16421334–16421341)
+                   NOTE: Phase I single cosine logs ran on the original u5hv cluster
+                         and are not available in this archive (results match Table ct-p1-single-cos).
+
+phase2_exp220/   — Phase II three-seed validation (seeds 7/25/42, N=372, 40k iter per seed)
+                   exp220_single_cosine_* : single projection + cosine (Slurm jobs 16431640–16431642, 16512914–16512916)
+                   exp220_dual_cosine_*   : dual projection + cosine   (Slurm jobs 16431632–16431639, 16512918–16512921)
+                   exp220_single_mse_*    : single projection + MSE    (Slurm jobs 16431643–16431644, 16512917)
+
+baseline_mtl/    — PAD-MTL baseline (no CT loss, seeds 7/25/42, N=372)
+                   bp1_baseline_mtl372_3seeds-16421316: first run  (bp1-gpu030)
+                   bp1_baseline_mtl372_r2-16430554:     rerun 2   (bp1-gpu015)
+                   bp1_baseline_mtl372_r3-16512906:     rerun 3   (bp1-gpu014)
+
+====================================================================
+COMPUTATIONAL OVERHEAD SUMMARY (from sacct + training logs)
+====================================================================
+All CT runs: 3 seeds × 40,000 iters, batch_size=2, single GPU
+
+SAME-HARDWARE COMPARISON (bp1-gpu040, jobs 16431632 and 16431641):
+  Configuration              JobID     Node       Elapsed       MaxRSS    Time/Image
+  -----------------------   --------  ----------  -----------   --------  ----------
+  Dual cosine w0 λ=0.50     16431632  bp1-gpu040  1d 05h 14m   3.73 GB   0.378 s/img
+  Single cosine w0 λ=1.00   16431641  bp1-gpu040  1d 05h 18m   3.49 GB   0.372 s/img
+  Difference (dual - single)                       +4 min       +0.24 GB  +0.006 s/img
+
+Note: elapsed = wall-clock for 3 seeds; per seed ≈ 9.7–9.8 hrs on bp1-gpu040.
+      MaxRSS = peak system RAM (SLURM sacct). GPU VRAM not directly measured.
+
+PARAMETER OVERHEAD (distillation_ch = 128, Conv2d(128,128,1)):
+  Single projection: +16,512 params  (~0.033% of ~50M total model params)
+  Dual projection:   +33,024 params  (~0.066% of ~50M total model params)
+
+CONCLUSION: Both projection variants introduce negligible computational overhead
+compared to the PAD-MTL baseline. Single projection is marginally more efficient
+(+4 min wall-clock over 3 seeds, -240 MB system RAM) while achieving higher mIoU.
+
+====================================================================
+KEY RESULTS FOR TABLE ct-phase2-3seeds (Section 4.7.2)
+====================================================================
+Config                          Seed7  Seed25  Seed42  Mean   Std   Delta
+-------------------------------  -----  ------  ------  -----  ----  -----
+PAD-MTL baseline                59.84   60.92   61.50  60.75  0.69   --
+single cosine, w0, λ=0.75      63.08   62.89   62.48  62.82  0.25  +2.07
+single cosine, w0, λ=1.00      63.01   63.37   63.37  63.25  0.17  +2.50  ← primary design choice
+single cosine, w0, λ=1.25      62.44   62.24   64.33  63.00  0.94  +2.25
+single MSE,    w5k, λ=1.00     61.32   62.92   63.93  62.72  1.07  +1.97
+single MSE,    w0,  λ=1.00     62.06   62.91   64.91  63.29  1.20  +2.54
+dual cosine,   w0,  λ=0.50     62.54   62.91   63.15  62.87  0.25  +2.12
+dual cosine,   w0,  λ=0.75     63.22   62.91   62.73  62.95  0.20  +2.20
+dual cosine,   w0,  λ=1.00     62.77   61.81   63.63  62.74  0.74  +1.99
+dual cosine,   w5k, λ=0.50     62.13   63.15   61.58  62.29  0.65  +1.54

@@ -2,7 +2,7 @@
 #SBATCH --job-name=exp221_mtl_sel
 #SBATCH --partition=gpu
 #SBATCH --account=coms037985
-#SBATCH --time=40:00:00
+#SBATCH --time=42:00:00
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
