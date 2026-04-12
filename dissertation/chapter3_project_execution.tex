@@ -1,365 +1,215 @@
 \chapter{Project Execution}
 \label{chap:execution}
 
-\noindent
-This chapter describes the systematic implementation and execution of the
-reproduction experiments for \cite{hoyer2023ijcv_sde} and the proposed
-cross-task consistency loss extension. Beyond a log of execution, this
-chapter delineates the rationale behind dataset configurations, the
-architecture of the training pipeline, the design of the PAD multi-task
-decoder, and the orchestration of computational resources on a
-high-performance computing (HPC) cluster. Throughout, this study adopts
-the paper's terminology: \textbf{Stage~(a)} refers to standard supervised
-learning and data selection, while \textbf{Stage~(b)} encompasses
-semi-supervised mechanisms and multi-task learning.
+This chapter documents how the reproduction experiments and the cross-task
+consistency loss extension were carried out in practice, including the
+computing environment, dataset configuration, training pipeline, use of the
+PAD multi-task decoder, and the organisation of individual experiment
+groups. Throughout, this project adopts the terminology of the original
+paper: \textbf{Stage~(a)} refers to standard supervised learning and data
+selection, while \textbf{Stage~(b)} encompasses semi-supervised mechanisms
+and multi-task learning.
 
 % ============================================================================
 \section{Experimental Setup}
 \label{sec:setup}
 
-\subsection{Hardware and Software Environment}
+The reproduction experiments (exp~210--213, corresponding to Tables~1, 3,
+5, and~7) were run on the University of Bristol's Isambard-AI
+platform~\cite{isambard_ai}, using a single GPU per job. The subsequent
+cross-task consistency loss extension experiments (exp~219--221) were run
+on the University of Bristol's BluePebble high-performance computing
+platform~(BP1) under the SLURM workload manager. Both sets of experiments
+followed the same configuration management and random seed control
+procedures to ensure traceability and reproducibility.
 
-This project was executed across two successive HPC environments,
-reflecting a mid-project migration in available computing resources.
-\begin{itemize}
-    \item \textbf{Reproduction experiments (exp~210--213, Tables~1,
-    3, 5, 7)}: These runs were submitted to
-    Isambard-AI~\cite{isambard_ai}, the University of Bristol's
-    AI-optimised supercomputing facility, using a single GPU per job.
-    \item \textbf{CT loss extension (exp~219--221)}: All
-    cross-task consistency loss experiments were executed on the
-    University of Bristol's BluePebble~(BP1) cluster under the SLURM
-    workload manager, following the migration to this newer resource.
-    BP1 is a heterogeneous cluster; Table~\ref{tab:bp1_nodes}
-    summarises the GPU node types encountered during these runs.
-\end{itemize}
+On BluePebble, each SLURM job was allocated one GPU, eight physical cores,
+and 64\,GB of system memory. Phase~I single-seed runs used a wall-time
+limit of 24~hours, while Phase~II (exp~220) and exp~221 three-seed runs
+used 40~hours, with all three seeds executed sequentially within a single
+job. BP1 is a heterogeneous cluster and node assignment is managed
+automatically by SLURM. The cross-task loss experiments were run
+predominantly on V100 nodes with 32\,GB VRAM. All experiments ran within a
+dedicated Conda environment with pinned dependencies to ensure consistent
+behaviour across node types.
 
-\begin{table}[H]
-\centering
-\caption{BP1 GPU node types allocated to CT loss experiments (exp~219--221).}
-\label{tab:bp1_nodes}
-\renewcommand{\arraystretch}{1.2}
-\begin{tabular}{llcc}
-\toprule
-\textbf{Node class} & \textbf{GPU model} & \textbf{GPU VRAM} &
-\textbf{Observed usage} \\
-\midrule
-\texttt{bp1-gpu014} & NVIDIA RTX~2080 & 8\,GB  & minority of runs \\
-\texttt{bp1-gpu030} & NVIDIA RTX~3090 & 24\,GB & baseline MTL reruns \\
-\texttt{bp1-gpu040} & NVIDIA V100     & 32\,GB & majority of CT loss runs \\
-\bottomrule
-\end{tabular}
-\end{table}
+Random seeds were fixed across Python, NumPy, and PyTorch at the start of
+every run. Each experiment's full configuration, including experiment ID,
+label budget, seed, and all hyperparameters, was logged alongside model
+checkpoints to support reproducibility.
 
-\noindent
-Job-to-node assignment on BP1 is managed by SLURM and is not directly
-controllable; the allocation therefore varies across submissions. The
-Phase~I and Phase~II CT loss runs (exp~219, 220) executed predominantly
-on \texttt{bp1-gpu040}~(V100, 32\,GB VRAM), which is the most VRAM-capable
-node class available on BP1 and the relevant reference hardware for
-the overhead analysis in Chapter~\ref{chap:evaluation}. The
-implementation was isolated within a dedicated Conda environment with
-pinned dependencies to ensure consistent execution across node types.
-
-\paragraph{Resource Allocation per Job (BP1).}
-All CT loss experiments on BluePebble were allocated the following
-resources per SLURM job:
-\begin{itemize}
-    \item \textbf{GPU}: One GPU per job (\texttt{--gres=gpu:1}); node
-    type determined at dispatch time.
-    \item \textbf{CPU and Memory}: 8 physical cores and 64\,GB of system
-    RAM per job, providing sufficient capacity for multi-worker data
-    pre-fetching without I/O bottleneck.
-    \item \textbf{Wall-time}: 24\,hours for Phase~I single-seed runs;
-    40\,hours for Phase~II (exp~220) and exp~221 three-seed runs, with
-    the three seeds executed sequentially within a single allocation.
-\end{itemize}
-
-\paragraph{Software and Reproducibility Controls.}
-Random seeds are fixed across Python, NumPy, and PyTorch at the start of
-every run. The full configuration of each experiment---experiment ID,
-label budget, seed, and all hyperparameters---is logged to disk alongside
-TensorBoard event files and model checkpoints. The codebase is
-version-controlled, enabling any run to be exactly reproduced from its
-recorded experiment ID.
-
-\paragraph{Training Protocol.}
-All reproduction and extension experiments use a ResNet-101 encoder
-pretrained on ImageNet. Stage~(b) and cross-task loss experiments
-additionally employ the PAD multi-task decoder
-(Section~\ref{sec:pad-decoder}). Training uses the SGD optimiser (momentum
-$0.9$, weight decay $5\!\times\!10^{-4}$) with a polynomial
-learning-rate decay schedule (\texttt{stepx}) over 40{,}000 iterations.
-Learning rates are set to $10^{-2}$ for the decoder, $10^{-3}$ for the
-backbone encoder, and $10^{-6}$ for the pose network. Due to the
-single-GPU constraint, a batch size of 2 is used without Synchronised
-Batch Normalisation~(SyncBN); this is expected to introduce minor
-discrepancies relative to the multi-GPU setup of the original paper, as
-each normalisation layer receives more limited batch statistics.
+All reproduction and extension experiments used a ResNet-101
+encoder~\cite{he2016resnet} pretrained on ImageNet~\cite{deng2009imagenet}.
+Training used the SGD optimiser with momentum $0.9$ and weight decay
+$5\!\times\!10^{-4}$, following a polynomial learning-rate decay schedule
+over 40{,}000 iterations. Learning rates were set to $10^{-2}$ for the
+decoder, $10^{-3}$ for the backbone encoder, and $10^{-6}$ for the pose
+network. Due to the single-GPU constraint, a batch size of~2 was used
+without Synchronised Batch Normalisation~(SyncBN), which may introduce
+minor discrepancies relative to the multi-GPU setup of the original paper.
 
 % ============================================================================
-\section{The Dataset and Feature Representation}
+\section{Dataset and Feature Representation}
 \label{sec:dataset}
 
-The pipeline exploits two complementary data modalities within the
+The pipeline makes use of two complementary data modalities within the
 Cityscapes dataset~\cite{cordts2016cityscapes}: pixel-level semantic
-annotations for supervised segmentation and adjacent temporal frames for
+annotations for supervised segmentation, and adjacent temporal frames for
 geometric self-supervision.
 
-\subsection{Data Composition}
-\begin{itemize}
-    \item \textbf{Fine Annotations}: 2{,}975 fine-annotated images
-    constitute the labelled pool. Low-label budgets of 100, 372, and 744
-    samples are simulated by selecting subsets from this pool. The
-    author-provided fixed subset indices are used throughout to maintain
-    exact parity with the original evaluation protocol.
-    \item \textbf{Adjacent Temporal Sequences}: For each target image, a
-    3-frame window (current frame~0, and neighbouring frames $-1$ and
-    $+1$) supplies geometric cues for monocular self-supervised depth
-    estimation and geometry-aware components such as DepthMix~(DX).
-    These frames carry no semantic annotations and are used only for
-    photometric and pose supervision signals.
-\end{itemize}
+The 2,975 fine-annotated images form the labelled pool. Low annotation
+budgets of 100, 372, and 744 samples are simulated by selecting subsets
+from this pool using the author-provided fixed subset indices, thereby
+preserving consistency with the original evaluation protocol. For each
+target image, a three-frame window consisting of the current frame and its
+immediate neighbours supplies geometric cues for self-supervised depth
+estimation and geometry-aware components such as DepthMix. These frames
+carry no semantic annotations and are used only for photometric and pose
+supervision.
 
-\subsection{Geometric Constraints and Preprocessing}
 Images are resized to $1024\!\times\!512$ and randomly cropped to
 $512\!\times\!512$ during training. This resolution balances sufficient
 spatial context for boundary-sensitive tasks against single-GPU VRAM
 feasibility, particularly for Stage~(b) configurations that maintain two
 parallel decoder branches simultaneously.
 
-\subsection{SDE Checkpoints for Downstream Components (fd0/fd2)}
-\label{sec:fd-checkpoints}
-Several Stage~(b) components require an SDE-pretrained encoder to
-provide depth-informed feature initialisations. \texttt{fd0} refers to
-encoder weights from standard monocular depth pretraining; \texttt{fd2}
-refers to weights from feature-distance regularised pretraining, which
+Several Stage~(b) components require an SDE-pretrained encoder to provide
+depth-informed encoder initialisation. \texttt{fd0} refers to encoder
+weights from standard monocular depth pretraining, and \texttt{fd2} refers
+to weights from feature-distance regularised pretraining, which
 additionally prevents forgetting of geometric representations during
-downstream fine-tuning. To maintain a controlled reproduction setting,
-we use the author-released checkpoints and keep them fixed across all
-downstream experiments.
+downstream fine-tuning. The author-released checkpoints are used
+throughout and kept fixed across all downstream experiments.
 
 % ============================================================================
-\section{The PAD Multi-Task Decoder}
+\section{Use of the PAD Multi-Task Decoder}
 \label{sec:pad-decoder}
 
-Stage~(b) experiments and the proposed $\mathcal{L}_\text{ct}$ extension
-rely on the Pyramid Aggregation and Decoupling~(PAD) decoder introduced
-in \cite{hoyer2023ijcv_sde}. PAD extends a standard depth decoder with a
-parallel segmentation branch that shares the ResNet-101 encoder features
-but maintains task-specific decoder parameters, enabling joint
-optimisation of depth estimation and semantic segmentation.
+Both Stage~(b) experiments and the $\mathcal{L}_\text{ct}$ extension are
+built on the PAD-Net multi-task architecture~\cite{xu2018padnet}. As
+described in Chapter~\ref{chap:technical}, PAD-Net maintains two parallel
+decoder branches for depth estimation and semantic segmentation on top of
+a shared ResNet-101 encoder, exchanging cross-task information at an
+intermediate distillation layer through an attention-guided distillation
+module.
 
-The architecture proceeds in two execution phases around an intermediate
-\emph{distillation layer} (decoder upsampling layer~7 in our
-configuration, producing feature maps of spatial resolution
-$128\!\times\!128$ with 128 channels):
-\begin{enumerate}
-    \item \textbf{First half (encoder to distillation layer)}: The depth
-    and segmentation decoder branches independently process the shared
-    encoder features up to the distillation layer. Self-attention
-    modules~(SA) are applied to each branch's intermediate feature map
-    to capture long-range spatial dependencies. The attention-weighted
-    depth features are then added to the segmentation branch state, and
-    vice versa, enabling bidirectional cross-task context exchange before
-    the second half begins.
-    \item \textbf{Second half (distillation layer to output)}: The depth
-    and segmentation decoders continue from the merged representations to
-    their respective final prediction heads, producing depth maps and
-    per-pixel segmentation logits.
-\end{enumerate}
-
-The intermediate feature maps at the distillation layer---denoted
-$f_\text{seg}$ and $f_\text{depth}$---are precisely the representations
-that the proposed $\mathcal{L}_\text{ct}$ acts upon
-(Chapter~\ref{chap:evaluation}, Section~\ref{sec:ct-calibration-ablation}).
-This placement is deliberate: the distillation layer sits after the
-self-attention exchange, so both feature maps already encode cross-task
-contextual information, making the explicit alignment introduced by
-$\mathcal{L}_\text{ct}$ a targeted refinement of an already-informed
-representation rather than a cold alignment from scratch.
+In this project's configuration, the distillation layer is placed at
+decoder upsampling layer~7, producing feature maps of spatial resolution
+$128\!\times\!128$ with 128 channels. The depth features $f_\text{depth}$
+and segmentation features $f_\text{seg}$ at this layer serve as the inputs
+to $\mathcal{L}_\text{ct}$. By explicitly encouraging alignment between
+these two intermediate representations, the loss is intended to promote
+the transfer of geometric information from the depth branch to the
+segmentation branch at the feature level.
 
 % ============================================================================
-\section{Configuration Architecture: The Experiments Hub}
+\section{Configuration Architecture}
 \label{sec:design}
 
-To manage the high dimensionality of hyperparameters across multiple
-reproduction tables and ablation studies, a centralised
-\texttt{experiments.py} module serves as a single source of truth,
-mapping discrete experiment IDs to fully-specified hyperparameter
-dictionaries. This prevents configuration drift between runs and enables
-atomic reproducibility of any individual result by ID.
+Because the project includes multiple reproduction experiments and extension
+ablations with closely related but not identical settings, all
+configurations are managed through a centralised \texttt{experiments.py}
+module. This module acts as the central configuration reference by mapping
+discrete experiment IDs to fully specified hyperparameter dictionaries,
+thereby reducing configuration drift across runs and making individual
+results reproducible from their experiment IDs.
 
-\begin{itemize}
-    \item \textbf{exp~210}: Baseline and mixing strategy variants for
-    Table~3 in \cite{hoyer2023ijcv_sde}, plus baseline and transfer
-    variants for Table~5.
-    \item \textbf{exp~211}: SDE-guided data selection variants for
-    Table~1 in \cite{hoyer2023ijcv_sde}.
-    \item \textbf{exp~212}: Multi-task learning~(MTL) configurations
-    for Stage~(b) evaluation (Tables~5 and~7).
-    \item \textbf{exp~213}: Full component ablation (S\,+\,DX\,+\,MTL)
-    for Table~7 in \cite{hoyer2023ijcv_sde}.
-    \item \textbf{exp~219}: Phase~I cross-task consistency loss sweep. A
-    systematic single-seed (seed~7) scan over all 32 combinations of
-    loss type (cosine~/ normalised MSE), projection layout (single~/
-    dual), warmup schedule ($w0$\,/\,$w5k$), and
-    $\lambda_\text{ct}\in\{0.25, 0.50, 0.75, 1.00\}$, each for 40{,}000
-    iterations.
-    \item \textbf{exp~220}: Phase~II three-seed validation. The top
-    candidates from exp~219 are retrained with three independent seeds
-    (7, 25, 42) to obtain statistically reliable mean and variance
-    estimates. Dual-projection variants are included to enable a fair
-    architectural comparison under multi-seed conditions.
-    \item \textbf{exp~221}: Extended PAD-MTL component ablation. Three
-    additional combinations of DepthMix~(DX) and label selection~(S)
-    applied on top of the PAD-MTL baseline are validated with three
-    independent seeds: MTL\,+\,DX; MTL\,+\,S; and
-    MTL\,+\,DX\,+\,S. Results for exp~221 are pending completion of
-    scheduled HPC maintenance and will be incorporated into
-    Chapter~\ref{chap:evaluation} upon availability.
-\end{itemize}
+The mapping is as follows. Exp~210 covers the baseline and mixing strategy
+variants for Table~3 and the baseline and transfer variants for Table~5.
+Exp~211 covers the SDE-guided data selection variants for Table~1.
+Exp~212 covers the multi-task learning configurations for Tables~5 and~7.
+Exp~213 covers the full component ablation for Table~7. Exp~219 is the
+Phase~I cross-task consistency loss sweep, scanning all 32 combinations of
+loss type, projection layout, warmup schedule, and $\lambda_\text{ct}$
+under a single seed. Exp~220 is the Phase~II three-seed validation of
+candidates identified in exp~219. Exp~221 is the extended PAD-MTL
+component ablation covering MTL\,+\,DX, MTL\,+\,S, and MTL\,+\,DX\,+\,S,
+each validated with three independent seeds.
 
 % ============================================================================
-\section{Run Manifest: From Table~1 to Table~7 and Beyond}
+\section{Experiment Groups}
 \label{sec:hpc_exec}
 
+The experimental runs fall into two broad groups. The first group
+reproduces the core results reported in Tables~1, 3, 5, and~7 of the
+original paper~\cite{hoyer2023ijcv_sde}, while the second group evaluates
+the proposed cross-task consistency loss extension on top of the PAD-MTL
+baseline. The following subsections summarise how each experiment group
+was organised.
+
 \subsection{Table~1: Data Selection (exp~211)}
-This task curates informative labelled subsets under fixed budgets using
-three selection criteria: (i)~Random sampling as baseline; (ii)~Entropy
+
+This experiment curates informative labelled subsets under fixed budgets
+using three selection criteria: random sampling as a baseline; entropy
 sampling, which ranks unlabelled images by model prediction uncertainty;
-and (iii)~SDE-guided heuristics combining Uncertainty Sampling~(US) and
-Diversity Sampling~(DS). For each criterion, images are scored and the
-top-$K$ are selected to match the target label budget (100, 372, or 744
-samples). The author-provided fixed subset indices ensure exact
-comparisons across runs.
+and SDE-guided selection combining uncertainty sampling~(US) and diversity
+sampling~(DS). For each criterion, images are scored and the top-$K$ are
+selected to match the target budget of 100, 372, or 744 samples. The
+author-provided fixed subset indices ensure exact comparability across
+runs.
 
 \subsection{Table~3: Mixing Strategy (exp~210)}
+
 This run evaluates four training strategies under the 372-label and
-full-supervision settings: (i)~supervised-only baseline; (ii)~pseudo-label
-self-training; (iii)~ClassMix; and (iv)~DepthMix~(DX). Semi-supervised
-variants follow the official teacher--student framework with
-exponential-moving-average (EMA) teacher updates and confidence-filtered
-pseudo-label generation. DepthMix replaces the binary masks of ClassMix
-with geometry-consistent composition masks derived from SDE-generated
-depth maps, reducing boundary artefacts at class transitions.
+full-supervision settings: a supervised-only baseline, pseudo-label
+self-training, ClassMix, and DepthMix. Semi-supervised variants follow
+the official teacher--student framework with exponential moving average
+teacher updates and confidence-filtered pseudo-label generation. DepthMix
+replaces the binary masks of ClassMix with geometry-consistent composition
+masks derived from SDE depth maps, reducing boundary artefacts at class
+transitions.
 
 \subsection{Tables~5 and~7: Feature Transfer and Component Ablation
 (exp~212, exp~213)}
-These runs evaluate SDE-to-segmentation feature transfer using fd0 and
-fd2 checkpoints~(Table~5), and the synergistic effects of combining data
+
+These runs evaluate SDE-to-segmentation feature transfer using the fd0
+and fd2 encoder checkpoints~(Table~5), and the combined effects of data
 selection~(S), DepthMix~(DX), and multi-task learning~(MTL)~(Table~7).
-Table~7 requires eight distinct configurations to isolate additive
-contributions; each is executed across three independent seeds (7, 25,
+Table~7 requires eight distinct configurations to isolate the contribution
+of each component; each is trained with three independent seeds~(7, 25,
 42) and results are reported as mean\,$\pm$\,std.
 
 \subsection{Cross-Task Consistency Loss (exp~219, exp~220)}
-\label{sec:ct_exec}
 
-The cross-task consistency loss experiments are structured as a
-two-phase protocol designed to maximise information gain per GPU~hour,
-balancing thorough hyperparameter exploration against the constraints of
-an academic single-GPU computing budget.
+The cross-task consistency loss experiments follow a two-phase design that
+balances hyperparameter search coverage against result stability within a
+limited computing budget.
 
-\paragraph{Phase~I --- Single-seed calibration sweep (exp~219).}
-The hyperparameter space for $\mathcal{L}_\text{ct}$ comprises four
-factors (loss type, projection layout, warmup schedule,
-$\lambda_\text{ct}$) yielding 32 distinct configurations. Evaluating
-all 32 with three seeds would require 96 full training runs of
-$\sim$10 hours each---approximately 960~GPU hours, which is prohibitive
-for a single-GPU academic project.
+Phase~I (exp~219) trains all 32 configurations formed by four factors,
+loss type, projection layout, warmup schedule, and $\lambda_\text{ct}$,
+for the full 40{,}000 iterations under a single seed. Seed~7 is used
+throughout Phase~I so that all configurations are compared under identical
+random initialisation conditions. The purpose of this phase is to identify
+configurations that merit further multi-seed validation, while filtering
+out settings that do not show competitive performance under the shared
+single-seed condition.
 
-Phase~I therefore fixes seed~7 and trains all 32 configurations for the
-full 40{,}000 iterations. Seed~7 is chosen as the median-performing seed
-in the PAD-MTL baseline ($59.84$\,\%, compared to $60.92$\,\% and
-$61.50$\,\% for seeds~25 and~42), providing a conservative reference
-that avoids inflating apparent gains. Since every configuration is
-evaluated under identical conditions---same seed, same data split, same
-training schedule---the relative ranking across configurations is
-informative even though absolute values carry single-seed variance.
-
-The goal of Phase~I is not to identify the globally optimal
-configuration, but to efficiently eliminate underperforming regions of
-the search space. Configurations that show clear gains over the seed-7
-baseline and represent distinct regions of the hyperparameter grid are
-retained as candidates for Phase~II; the remainder are discarded without
-spending additional GPU resources on multi-seed validation.
-
-\paragraph{Phase~II --- Three-seed validation (exp~220).}
-\label{par:phase2_rationale}
-Multi-seed training is reserved exclusively for the candidates
-identified in Phase~I. The rationale is as follows. The purpose of
-running three independent seeds is to determine whether an observed
-improvement is genuine and reproducible, or whether it is an artefact
-of a particular random initialisation. This question is only
-scientifically relevant for configurations that Phase~I has already
-shown to be competitive: committing three seeds to configurations that
-Phase~I ranked consistently below the baseline would consume three
-times the compute while yielding no additional insight, since the
-low Phase~I performance under a controlled single-seed comparison
-already constitutes strong evidence of underperformance.
-
-Selecting candidates based on Phase~I ranking is therefore not
-cherry-picking---it is a principled allocation of a finite compute
-budget. The selection ensures that Phase~II provides dense, statistically
-reliable coverage precisely where it matters: the high-performing region
-of the hyperparameter space, where genuine differences between
-configurations are small enough that single-seed evidence alone is
-insufficient to draw firm conclusions. Dual-projection variants are
-included in Phase~II despite their Phase~I results being marginally
-below the single-projection peaks, specifically to provide a fair
-architectural comparison under multi-seed conditions rather than
-dismissing them on single-seed evidence alone.
-
-Each Phase~II configuration is submitted as an independent SLURM job
-running three seeds (7, 25, 42) sequentially within a 40-hour
-wall-time allocation. The PAD-MTL baseline (no $\mathcal{L}_\text{ct}$)
-is retrained with the same three seeds in the same submission batch,
-providing a consistent per-seed reference for paired comparisons and
-eliminating confounds from cross-run baseline drift.
+Phase~II (exp~220) retrains the candidates selected from Phase~I using
+three independent seeds~(7, 25, 42) to assess reproducibility. The
+PAD-MTL baseline (without $\mathcal{L}_\text{ct}$) is retrained with the
+same three seeds in the same submission batch, providing a consistent
+per-seed reference for paired comparisons. Each configuration is submitted
+as an independent SLURM job with a 40-hour wall-time limit, running all
+three seeds sequentially.
 
 \subsection{Extended Component Ablation (exp~221)}
-\label{sec:exp221}
 
-Exp~221 complements the Table~7 reproduction by providing additional
-three-seed validation for PAD-MTL component combinations that are
-directly relevant to contextualising the $\mathcal{L}_\text{ct}$ results.
-Three configurations are evaluated: MTL\,+\,DX (multi-task with
-DepthMix augmentation), MTL\,+\,S (multi-task with SDE-guided label
-selection), and MTL\,+\,DX\,+\,S (the full combination). Each is
-trained with seeds 7, 25, and~42 for 40{,}000 iterations on the
-372-label regime under the same pipeline as exp~219 and~220, ensuring
-direct comparability with the CT loss results.
-
-At the time of writing, exp~221 jobs have been submitted to the BP1
-cluster and are queued pending completion of scheduled HPC maintenance.
-Results will be incorporated into Chapter~\ref{chap:evaluation} upon
-availability.
+Exp~221 evaluates three PAD-MTL component combinations, MTL\,+\,DX,
+MTL\,+\,S, and MTL\,+\,DX\,+\,S, each with three independent seeds on
+the 372-label setting, using the same pipeline as exp~219 and~220 to
+ensure direct comparability with the cross-task loss results. At the time
+of writing, exp~221 has been configured and submitted, but its results
+have not yet been incorporated into the current analysis.
 
 % ============================================================================
 \section{Summary}
 \label{sec:exec_summary}
 
-This chapter described a controlled execution environment in which data
-splits, model configurations, and HPC resources were consistently managed
-throughout. By leveraging the University of Bristol's BluePebble cluster
-and a centralised configuration hub (\texttt{experiments.py}), the core
-reproduction experiments corresponding to Tables~1, 3, 5, and~7 of
-\cite{hoyer2023ijcv_sde} were executed in a principled and reproducible
-manner.
-
-The cross-task consistency loss investigation followed a two-phase
-protocol designed to maximise scientific return per GPU~hour: a
-single-seed scan (Phase~I, exp~219) efficiently identified promising
-regions of the 32-configuration hyperparameter space, and a three-seed
-validation (Phase~II, exp~220) confirmed the statistical reliability of
-the top candidates. The rationale for restricting multi-seed resources
-to Phase~I candidates---rather than exhaustively validating all
-configurations---is grounded in the principle that multi-seed validation
-is only informative for configurations already demonstrated to be
-competitive. The PAD multi-task decoder (Section~\ref{sec:pad-decoder})
-provides the architectural foundation for both the reproduced MTL
-baseline and the proposed $\mathcal{L}_\text{ct}$ extension. A further
-ablation (exp~221) will contextualise the CT loss results against
-additional PAD-MTL component combinations once HPC resources are
-restored.
+This chapter has outlined how the experiments were organised in practice,
+including the computing environment, dataset setup, model configuration,
+and the correspondence between experiment IDs and the reproduced result
+tables. The reproduction experiments (exp~210--213) were run on the
+Isambard-AI platform and the extension experiments (exp~219--221) on
+BluePebble, with both sets managed through consistent configuration
+control and fixed random seeds. These details provide the implementation
+context for the results presented in Chapter~\ref{chap:evaluation}.
