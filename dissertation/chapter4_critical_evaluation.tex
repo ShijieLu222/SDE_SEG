@@ -12,15 +12,14 @@ critical evaluation of the reproduction results for Stage~(a) (standard
 supervised learning) and Stage~(b) (semi-supervised and multi-task
 learning) based on the framework proposed by \cite{hoyer2023ijcv_sde}.
 The second part (Section~\ref{sec:ct-calibration-ablation}) evaluates the
-proposed Cross-Task Consistency Loss ($\mathcal{L}_\text{ct}$), an
-original contribution of this work that introduces an explicit
-feature-alignment objective between the segmentation and depth decoder
-branches of the PAD architecture.
+proposed Cross-Task Consistency Loss ($\mathcal{L}_\text{ct}$), which
+introduces an explicit feature-alignment objective between the
+segmentation and depth decoder branches of the PAD architecture.
 
 The primary objectives are: (i)~to verify whether the reported
 performance trends of \cite{hoyer2023ijcv_sde} are consistent under a
 constrained single-GPU academic computing environment; and
-(ii)~to demonstrate that $\mathcal{L}_\text{ct}$ yields reliable,
+(ii)~to evaluate whether $\mathcal{L}_\text{ct}$ yields reliable,
 statistically stable improvements over the reproduced multi-task baseline
 under label-efficient conditions. All experiments are conducted on the
 Cityscapes dataset at the 372-label (1/8) regime unless otherwise stated,
@@ -38,13 +37,13 @@ To avoid redundancy, this evaluation follows the design and implementation
 described in Chapter~\ref{chap:execution}. Stage~(a) and transfer
 experiments use a ResNet-101 encoder with an ASPP-based decoder;
 Stage~(b) multi-task and cross-task loss experiments additionally employ
-the PAD decoder (Section~\ref{sec:bridge}). We used the author-provided
-fixed subset indices for the 100, 372, and 744 label regimes. All models
-were trained for 40,000 iterations using SGD with polynomial
-learning-rate decay, and results are reported as mean mIoU~(\%) $\pm$
-standard deviation over three seeds. For Stage~(b) transfer-related
-experiments (Table~5), we use the author-released SDE checkpoints
-(fd0/fd2) to maintain parity with the official pipeline.
+the PAD decoder (Section~\ref{sec:pad-decoder}). We used the
+author-provided fixed subset indices for the 100, 372, and 744 label
+regimes. All models were trained for 40,000 iterations using SGD with
+polynomial learning-rate decay, and results are reported as mean
+mIoU~(\%) $\pm$ standard deviation over three seeds. For Stage~(b)
+transfer-related experiments (Table~5), we use the author-released SDE
+checkpoints (fd0/fd2) to maintain parity with the official pipeline.
 
 Baseline values are reported per table under the corresponding experiment
 configuration. When baseline values differ across tables, this reflects
@@ -102,20 +101,21 @@ Ours (DS+US) &
 
 \noindent
 \textbf{Observation and Analysis.}
-Our reproduction confirms the overall trend that informed selection
-strategies consistently outperform Random across all label budgets.
-Relative to Random, entropy and the depth-guided variants yield
-substantial gains under the 100 and 372 label regimes, while the margin
-narrows at 744 labels, suggesting diminishing returns as supervision
-increases. Although the paper reports DS+US as the most consistently
-effective strategy, our results indicate that Entropy achieves comparable
-performance in the lowest-budget setting, implying that model-based
-uncertainty alone is a strong signal when annotations are extremely
-scarce. The remaining absolute gaps to the paper (typically within
-$\sim$1 mIoU) are consistent with the absence of SyncBN under a
-single-GPU setup, which reduces the effective batch statistics available
-to the normalisation layers, but may also partly reflect run-to-run
-variance.
+Our reproduction is broadly consistent with the overall trend that informed
+selection strategies outperform Random across all label budgets. Relative
+to Random, entropy and the depth-guided variants yield substantial gains
+under the 100 and 372 label regimes, while the margin narrows at 744
+labels, suggesting diminishing returns as supervision increases.
+Although the paper reports DS+US as the most consistently effective
+strategy, our results indicate that Entropy achieves comparable
+performance in the lowest-budget setting. This may suggest that
+model-based uncertainty alone provides a reasonably strong selection
+signal when annotations are extremely scarce, without necessarily
+requiring depth-guided refinement. The remaining absolute gaps to the
+paper (typically within $\sim$1 mIoU) are consistent with the absence
+of SyncBN under a single-GPU setup, which reduces the effective batch
+statistics available to the normalisation layers, but may also partly
+reflect run-to-run variance.
 
 \clearpage
 % ============================================================
@@ -160,19 +160,19 @@ $70.11 \pm 0.28$ {\scriptsize ($69.83 \pm 0.36$), $\Delta=+0.28$} \\
 \noindent
 \textbf{Observation and Analysis.}
 The performance hierarchy (DepthMix $>$ ClassMix $>$ Baseline) is
-effectively reproduced across both label regimes. The superiority of
-DepthMix confirms that incorporating geometric scene structure into the
-mixing mask reduces the boundary artefacts typical of ClassMix, where
+reproduced across both label regimes. The result is consistent with the
+interpretation that incorporating geometric scene structure into the
+mixing mask may reduce the boundary artefacts typical of ClassMix, where
 semantically inconsistent regions can be introduced at the cut boundary.
 The largest deviation from the paper is observed for pseudo-labelling
 ($\Delta = -2.34$), which is considerably larger than all other gaps in
-this table. Self-training is particularly sensitive to the confidence
-threshold used to filter pseudo-labels and to the quality of the batch
-statistics used for normalisation: both are adversely affected under a
-reduced batch size. This result highlights the hardware sensitivity of
-self-training methods and reinforces the rationale for pursuing
-augmentation-based and multi-task approaches, which are more robust to
-batch size constraints.
+this table. The larger gap for pseudo-labelling may reflect a stronger
+dependence of self-training on pseudo-label confidence calibration and
+stable batch normalisation statistics, both of which are harder to
+maintain under single-GPU training with a reduced batch size. This
+observation provides a practical motivation for considering
+augmentation-based and multi-task alternatives, which appear more stable
+under the same constraint.
 
 % ============================================================
 \section{Stage (b): SDE Feature Transfer Reproduction (Table 5)}
@@ -213,30 +213,30 @@ $69.40 \pm 0.29$ {\scriptsize ($69.76 \pm 0.39$), $\Delta=-0.36$} \\
 
 \noindent
 \textbf{Observation and Analysis.}
-Our results reinforce the core scientific claims: SDE pretraining
-provides a superior initialisation, and $\mathcal{L}_F$ successfully
-prevents catastrophic forgetting of the geometric representations
-acquired during self-supervised depth estimation. The near-perfect
-alignment for Transfer ($\mathcal{L}_F=\checkmark$) at 372 labels
-($\Delta = +0.03$) is particularly encouraging, as it suggests that the
+Our results are broadly consistent with the core scientific claims of the
+original paper: SDE pretraining appears to provide a stronger
+initialisation, and $\mathcal{L}_F$ may help prevent catastrophic
+forgetting of the geometric representations acquired during self-supervised
+depth estimation. The near-zero gap for Transfer ($\mathcal{L}_F=\checkmark$)
+at 372 labels ($\Delta = +0.03$) is encouraging, suggesting that the
 benefit of SDE-derived features transfers robustly across training
-environments, even under single-GPU constraints.
+environments even under single-GPU constraints.
 
-These results also expose a structural limitation of the MTL setting.
+These results also point to a structural limitation of the MTL setting.
 Although the depth and segmentation decoders share the same encoder and
 are trained jointly, their intermediate feature representations are never
 explicitly required to be mutually consistent. The depth decoder learns
 geometric structure that is potentially informative for segmentation
 boundaries and object extents, yet this information can only propagate
-implicitly through the shared encoder gradients. Consequently, the degree
+implicitly through the shared encoder gradients. Consequently, the extent
 to which depth-derived geometric knowledge benefits the segmentation
-branch depends entirely on the gradient dynamics of the shared encoder,
-which are neither stable nor directly controllable. This gap directly
-motivates the design of $\mathcal{L}_\text{ct}$, which introduces a
-learnable projection head to enforce explicit alignment between the two
-decoder branches, providing a direct and controllable channel for
-geometric knowledge to regularise the segmentation task under
-label-efficient conditions.
+branch depends on the gradient dynamics of the shared encoder, which
+remain implicit and are difficult to control directly. This structural
+gap provides a clear motivation for the design of
+$\mathcal{L}_\text{ct}$, which introduces a learnable projection head to
+enforce explicit alignment between the two decoder branches, providing a
+more direct and controllable channel for geometric knowledge to
+regularise the segmentation task under label-efficient conditions.
 
 % ============================================================
 \section{Stage (b): Framework Component Ablation (Table 7)}
@@ -293,7 +293,7 @@ $\Delta$.}
 
 \noindent
 \textbf{Observation and Synergy Analysis.}
-The full ablation confirms that S+DX+MTL achieves the highest performance
+The full ablation indicates that S+DX+MTL achieves the highest performance
 at the 372-label regime ($67.66$\,\% mIoU), consistent with the paper's
 findings. Our reproduced values are broadly well-aligned with the paper,
 with most configurations falling within $\pm$1\,mIoU, and several
@@ -304,26 +304,24 @@ the fixed subset indices.
 
 A notable discrepancy arises in the DX+MTL configuration at 372 labels,
 where our result ($65.11$) falls $1.55$\,mIoU below the paper ($66.66$),
-despite exceeding the DX-only result ($64.57$). This pattern suggests
-that the joint optimisation of DepthMix augmentation and the auxiliary
+despite exceeding the DX-only result ($64.57$). One plausible explanation
+is that the joint optimisation of DepthMix augmentation and the auxiliary
 depth objective is more sensitive to batch size than either component in
-isolation. Specifically, DepthMix introduces mixed-geometry samples whose
-depth pseudo-labels are geometrically inconsistent at the mixing
-boundary. Under a small batch size, the auxiliary depth objective
-receives noisier gradient estimates from these boundary regions, which
-can interfere with the segmentation branch via the shared encoder.
-In the multi-GPU setup of the original paper, larger effective batch
-sizes smooth out this noise, whereas our single-GPU setup amplifies it.
+isolation. Specifically, DepthMix introduces mixed-geometry boundary
+regions whose depth supervision may be noisier than in unmixed samples.
+Under a small batch size, the auxiliary depth objective may receive noisier
+gradient estimates from these boundary regions, which could interfere with
+the segmentation branch via the shared encoder. In the multi-GPU setup of
+the original paper, larger effective batch sizes may smooth out this noise,
+whereas the single-GPU setup may amplify it.
 
-This observation directly motivates the design of $\mathcal{L}_\text{ct}$.
-Rather than relying on the shared encoder gradient path to propagate
-depth-derived knowledge to the segmentation branch---a mechanism that is
-both implicit and sensitive to batch noise---an explicit feature-level
-alignment loss operates directly on decoder representations after the
-augmentation-induced noise has been absorbed by the task-specific heads.
-This provides a more stable and controllable mechanism for cross-task
-knowledge transfer, particularly under the small-batch conditions of an
-academic single-GPU environment.
+This pattern reinforces the structural gap identified in Table~5: under
+small-batch conditions, the implicit path through the shared encoder is
+particularly susceptible to gradient noise introduced by mixed-geometry
+samples. An explicit feature-level alignment loss operating directly on
+decoder representations---after the augmentation-induced noise has been
+absorbed by the task-specific heads---may therefore provide a more stable
+channel for cross-task knowledge transfer in this setting.
 
 % ============================================================
 \section{Cross-Task Consistency Loss: Calibration and Ablation}
@@ -345,7 +343,7 @@ mIoU differences in percentage points~(pp).
 \label{subsec:ct-phase1-seed7}
 
 \noindent
-The hyperparameter space for $\mathcal{L}_\text{ct}$ comprises four
+The main Phase~I sweep for $\mathcal{L}_\text{ct}$ comprises four
 factors: loss type (cosine similarity vs.\ normalised MSE), projection
 layout (single vs.\ dual $1{\times}1$ convolutional heads), warmup
 schedule ($w5k$: 5{,}000 segmentation-only iterations before activating
@@ -354,39 +352,21 @@ $\lambda_\text{ct}\in\{0.25, 0.50, 0.75, 1.00\}$. This yields
 $2 \times 2 \times 2 \times 4 = 32$ distinct configurations. Evaluating
 every configuration with three independent seeds would require 96 full
 training runs, which is prohibitive under the available single-GPU
-computing budget.
+computing budget. Phase~I therefore fixes random seed~7 to screen all 32
+configurations; the goal is not to identify a globally optimal
+configuration, but to eliminate underperforming regions of the search
+space and reduce the candidate set to a tractable size for multi-seed
+validation in Phase~II.
 
-\paragraph{Rationale for single-seed screening.}
-Phase~I therefore fixes random seed~7 and measures the best validation
-mIoU for each of the 32 configurations. Since every configuration is
-evaluated under identical conditions---same seed, same dataset split,
-same training schedule---the relative ranking across configurations is
-meaningful even though the absolute values carry single-seed variance.
-Seed~7 was selected because it corresponds to the
-median-performing seed in the PAD-MTL baseline ($59.84$\,\%, compared to
-$60.92$\,\% and $61.50$\,\% for seeds~25 and~42), making it a
-conservative reference that avoids inflating apparent gains. The goal of
-Phase~I is not to identify the globally optimal configuration, but to
-eliminate underperforming regions of the search space and reduce the
-candidate set to a tractable size for multi-seed validation in Phase~II.
-
-\paragraph{Baseline reference.}
-The PAD-MTL baseline (Table~\ref{tab:table5_repro}, Multi-Task row,
-3~seeds) yields seed-7 / 25 / 42 $=$ 59.84 / 60.92 / 61.50\,\%,
-mean $= 60.75$\,\%, std $= 0.69$\,\%.
-All Phase~I $\Delta$ values use the same-seed value
-$\text{baseline}_{\text{S7}} = 59.84$\,\%.
-
-\paragraph{Single-projection scan.}
-Tables~\ref{tab:ct-p1-single-cos} and~\ref{tab:ct-p1-single-mse} report
-the single-projection results. In the single-projection design, one
-$1{\times}1$ convolutional head projects the segmentation decoder
-features into the depth feature space, where the alignment loss is then
-computed. The depth features serve as a fixed anchor, and only the
-projection head---together with the segmentation branch---is updated by
-$\mathcal{L}_\text{ct}$. The single+MSE block was independently re-run
-(Slurm jobs 16513723--16513730); all other blocks follow the exp~219
-sweep protocol.
+Seed~7 was selected because it corresponds to the median-performing seed
+in the PAD-MTL baseline ($59.84$\,\%, compared to $60.92$\,\% and
+$61.50$\,\% for seeds~25 and~42), providing a conservative reference.
+All Phase~I $\Delta$ values use $\text{baseline}_{\text{S7}} = 59.84$\,\%.
+Since every configuration is evaluated under identical conditions---same
+seed, same dataset split, same training schedule---the relative ranking
+is meaningful even though the absolute values carry single-seed variance.
+The single+MSE block was independently re-run (Slurm jobs
+16513723--16513730); all other blocks follow the exp~219 sweep protocol.
 
 \begin{table}[H]
 \centering
@@ -440,31 +420,30 @@ $w0$  & 1.00 & 62.16 & $+2.32$ \\
 
 \noindent
 \textbf{Phase-I findings (single projection).}
-\begin{itemize}
-\item $\mathcal{L}_\text{ct}$ is consistently beneficial: all 16
-  single-projection configurations improve over the seed-7 baseline
-  under both loss types, with gains ranging from $+1.56$ to
-  $+3.93$\,pp. This confirms the loss provides a reliable positive
-  signal across the full range of tested hyperparameters.
-
-\item For cosine, $w0$ is clearly superior: the best cell is
-  $w0$, $\lambda_\text{ct}=1.00$ ($63.77$\,\%, $+3.93$\,pp). With $w5k$,
-  performance plateaus or degrades at larger $\lambda_\text{ct}$,
-  suggesting that delaying the loss activation is unnecessary when
-  cosine similarity is used, as its scale-invariant formulation
-  produces well-behaved gradients from the start of training.
-
-\item For MSE, $w5k$ is substantially better than $w0$ at
-  $\lambda_\text{ct}=1.00$ ($63.43$\,\% vs.\ $62.16$\,\%, gap of
-  $1.27$\,pp). Unlike cosine, the MSE gradient magnitude is sensitive
-  to the scale of the feature vectors; a brief warmup period allows the
-  projection head to stabilise its output scale before the cross-task
-  term is activated at full weight.
-
-\item These results narrow the candidate configurations for Phase~II:
-  cosine with $w0$ and $\lambda_\text{ct}\in\{0.75, 1.00, 1.25\}$;
-  MSE with $w5k$ and $w0$ at $\lambda_\text{ct}=1.0$.
-\end{itemize}
+All 16 single-projection configurations improve over the seed-7 baseline
+under both loss types, with gains ranging from $+1.56$ to $+3.93$\,pp,
+suggesting that $\mathcal{L}_\text{ct}$ provides a positive signal across
+the full range of tested hyperparameters. For cosine, $w0$ is
+consistently stronger than $w5k$: the best cell is $w0$,
+$\lambda_\text{ct}=1.00$ ($63.77$\,\%, $+3.93$\,pp), with $w5k$
+performance appearing to plateau or degrade at larger $\lambda_\text{ct}$.
+This may indicate that the scale-invariant cosine formulation produces
+well-behaved gradients from the start of training, making the warmup
+period unnecessary. For MSE, $w5k$ performs notably better than $w0$ at
+$\lambda_\text{ct}=1.00$ ($63.43$\,\% vs.\ $62.16$\,\%, gap of
+$1.27$\,pp), which is consistent with the interpretation that a brief
+warmup period allows the projection head to stabilise its output scale
+before the cross-task term is activated at full weight. These results
+suggest that the most promising cosine configurations lie in the
+higher-$\lambda_\text{ct}$ range under $w0$, motivating Phase~II
+validation at $\lambda_\text{ct}=0.75$ and $1.00$. Because the seed-7
+cosine results under $w0$ continued to improve up to
+$\lambda_\text{ct}=1.00$ without showing signs of saturation, one
+additional local follow-up point at $\lambda_\text{ct}=1.25$ was
+evaluated for the single-projection cosine configuration only and
+carried forward to Phase~II. For MSE, the most competitive
+configurations were observed at $\lambda_\text{ct}=1.00$ under both
+$w5k$ and $w0$.
 
 % ============================================================
 \subsection{Phase II: Three-seed Validation and Dual-Projection Comparison}
@@ -483,10 +462,10 @@ This doubles the number of additional parameters relative to single
 projection ($33{,}024$ vs.\ $16{,}512$, though both are negligible
 at $<0.07$\% of total model parameters). Tables~\ref{tab:ct-p1-dual-cos}
 and~\ref{tab:ct-p1-dual-mse} provide the dual-projection seed-7 scan
-from Phase~I for direct comparison against the single-projection results
-above. Although dual-projection variants are not among the top Phase~I
-configurations, they are included in Phase~II to provide a fair
-architectural comparison under multi-seed conditions.
+from Phase~I for direct comparison. Although dual-projection variants
+are not among the top Phase~I configurations, they are included in
+Phase~II to provide a fair architectural comparison under multi-seed
+conditions.
 
 \begin{table}[H]
 \centering
@@ -607,42 +586,43 @@ dual cosine, $w5k$, $\lambda=0.50$ &
 \item \textit{$\mathcal{L}_\text{ct}$ is robustly beneficial.}
   All nine validated configurations improve over the baseline mean
   ($60.75$\,\%), with gains ranging from $+1.54$ to $+2.54$\,pp.
-  This confirms that $\mathcal{L}_\text{ct}$ provides a consistent
-  positive signal across diverse hyperparameter choices, and that the
-  improvement is not an artefact of a particular configuration.
+  This is consistent with $\mathcal{L}_\text{ct}$ providing a reliable
+  positive signal across diverse hyperparameter choices, and suggests
+  that the improvement is not an artefact of a particular configuration.
 
 \item \textit{MSE loss produces the highest raw mean but is unreliable.}
   Both MSE variants carry the largest standard deviations in the table
   (std $1.20$ and $1.07$ respectively). The per-seed spread of
-  $62.06$--$64.91$ for single MSE $w0$ reveals that the high mean is
-  driven by a single fortunate seed rather than consistent improvement.
-  This sensitivity arises because the MSE gradient magnitude depends on
-  the absolute scale of the projected feature vectors, which can vary
-  substantially across seeds at the start of training, producing
-  different effective loss weightings across runs.
+  $62.06$--$64.91$ for single MSE $w0$ indicates that the high mean is
+  largely driven by a single seed rather than consistent improvement.
+  This sensitivity may arise because the MSE gradient magnitude depends
+  on the absolute scale of the projected feature vectors, which can vary
+  across seeds at the start of training, producing different effective
+  loss weightings across runs.
 
-\item \textit{Single cosine, $w0$, $\lambda_\text{ct}=1.00$ is the
-  best reliable configuration.} It ranks second by mean ($63.25$\,\%,
-  $\Delta=+2.50$\,pp) but achieves the lowest standard deviation of
-  any tested variant ($0.17$\,\%), with seed values tightly clustered
-  at $63.01$ / $63.37$ / $63.37$. This stability indicates the
-  improvement is genuine and reproducible rather than seed-dependent,
-  and it is therefore selected as the primary design choice.
+\item \textit{Single cosine, $w0$, $\lambda_\text{ct}=1.00$ emerges as
+  the most reliable configuration among the tested candidates.} It ranks
+  second by mean ($63.25$\,\%, $\Delta=+2.50$\,pp) but achieves the
+  lowest standard deviation of any tested variant ($0.17$\,\%), with
+  seed values tightly clustered at $63.01$ / $63.37$ / $63.37$. This
+  stability suggests the improvement is consistent and reproducible
+  rather than seed-dependent, and it is therefore selected as the
+  primary design choice.
 
 \item \textit{Dual-projection results consistently fall below the best
   stable single-projection result.} The best dual variant (dual cosine,
   $w0$, $\lambda_\text{ct}{=}0.75$) achieves mean $62.95$\,\%
   ($+2.20$\,pp), approximately $0.30$\,pp below the selected single
   configuration, while also doubling the additional parameters from
-  $16{,}512$ to $33{,}024$. The performance gap can be attributed to
-  the asymmetric alignment structure of single projection: with only
-  one learnable head, the depth feature space acts as a fixed
-  geometric anchor and the segmentation features are guided towards it.
-  Dual projection, by contrast, allows both feature spaces to move
-  simultaneously, creating an under-constrained optimisation target
-  that is particularly susceptible to instability when labelled data
-  are scarce. Single projection is therefore the Pareto-optimal choice:
-  higher accuracy, lower variance, and strictly simpler architecture.
+  $16{,}512$ to $33{,}024$. A plausible interpretation is that the
+  asymmetric structure of single projection---where only the
+  segmentation head is updated and the depth feature space acts as a
+  fixed anchor---provides more stable guidance than dual projection,
+  which allows both feature spaces to move simultaneously and may
+  create a less constrained optimisation target when labelled data are
+  scarce. Single projection therefore appears to be the more
+  favourable design within the tested setting: higher accuracy, lower
+  variance, and a strictly simpler architecture.
 
 \item \textit{Phase~I single-seed peaks do not always generalise.}
   The Phase~I peak for dual cosine ($w0$, $\lambda_\text{ct}=0.50$:
@@ -653,10 +633,11 @@ dual cosine, $w5k$, $\lambda=0.50$ &
 
 \item \textit{Combining warmup with dual projection is suboptimal.}
   Dual cosine with $w5k$ yields the smallest gain among all
-  configurations ($+1.54$\,pp). When both projection heads are allowed
-  to move freely and the loss is additionally delayed, the alignment
-  signal is too weak early in training to establish a useful geometric
-  anchor, resulting in reduced benefit from $\mathcal{L}_\text{ct}$.
+  configurations ($+1.54$\,pp). When both projection heads are
+  unconstrained and the loss is additionally delayed, the alignment
+  signal may be too weak early in training to establish a useful
+  geometric anchor, resulting in reduced benefit from
+  $\mathcal{L}_\text{ct}$.
 
 \end{itemize}
 
@@ -669,49 +650,51 @@ The two-phase evaluation supports the following conclusions:
 
 \begin{enumerate}
 
-\item \textit{Effectiveness.} $\mathcal{L}_\text{ct}$ provides consistent
-  positive gains over the PAD-MTL baseline across all tested
-  configurations, confirming that explicit cross-task feature alignment
-  is beneficial for label-efficient segmentation. The gains are robust
-  to hyperparameter choice, with every tested variant improving over
-  the baseline.
+\item \textit{Effectiveness.} Across all tested configurations,
+  $\mathcal{L}_\text{ct}$ consistently improves over the PAD-MTL
+  baseline, indicating that explicit cross-task feature alignment is
+  beneficial for label-efficient segmentation within the present setup.
+  The gains are robust to hyperparameter choice, with every tested
+  variant improving over the baseline.
 
-\item \textit{Single projection is the Pareto-optimal design.}
-  Single-projection variants achieve higher mean mIoU and lower
-  variance than dual-projection counterparts at strictly lower
-  parameter cost ($16{,}512$ vs.\ $33{,}024$ additional parameters).
-  The performance advantage stems from the asymmetric alignment
-  structure: single projection uses the depth feature space as a
-  stable anchor, guiding the segmentation branch towards geometrically
-  informative representations without destabilising either branch. This
-  reduced-freedom formulation is particularly well-suited to the
+\item \textit{Single projection is the most favourable design in this
+  study.} Single-projection variants achieve higher mean mIoU and lower
+  variance than dual-projection counterparts at strictly lower parameter
+  cost ($16{,}512$ vs.\ $33{,}024$ additional parameters). The
+  performance advantage is consistent with the asymmetric alignment
+  structure: using the depth feature space as a stable anchor appears
+  to guide the segmentation branch towards geometrically informative
+  representations without destabilising either branch. This
+  reduced-freedom formulation may be particularly well-suited to the
   label-efficient setting, where the scarcity of annotated data makes
-  under-constrained objectives difficult to optimise reliably.
+  less constrained objectives harder to optimise reliably.
 
-\item \textit{Cosine loss is more reliable than MSE.} MSE variants
-  achieve competitive or even higher raw means, but with standard
-  deviations exceeding $1.0$\,\%---more than five times larger than
-  the best cosine configuration (std $0.17$\,\%). Cosine similarity,
-  being scale-invariant, is insensitive to the initial magnitude of
-  the projected features and therefore produces stable gradient
-  signals across different random seeds. MSE, by contrast, conflates
-  alignment with magnitude matching, introducing a source of
-  seed-dependent variance that is unrelated to the geometric alignment
-  objective.
+\item \textit{Cosine loss shows more reliable behaviour than MSE within
+  the tested configurations.} MSE variants achieve competitive or even
+  higher raw means, but with standard deviations exceeding
+  $1.0$\,\%---more than five times larger than the best cosine
+  configuration (std $0.17$\,\%). Cosine similarity, being
+  scale-invariant, is insensitive to the initial magnitude of the
+  projected features and therefore tends to produce more stable
+  gradient signals across different random seeds. MSE, by contrast,
+  conflates alignment with magnitude matching, introducing a source of
+  seed-dependent variance that may be unrelated to the geometric
+  alignment objective.
 
-\item \textit{Warmup is not universally required.} For the cosine loss,
-  $w0$ consistently outperforms $w5k$, as the scale-invariant
-  formulation produces well-behaved gradients from the start of
-  training. Warmup retains a benefit for MSE under single projection,
-  where it stabilises the gradient scale of the projection head before
-  the cross-task term reaches full weight, but offers no advantage once
-  dual projection is introduced.
+\item \textit{Warmup is not universally beneficial.} For the cosine loss,
+  $w0$ consistently outperforms $w5k$, consistent with the
+  scale-invariant formulation producing well-behaved gradients from the
+  start of training. Warmup retains a benefit for MSE under single
+  projection, where it may help stabilise the gradient scale of the
+  projection head before the cross-task term reaches full weight, but
+  offers no clear advantage once dual projection is introduced.
 
-\item \textit{Robust $\lambda_\text{ct}$ range.} For single cosine with
+\item \textit{Stable $\lambda_\text{ct}$ range.} For single cosine with
   $w0$, $\lambda_\text{ct}=1.00$ offers the best balance of performance
   and stability across three seeds. The adjacent value of $0.75$
-  achieves a similar mean   ($62.82$\,\%) with a similarly low standard deviation
-  ($0.25$\,\%), indicating that the method is not highly sensitive to
-  the exact choice of $\lambda_\text{ct}$ within this range.
+  achieves a similar mean ($62.82$\,\%) with a similarly low standard
+  deviation ($0.25$\,\%), indicating that the method does not appear
+  highly sensitive to the exact choice of $\lambda_\text{ct}$ within
+  this range.
 
 \end{enumerate}

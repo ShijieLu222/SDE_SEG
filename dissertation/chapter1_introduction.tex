@@ -55,13 +55,13 @@ Geometry Sampling, are added to use SDE for aligning the geometric
 distributions between source and target domains.
 
 This project focuses on reproducing Stages~(a) and~(b) on Cityscapes,
-which provides the foundation for the architectural extensions introduced
-later. Stage~(c) is outside the scope of this work, as it tackles a
-different problem that requires additional datasets, domain-specific
-pipelines, and alignment strategies that are not directly relevant to the
-contributions here. This project instead looks at improving multi-task
-feature use within the same domain, where the relationship between depth
-and segmentation representations can be examined more directly.
+which provide the basis for the architectural extension studied later.
+Stage~(c) is outside the scope of this work because it addresses
+cross-domain transfer and would require additional datasets,
+domain-specific pipelines, and alignment strategies beyond the main focus
+here. Instead, this project concentrates on improving feature interaction
+within the same domain, where the relationship between depth and
+segmentation representations can be examined more directly.
 
 % -----------------------------------------------------------------------------
 \section{Motivation}
@@ -111,22 +111,15 @@ as a continuously available, label-free teacher for the segmentation branch,
 providing extra geometric supervision precisely when labelled data is most
 limited.
 
-In terms of implementation, we explore two loss formulations: a normalised
-MSE computed after $\ell_2$ normalisation, and a cosine similarity loss that
-directly constrains feature directions. A lightweight $1{\times}1$ projection
-layer maps depth features into the segmentation feature space, and a
-stop-gradient is applied on the depth side so that $\mathcal{L}_\text{ct}$
-only updates the segmentation branch and the projection layer, leaving the
-depth training objective untouched. A warmup period of 5{,}000 iterations is
-also applied before $\mathcal{L}_\text{ct}$ is activated, giving both
-decoders time to develop meaningful representations before alignment is
-enforced.
-
-We evaluate the proposed loss against three hypotheses: (H1) it improves
-segmentation accuracy compared to the reproduced Stage~(b) MTL baseline;
-(H2) the improvement holds consistently across different random seeds; and
-(H3) a suitable $\lambda_\text{ct}$ can be identified through a systematic
-loss-scale calibration procedure.
+At a high level, the proposed loss aligns intermediate features from the
+depth and segmentation decoders through a lightweight projection module,
+while leaving the original depth objective unchanged. Two similarity
+formulations are considered, and the resulting design is evaluated with
+respect to three questions: whether it improves segmentation performance
+over the reproduced Stage~(b) MTL baseline, whether any improvement
+remains consistent across different random seeds, and whether a stable
+operating range for $\lambda_\text{ct}$ can be identified through
+systematic calibration.
 
 % -----------------------------------------------------------------------------
 \section{Aims and Objectives}
