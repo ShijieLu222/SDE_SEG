@@ -764,6 +764,105 @@ def generate_experiment_cfgs(base_cfg, id):
                 }
                 cfgs.append(cfg)
 
+    # exp 222: 完整模型 = exp221 三组配置 + cross-task projection loss (single, w0, λ=1.0)
+    # 两种 loss 类型都测试：MSE λ=1.0 和 Cosine λ=1.0，均无 warm-up
+    # projection_mode='single'
+    # Run IDs:
+    #   MSE    λ=1.0: 0-2  = MTL+DX,  3-5  = MTL+Sel,  6-8  = MTL+DX+Sel
+    #   Cosine λ=1.0: 9-11 = MTL+DX, 12-14 = MTL+Sel, 15-17 = MTL+DX+Sel
+    elif id == 222:
+        dataset = "cityscapes"
+        pres_method = "ds_us"
+        dc_ft, dc_m = 0, 0.03
+        mono_pretrain = 'mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4'
+        dec, dec_params, crop, batch_size = (6, "lr5_fd2_crop512x512bs4", (512, 512), 2)
+        n_subset = 372
+        final_layer, distillation_layer = 9, 7
+        opt, lr, blr, plr, dlr = "sgd", 1e-2, 1e-3, 1e-6, 1e-3
+        gclip, disable_depth_clip = 10, False
+        mono_lambda, seg_lambda = 1, 1
+        lr_sch, backward_first = "stepx", False
+        projection_mode = "single"
+
+        # (ct_type, ct_lambda) — both w0 (no warm-up), λ=1.0
+        ct_variants = [
+            ("mse",    1.0),  # runs  0- 8
+            ("cosine", 1.0),  # runs  9-17
+        ]
+
+        exp222_combos = [
+            (False, True,  "mtl_dx"),     # +0: MTL + DX
+            (True,  False, "mtl_sel"),    # +3: MTL + Sel
+            (True,  True,  "mtl_dx_sel"), # +6: MTL + DX + Sel
+        ]
+
+        for ct_type, ct_lambda in ct_variants:
+            lam_str = f"{ct_lambda:.2f}".replace(".", "p")
+            ct_tag = f"ct{ct_type}w0lam{lam_str}"
+            for preselect, use_dx, combo_label in exp222_combos:
+                restrict_mode = "fixed" if preselect else "random"
+                mix_mask = "depthcomp" if use_dx else None
+                unlab_cfg = {
+                    "consistency_weight": 1.0, "mix_mask": mix_mask,
+                    "depthmix_online_depth": use_dx,
+                    "backward_first_pseudo_label": backward_first,
+                    "color_jitter": True, "blur": True,
+                    "only_unlabeled": False, "mix_use_gt": use_dx,
+                    "depthcomp_margin": dc_m,
+                    "depthcomp_foreground_threshold": dc_ft,
+                    "debug_image": True,
+                }
+                if use_dx:
+                    name_base = f'sel_{pres_method}_pad_transfer_dcompgt{dc_m}{dc_ft}_{ct_tag}' if preselect \
+                                else f'pad_transfer_dcompgt{dc_m}{dc_ft}_{ct_tag}'
+                else:
+                    name_base = f'sel_{pres_method}_pad_transfer_{ct_tag}' if preselect \
+                                else f'pad_transfer_{ct_tag}'
+                name_base = name_base.replace('.', '').replace(' ', '')
+                unlab_str = f"_Unlab1.0{mix_mask}FPL{backward_first}jitblur"
+
+                for seed in [7, 25, 42]:
+                    cfg = deepcopy(base_cfg)
+                    cfg['general'] = {
+                        'tag': tune.grid_search([
+                            f"{dataset}_{name_base}_D{n_subset}{restrict_mode}_S{seed}_{opt}Lr{lr:.0E}{blr:.0E}{plr:.0E}{dlr:.0E}{lr_sch}_clip{gclip}{disable_depth_clip}_m{mono_lambda}s{seg_lambda}_crop{crop[0]}x{crop[1]}bs{batch_size}_flip_dec{dec}_{dec_params}_l{final_layer}i{distillation_layer}Trueos1{unlab_str}"
+                        ])}
+                    cfg['model']['segmentation_name'] = 'mtl_pad'
+                    cfg['model']['backbone_name'] = 'resnet101'
+                    cfg, _ = decoder_variant(cfg, dec, crop)
+                    cfg['model']['backbone_pretraining'] = mono_pretrain
+                    cfg['model']['variant'] = name_base
+                    cfg['model']['depth_estimator_weights'] = mono_pretrain
+                    cfg['model']['depth_pretraining'] = mono_pretrain
+                    cfg['model']['pose_pretraining'] = mono_pretrain
+                    cfg['model']['disable_pose'] = mono_lambda == 0
+                    cfg['model']['disable_monodepth'] = False
+                    cfg['training']['segmentation_lambda'] = seg_lambda
+                    cfg['training']['monodepth_lambda'] = mono_lambda
+                    cfg['training']['disable_depth_estimator'] = True
+                    cfg['training']['cross_task_lambda'] = ct_lambda
+                    cfg['training']['cross_task_type'] = ct_type
+                    cfg['training']['cross_task_warmup_iters'] = 0
+                    cfg = setup_optimizer(cfg, opt, lr, blr, plr, None, gclip)
+                    cfg["training"]["disable_depth_grad_clip"] = disable_depth_clip
+                    cfg["training"]["batch_size"] = batch_size
+                    cfg = setup_dataset(cfg, dataset, crop, lr_sch)
+                    cfg['data']['restrict_to_subset']['mode'] = restrict_mode
+                    cfg['data']['restrict_to_subset']['n_subset'] = n_subset
+                    if preselect:
+                        cfg['data']['restrict_to_subset']['subset'] = preselected_labels(
+                            {7: 42, 25: 43, 42: 44}[seed], n_subset, dataset, method=pres_method
+                        )
+                    cfg['training']['unlabeled_segmentation'] = unlab_cfg
+                    cfg['seed'] = seed
+                    cfg['model']['segmentation_args'] = {
+                        'weights': mono_pretrain, 'output_stride': 1,
+                        'distillation_layer': distillation_layer,
+                        'side_output': True, 'final_layer': final_layer,
+                        'projection_mode': projection_mode,
+                    }
+                    cfgs.append(cfg)
+
     else:
         raise NotImplementedError("Unknown id {}".format(id))
 
