@@ -6,9 +6,11 @@ consistency loss extension were carried out in practice, including the
 computing environment, dataset configuration, training pipeline, use of the
 PAD multi-task decoder, and the organisation of individual experiment
 groups. Throughout, this project adopts the terminology of the original
-paper: \textbf{Stage~(a)} refers to standard supervised learning and data
-selection, while \textbf{Stage~(b)} encompasses semi-supervised mechanisms
-and multi-task learning.
+paper: \textbf{Stage~(a)} refers to standard supervised learning using all
+available annotated data as the baseline, while \textbf{Stage~(b)}
+encompasses semi-supervised extension mechanisms, including automatic data
+selection~(S), DepthMix data augmentation~(DX), and multi-task
+learning~(MTL).
 
 % ============================================================================
 \section{Experimental Setup}
@@ -41,9 +43,75 @@ Training used the SGD optimiser with momentum $0.9$ and weight decay
 $5\!\times\!10^{-4}$, following a polynomial learning-rate decay schedule
 over 40{,}000 iterations. Learning rates were set to $10^{-2}$ for the
 decoder, $10^{-3}$ for the backbone encoder, and $10^{-6}$ for the pose
-network. Due to the single-GPU constraint, a batch size of~2 was used
-without Synchronised Batch Normalisation~(SyncBN), which may introduce
-minor discrepancies relative to the multi-GPU setup of the original paper.
+network.
+
+A key resource constraint of this project is that all experiments were run
+on a single GPU. Although the University of Bristol's HPC platforms
+technically support multi-GPU jobs, this project required running tens of
+distinct experiment configurations. Waiting for multiple GPUs to become
+simultaneously available would have imposed prohibitively long queue times,
+severely compressing the window available for iterative experimentation.
+The single-GPU strategy was therefore adopted as a deliberate trade-off:
+accepting reduced per-run hardware capacity in exchange for substantially
+higher experiment throughput within the available project timeline.
+
+As a direct consequence of the single-GPU constraint, a batch size of~2
+was used without Synchronised Batch Normalisation~(SyncBN).
+SyncBN is a technique used in multi-GPU training that synchronises the
+computation of batch normalisation statistics---specifically the per-channel
+mean and variance---across all GPUs at each step, so that the normalisation
+is effectively performed over the full cross-GPU batch rather than each
+GPU's local shard. In the original paper's multi-GPU setup, SyncBN
+produced stable normalisation statistics equivalent to an effective batch
+size of~8; in this project's single-GPU setup with batch size~2, batch
+normalisation statistics are estimated from fewer samples per step,
+introducing greater noise into the normalisation. This is one of the
+primary reasons why the reproduced results are systematically slightly
+below the original paper across most configurations, with gaps in the
+range of approximately $0.2$ to $1.6$\,pp---a discrepancy consistent with
+the well-documented sensitivity of semi-supervised methods to effective
+batch size.
+
+Despite these hardware constraints, all qualitative performance trends are
+preserved. More importantly, the proposed $\mathcal{L}_\text{ct}$ under
+its best configuration---MSE loss on top of MTL\,+\,DX\,+\,S---achieves
+$68.19$\,\% mIoU, which exceeds both the reproduced full-framework baseline
+under the same configuration by $+0.53$\,pp and the original paper's
+reported value under multi-GPU conditions by $+0.18$\,pp. This
+demonstrates that the proposed extension produces genuine improvements that
+do not depend on the availability of abundant computational resources.
+
+% --- NEW: configuration management moved here from former Section 3.4 ---
+All experiment configurations are managed through a centralised
+\texttt{experiments.py} module, which maps discrete experiment IDs to
+fully specified hyperparameter dictionaries. This acts as the central
+configuration reference, reducing configuration drift across runs and
+making individual results reproducible from their experiment IDs alone.
+Table~\ref{tab:exp_id_mapping} summarises the mapping between experiment
+IDs, their purposes, and the result tables to which they contribute.
+
+\begin{table}[H]
+\centering
+\caption{Mapping between experiment IDs and the corresponding purposes.
+Reproduction experiments target specific tables of the original
+paper~\cite{hoyer2023ijcv_sde}; extension experiments evaluate the
+proposed $\mathcal{L}_\text{ct}$.}
+\label{tab:exp_id_mapping}
+\small
+\begin{tabular}{lll}
+\toprule
+\textbf{Exp ID} & \textbf{Scope} & \textbf{Purpose} \\
+\midrule
+exp~210 & Reproduction & Table~3 (mixing), Table~5 (baseline, transfer) \\
+exp~211 & Reproduction & Table~1 (data selection) \\
+exp~212 & Reproduction & Tables~5 \& 7 (MTL configurations) \\
+exp~213 & Reproduction & Table~7 (8-cell component ablation) \\
+exp~219 & Extension    & $\mathcal{L}_\text{ct}$ Phase~I sweep (32 configs, 1 seed) \\
+exp~220 & Extension    & $\mathcal{L}_\text{ct}$ Phase~II validation (3 seeds) \\
+exp~222 & Extension    & $\mathcal{L}_\text{ct}$ component-level ablation (3 seeds) \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 % ============================================================================
 \section{Dataset and Feature Representation}
@@ -71,12 +139,21 @@ feasibility, particularly for Stage~(b) configurations that maintain two
 parallel decoder branches simultaneously.
 
 Several Stage~(b) components require an SDE-pretrained encoder to provide
-depth-informed encoder initialisation. \texttt{fd0} refers to encoder
-weights from standard monocular depth pretraining, and \texttt{fd2} refers
-to weights from feature-distance regularised pretraining, which
-additionally prevents forgetting of geometric representations during
-downstream fine-tuning. The author-released checkpoints are used
-throughout and kept fixed across all downstream experiments.
+depth-informed encoder initialisation. The framework of
+\cite{hoyer2023ijcv_sde} produces two encoder weight variants, \texttt{fd0}
+and \texttt{fd2}, whose properties are described in detail in
+Section~\ref{sec:sde}. In brief, \texttt{fd0} applies standard monocular
+depth pre-training, optimising the encoder purely for depth estimation;
+this risks the encoder drifting away from the ImageNet feature space and
+losing semantic representations that are beneficial for downstream
+segmentation. \texttt{fd2} addresses this by adding a feature-distance
+regularisation term~$\mathcal{L}_F$ during depth pre-training, which
+penalises large deviations from the ImageNet-initialised feature space.
+This retains useful semantic knowledge while still incorporating geometric
+cues from SDE, making \texttt{fd2} a stronger initialisation for the
+downstream segmentation task. The author-released checkpoints for both
+variants are used throughout and kept fixed across all downstream
+experiments.
 
 % ============================================================================
 \section{Use of the PAD Multi-Task Decoder}
@@ -101,44 +178,6 @@ By explicitly encouraging alignment between the projected depth
 representation and the segmentation representation, the loss is intended
 to promote the transfer of geometric information from the depth branch to
 the segmentation branch at the feature level.
-
-% ============================================================================
-\section{Configuration Architecture}
-\label{sec:design}
-
-Because the project includes multiple reproduction experiments and extension
-ablations with closely related but not identical settings, all
-configurations are managed through a centralised \texttt{experiments.py}
-module. This module acts as the central configuration reference by mapping
-discrete experiment IDs to fully specified hyperparameter dictionaries,
-thereby reducing configuration drift across runs and making individual
-results reproducible from their experiment IDs.
-
-Table~\ref{tab:exp_id_mapping} summarises the mapping between experiment
-IDs, their purposes, and the result tables to which they contribute.
-
-\begin{table}[H]
-\centering
-\caption{Mapping between experiment IDs and the corresponding purposes.
-Reproduction experiments target specific tables of the original
-paper~\cite{hoyer2023ijcv_sde}; extension experiments evaluate the
-proposed $\mathcal{L}_\text{ct}$.}
-\label{tab:exp_id_mapping}
-\small
-\begin{tabular}{lll}
-\toprule
-\textbf{Exp ID} & \textbf{Scope} & \textbf{Purpose} \\
-\midrule
-exp~210 & Reproduction & Table~3 (mixing), Table~5 (baseline, transfer) \\
-exp~211 & Reproduction & Table~1 (data selection) \\
-exp~212 & Reproduction & Tables~5 \& 7 (MTL configurations) \\
-exp~213 & Reproduction & Table~7 (8-cell component ablation) \\
-exp~219 & Extension    & $\mathcal{L}_\text{ct}$ Phase~I sweep (32 configs, 1 seed) \\
-exp~220 & Extension    & $\mathcal{L}_\text{ct}$ Phase~II validation (3 seeds) \\
-exp~222 & Extension    & $\mathcal{L}_\text{ct}$ component-level ablation (3 seeds) \\
-\bottomrule
-\end{tabular}
-\end{table}
 
 % ============================================================================
 \section{Experiment Groups}
@@ -176,12 +215,12 @@ transitions.
 \subsection{Tables~5 and~7: Feature Transfer and Component Ablation
 (exp~212, exp~213)}
 
-These runs evaluate SDE-to-segmentation feature transfer using the fd0
-and fd2 encoder checkpoints~(Table~5), and the combined effects of data
-selection~(S), DepthMix~(DX), and multi-task learning~(MTL)~(Table~7).
-Table~7 requires eight distinct configurations to isolate the contribution
-of each component; each is trained with three independent seeds~(7, 25,
-42) and results are reported as mean\,$\pm$\,std.
+These runs evaluate SDE-to-segmentation feature transfer using the
+\texttt{fd0} and \texttt{fd2} encoder checkpoints~(Table~5), and the
+combined effects of data selection~(S), DepthMix~(DX), and multi-task
+learning~(MTL)~(Table~7). Table~7 requires eight distinct configurations
+to isolate the contribution of each component; each is trained with three
+independent seeds~(7, 25, 42) and results are reported as mean\,$\pm$\,std.
 
 \subsection{Cross-Task Consistency Loss Calibration (exp~219, exp~220)}
 
@@ -189,9 +228,17 @@ The calibration of $\mathcal{L}_\text{ct}$ follows a two-phase design that
 balances hyperparameter search coverage against result stability within a
 limited computing budget.
 
-Phase~I (exp~219) trains all 32 configurations formed by four factors,
-loss type, projection layout, warmup schedule, and $\lambda_\text{ct}$,
-for the full 40{,}000 iterations under a single seed. Seed~7 is used
+Running all candidate configurations with three independent seeds from the
+outset would require $32 \times 3 = 96$ full training runs of 40{,}000
+iterations each, a cost that exceeds the available compute allocation for
+this project. The two-phase strategy therefore first uses a single seed to
+screen the full search space efficiently, and then applies multi-seed
+validation only to the most promising candidates, providing a principled
+balance between hyperparameter coverage and statistical reliability.
+
+Phase~I (exp~219) trains all 32 configurations formed by four factors---loss
+type, projection layout, warmup schedule, and $\lambda_\text{ct}$---for
+the full 40{,}000 iterations under a single seed. Seed~7 is used
 throughout Phase~I so that all configurations are compared under identical
 random initialisation conditions. The purpose of this phase is to identify
 configurations that merit further multi-seed validation, while filtering
@@ -239,6 +286,9 @@ and the correspondence between experiment IDs and the reproduced result
 tables. The reproduction experiments (exp~210--213) were run on the
 Isambard-AI platform and the extension experiments (exp~219, exp~220, and
 exp~222) on BluePebble, with both sets managed through consistent
-configuration control and fixed random seeds. These details provide the
-implementation context for the results presented in
-Chapter~\ref{chap:evaluation}.
+configuration control and fixed random seeds. The single-GPU constraint,
+while limiting effective batch size and precluding SyncBN, was a
+deliberate resource trade-off to maximise experiment throughput; the
+impact of this constraint on reproduced results is analysed in
+Chapter~\ref{chap:evaluation}. These details provide the implementation
+context for the results presented in Chapter~\ref{chap:evaluation}.

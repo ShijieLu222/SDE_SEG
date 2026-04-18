@@ -61,51 +61,56 @@
 % automatically by LaTeX; the use of \chapter* means they are not numbered.
 
 % -----------------------------------------------------------------------------
-
 \chapter*{Abstract}
 
-{\bf A compulsory section, of at most 300 words} 
-\vspace{1cm} 
-
 \noindent
-This section should give an overview of the project context, aims and
-objectives, and main contributions (e.g., deliverables) and achievements.  The
-goal is to ensure the reader is clear about what the topic is, what you have
-done within this topic, {\em and} what your view of the outcome is.
+Semantic segmentation requires dense pixel-level annotation, averaging
+around 1.5~hours per image in complex urban scenes, making full dataset
+annotation prohibitively expensive. This motivates research into training
+strong segmentation models under limited annotation budgets.
+Hoyer et al.\ propose a framework that integrates self-supervised depth
+estimation~(SDE) into semi-supervised segmentation through three
+complementary components: automatic data selection, geometry-aware mixing
+augmentation~(DepthMix), and multi-task learning, achieving strong
+performance under label-efficient conditions.
 
-The former aspects should be guided by your specification: essentially 
-this section is a (very) short version of what is typically the first 
-chapter. If your project is experimental in nature, this should include 
-a clear research hypothesis.  This will obviously differ significantly
-for each project, but an example might be as follows:
+This project hypothesises that introducing an explicit cross-task
+feature alignment objective~($\mathcal{L}_\text{ct}$) between the depth
+and segmentation decoder branches of the PAD-Net multi-task architecture
+can produce statistically stable, reproducible improvements under a
+constrained single-GPU academic computing environment, and that this
+benefit remains additive when combined with the existing framework
+components.
 
-\begin{quote}
-My research hypothesis is that a suitable genetic algorithm will yield
-more accurate results (when applied to the standard ACME data set) than 
-the algorithm proposed by Jones and Smith, while also executing in less
-time.
-\end{quote}
+The main contributions of this project are as follows:
 
-\noindent
-The latter aspects should (ideally) be presented as a concise, factual 
-bullet point list.  Again the points will differ for each project, but 
-an might be as follows:
-
-\begin{quote}
-\noindent
 \begin{itemize}
-\item I spent $120$ hours collecting material on and learning about the 
-      Java garbage-collection sub-system. 
-\item I wrote a total of $5000$ lines of source code, comprising a Linux 
-      device driver for a robot (in C) and a GUI (in Java) that is 
-      used to control it.
-\item I designed a new algorithm for computing the non-linear mapping 
-      from A-space to B-space using a genetic algorithm, see page $17$.
-\item I implemented a version of the algorithm proposed by Jones and 
-      Smith in [6], see page $12$, corrected a mistake in it, and 
-      compared the results with several alternatives.
+
+\item The four result tables of \cite{hoyer2023ijcv_sde} (data
+  selection, mixing strategy, SDE feature transfer, and framework
+  component ablation) were successfully reproduced on Cityscapes under
+  a single-GPU constraint at the University of Bristol. All qualitative
+  performance trends are preserved, with most configurations falling
+  within $\pm$1\,mIoU of the paper.
+
+\item $\mathcal{L}_\text{ct}$ was designed and implemented within the
+  PAD-Net multi-task decoder, with two loss formulations---normalised
+  MSE and cosine similarity---evaluated through a systematic two-phase
+  calibration procedure.
+
+\item The best-performing configuration (single-projection cosine loss,
+  $\lambda_\text{ct}=1.00$) yields a consistent $+2.50$\,pp improvement
+  over the PAD-MTL baseline across three independent seeds, with a
+  standard deviation of only $0.17$\,\%.
+
+\item When combined with the full framework, the strongest configuration
+  achieves $68.19$\,\% mIoU at the 372-label regime, exceeding both the
+  reproduced full-framework baseline by $+0.53$\,pp and the original
+  paper's multi-GPU result by $+0.18$\,pp, demonstrating that the
+  proposed method produces genuine improvements even under more
+  constrained hardware conditions.
+
 \end{itemize}
-\end{quote}
 
 % -----------------------------------------------------------------------------
 

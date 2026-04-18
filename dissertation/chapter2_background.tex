@@ -132,20 +132,74 @@ to extract features from local image regions. Shared convolutional filters
 allow the network to detect the same patterns --- edges, textures, and
 object parts --- at different locations in an image. As the network goes
 deeper, these low-level features gradually combine into higher-level
-semantic representations, such as vehicle shapes or pedestrian silhouettes.
-This hierarchical extraction mechanism makes CNNs effective for image
-understanding tasks.
+semantic representations, such as vehicle shapes or pedestrian
+silhouettes. This hierarchical extraction mechanism makes CNNs effective
+for image understanding tasks.
+
+% --- NEW: Batch Normalisation explanation, needed because SyncBN is
+%     discussed in Chapter 3 and the second marker may not know what BN is ---
+\subsection{Batch Normalisation}
+\label{sec:batchnorm}
+
+A practical challenge in training deep networks is that the distribution
+of activations within each layer shifts as the weights of earlier layers
+are updated, forcing subsequent layers to constantly adapt to a moving
+target. This phenomenon, known as internal covariate shift, slows down
+training and makes it harder to use high learning rates.
+
+Batch Normalisation (BN)~\cite{ioffe2015batchnorm} addresses this by
+standardising the activations of each layer across the samples in a
+mini-batch before passing them to the next layer. Concretely, for each
+channel, BN computes the mean~$\mu_\mathcal{B}$ and
+variance~$\sigma^2_\mathcal{B}$ of the activations over the current
+training batch, and normalises:
+\[
+    \hat{x} = \frac{x - \mu_\mathcal{B}}{\sqrt{\sigma^2_\mathcal{B} + \epsilon}},
+\]
+where $\epsilon$ is a small constant for numerical stability. Two
+learnable parameters then rescale and shift the normalised value:
+$y = \gamma\hat{x} + \beta$. This stabilises the training signal,
+allows the use of higher learning rates, and generally reduces the
+sensitivity of training to the choice of weight initialisation.
+
+A well-known limitation of BN is that the quality of its statistics
+depends on the number of samples in the mini-batch. With very small
+batches, the estimated mean and variance are noisy, which can destabilise
+training. In multi-GPU settings where each device only sees a fraction of
+the full batch, Synchronised Batch Normalisation
+(SyncBN)~\cite{ioffe2015batchnorm} resolves this by aggregating
+statistics across all GPUs before normalising, so that the effective
+batch size for statistics computation equals the total number of samples
+across all devices. This distinction is directly relevant to this
+project: because all experiments were conducted on a single GPU with
+batch size~2, SyncBN was not applicable, and BN statistics were estimated
+from only two samples per step---a constraint discussed further in
+Chapter~\ref{chap:execution}.
 
 \subsection{ResNet-101}
 
-As CNNs became deeper, vanishing gradients became a serious obstacle:
-gradients computed during backpropagation shrink as they pass through many
-layers, making it very difficult to update the weights of early layers.
+As CNNs became deeper, vanishing gradients became a serious obstacle.
+During training, networks learn by computing gradients---signals that
+indicate how each weight should be adjusted to reduce the prediction
+error. In very deep networks, these gradients must propagate back through
+many successive layers. At each layer, the gradient is multiplied by the
+local derivative of the activation function. When these derivatives are
+small (less than 1), repeated multiplication causes the gradient to shrink
+exponentially, eventually becoming so small that the early layers receive
+virtually no update signal---a problem known as the vanishing gradient.
+
 ResNet~\cite{he2016resnet} addresses this with residual connections. Each
 residual block has a standard convolutional path alongside a shortcut that
-adds the block's input directly to its output, allowing gradients to flow
-across many layers without diminishing. This makes stable training of very
-deep networks possible.
+adds the block's input directly to its output:
+\[
+    \mathbf{y} = \mathcal{F}(\mathbf{x}) + \mathbf{x},
+\]
+where $\mathbf{x}$ is the block's input, $\mathcal{F}(\mathbf{x})$
+represents the convolutional layers, and $\mathbf{y}$ is the output.
+Because the shortcut bypasses the convolutional layers entirely, gradients
+can flow directly from any layer back to the input without passing through
+the intermediate multiplications, eliminating the vanishing gradient
+problem and making stable training of very deep networks possible.
 
 This project uses ResNet-101~\cite{he2016resnet} as the encoder backbone
 throughout. With 101 layers, it provides strong general-purpose visual
@@ -160,8 +214,8 @@ learning addresses this by first training the network on a large dataset,
 then reusing the learned weights as a starting point for a different but
 related task. ImageNet~\cite{deng2009imagenet} contains over one million
 images across 1{,}000 categories. Networks pre-trained on it have already
-learned to detect a wide range of general visual features, including edges,
-textures, and object parts.
+learned to detect a wide range of general visual features, including
+edges, textures, and object parts.
 
 In this project, the ResNet-101 encoder is initialised with ImageNet
 pre-trained weights before any task-specific training. Compared to
@@ -186,49 +240,54 @@ and the remaining images are treated as unlabelled data.
 This project runs experiments at three budget levels: 100~images
 (approximately 1/30 of the training set), 372~images (approximately
 1/8), and 744~images (approximately 1/4). These three levels are widely
-used benchmarks in the semi-supervised segmentation literature, covering
-scenarios from extremely scarce to moderately limited annotation. Among
-them, the 372-label setting is the primary experimental regime for this
-project: all ablations of the proposed components and the hyperparameter
-search for the cross-task consistency loss are conducted at this level.
-The 100-label regime produces results with high variance across seeds,
-making it difficult to reliably measure fine-grained improvements. The
-372-label setting retains the challenge of working with limited
-supervision while providing a stable enough evaluation environment to
-draw meaningful conclusions.
+used benchmarks in the semi-supervised segmentation
+literature~\cite{hoyer2023ijcv_sde}, covering scenarios from extremely
+scarce to moderately limited annotation. Among them, the 372-label
+setting is the primary experimental regime for this project: all
+ablations of the proposed components and the hyperparameter search for
+the cross-task consistency loss are conducted at this level. The
+100-label regime produces results with high variance across seeds, making
+it difficult to reliably measure fine-grained improvements. The 372-label
+setting retains the challenge of working with limited supervision while
+providing a stable enough evaluation environment to draw meaningful
+conclusions.
 
 \subsection{Problem Setup}
 
 Semi-supervised learning (SSL) aims to train a model using a small amount
-of labelled data alongside a much larger pool of unlabelled data. In the
-context of semantic segmentation, only a small subset of images carries
-pixel-level annotations, while the rest remain unlabelled. The model must
-extract semantic knowledge from the labelled samples while also exploiting
-structural information in the unlabelled ones to improve generalisation.
+of labelled data alongside a much larger pool of unlabelled
+data~\cite{chapelle2006ssl}. In the context of semantic segmentation,
+only a small subset of images carries pixel-level annotations, while the
+rest remain unlabelled. The model must extract semantic knowledge from
+the labelled samples while also exploiting structural information in the
+unlabelled ones to improve generalisation.
 
 \subsection{Pseudo-Labels and Confirmation Bias}
 
-Pseudo-labelling is one of the most widely used strategies in SSL. The
-model generates predictions for unlabelled images, treats those predictions
-as labels, and then continues training on the combined labelled and
-pseudo-labelled data. This process can be repeated iteratively as
-pseudo-label quality improves alongside the model.
+Pseudo-labelling is one of the most widely used strategies in
+SSL~\cite{lee2013pseudolabel}. The model generates predictions for
+unlabelled images, treats those predictions as labels, and then continues
+training on the combined labelled and pseudo-labelled data. This process
+can be repeated iteratively as pseudo-label quality improves alongside
+the model.
 
 However, pseudo-labelling carries a fundamental risk known as confirmation
 bias. When the model's initial performance is poor, the pseudo-labels it
 generates contain many errors. Training on those incorrect labels
 reinforces the model's mistakes rather than correcting them, causing
-performance to stagnate or even degrade. This problem is especially severe
-when labelled data is extremely scarce, since the initial predictions are
-less reliable and the proportion of erroneous pseudo-labels is higher.
+performance to stagnate or even degrade~\cite{arazo2020pseudolabel}.
+This problem is especially severe when labelled data is extremely scarce,
+since the initial predictions are less reliable and the proportion of
+erroneous pseudo-labels is higher.
 
 \subsection{Mean Teacher}
 
 To reduce confirmation bias, this project uses the Mean
-Teacher~\cite{tarvainen2017meanteacher} framework to generate pseudo-labels.
-Mean Teacher maintains two networks: a student that is updated through
-normal gradient-based training, and a teacher whose weights are updated via
-an exponential moving average (EMA) of the student weights:
+Teacher~\cite{tarvainen2017meanteacher} framework to generate
+pseudo-labels. Mean Teacher maintains two networks: a student that is
+updated through normal gradient-based training, and a teacher whose
+weights are updated via an exponential moving average (EMA) of the
+student weights:
 \[
     \theta_T \leftarrow \alpha\,\theta_T + (1 - \alpha)\,\theta_S,
 \]
@@ -246,9 +305,10 @@ confirmation bias.
 
 Consistency regularisation encourages the model to produce the same
 prediction for a given image regardless of what perturbations are applied
-to it. This pushes the model to learn representations that are
-\emph{robust} to various transformations --- meaning the model can still
-predict accurately even when the input has been altered or distorted.
+to it~\cite{sohn2020fixmatch}. This pushes the model to learn
+representations that are \emph{robust} to various transformations ---
+meaning the model can still predict accurately even when the input has
+been altered or distorted.
 
 Data augmentation achieves this by applying random transformations to
 training images, such as flipping, cropping, brightness adjustments, and
@@ -294,12 +354,13 @@ ground-truth depth annotations, however, requires expensive equipment
 such as LiDAR sensors and does not scale easily. Self-supervised depth
 estimation (SDE) offers an alternative: it learns to predict depth purely
 from unlabelled video sequences, using the geometric relationships between
-consecutive frames as supervision, with no manual annotation required.
+consecutive frames as supervision, with no manual annotation
+required~\cite{godard2017unsupervised}.
 
 \subsection{View Synthesis and Photometric Loss}
 
-The core idea behind SDE is view synthesis. If the depth of every pixel in
-an image is known along with the camera motion between two frames, one
+The core idea behind SDE is view synthesis. If the depth of every pixel
+in an image is known along with the camera motion between two frames, one
 frame can be geometrically warped into the appearance of the other. If
 the synthesised frame closely matches the real target frame, the predicted
 depth and camera motion must be accurate.
@@ -310,25 +371,58 @@ the relative camera motion between adjacent frames. During training, the
 source frame is warped into the target view using the predicted depth and
 pose, and the photometric reprojection error between the synthesised and
 real target frames is minimised. This loss combines an $\ell_1$ pixel
-intensity term with a Structural Similarity (SSIM)
-term~\cite{godard2017unsupervised} that captures local structural
-consistency. Because the entire process requires no annotations, SDE can
-be trained on large quantities of easily accessible unlabelled video data,
-building up rich geometric priors that subsequently benefit semantic
-segmentation.
+intensity term with a Structural Similarity
+(SSIM)~\cite{wang2004ssim} term~\cite{godard2017unsupervised} that
+captures local structural consistency. Because the entire process requires
+no annotations, SDE can be trained on large quantities of easily
+accessible unlabelled video data, building up rich geometric priors that
+subsequently benefit semantic segmentation.
 
+% --- EXPANDED: fd0/fd2 section with formula and fuller explanation ---
 \subsection{Depth Pre-training Variants: \texttt{fd0} and \texttt{fd2}}
+\label{sec:fd0-fd2}
 
 Within the framework of Hoyer et al.~\cite{hoyer2023ijcv_sde}, SDE
-pre-training produces two encoder weight variants. \textbf{\texttt{fd0}}
-applies standard depth pre-training, optimising the encoder purely for
-depth estimation. The risk is that the encoder drifts away from the
-ImageNet feature space, losing semantic features that are useful for
-segmentation. \textbf{\texttt{fd2}} adds a feature-distance regularisation
-term that penalises large deviations from the ImageNet-initialised feature
-space during depth pre-training. This retains useful semantic knowledge
-while still incorporating geometric cues from SDE, making it a better
-starting point for the downstream segmentation task.
+pre-training produces two encoder weight variants that differ in how the
+encoder is regularised during depth pre-training.
+
+\textbf{\texttt{fd0}} applies standard depth pre-training, optimising
+the encoder purely to minimise the SDE photometric loss. While this
+produces an encoder with strong geometric representations, it risks
+drifting away from the ImageNet feature space: because the SDE objective
+provides no incentive to retain general visual features, the encoder may
+``forget'' the semantic knowledge acquired during ImageNet pre-training.
+When these weights are later transferred to initialise the segmentation
+branch, the lost semantic features can be difficult to recover, limiting
+the benefit of the transfer.
+
+\textbf{\texttt{fd2}} addresses this forgetting problem by adding a
+feature-distance regularisation loss~$\mathcal{L}_F$ during depth
+pre-training~\cite{hoyer2023ijcv_sde}. This loss penalises the
+$\ell_2$ distance between the current encoder's bottleneck features
+$f^E_\theta$ and those of the frozen ImageNet-initialised
+encoder~$f^E_I$:
+\[
+    \mathcal{L}_F = \| f^E_\theta - f^E_I \|_2.
+\]
+The total pre-training loss becomes:
+\[
+    \mathcal{L}_{D,\text{pretrain}} = \mathcal{L}_D + \lambda_F \mathcal{L}_F,
+\]
+where $\mathcal{L}_D$ is the standard SDE photometric loss and
+$\lambda_F$ controls the strength of the regularisation. By keeping the
+encoder features close to their ImageNet initialisation, \texttt{fd2}
+retains general semantic representations while still acquiring geometric
+knowledge from depth pre-training, making it a stronger starting point
+for the downstream segmentation task compared to \texttt{fd0}.
+
+In the experiments of Chapter~\ref{chap:evaluation}, \texttt{fd0} is
+used as the encoder initialisation for the \emph{Transfer (no
+$\mathcal{L}_F$)} condition, and \texttt{fd2} is used for the
+\emph{Transfer ($\mathcal{L}_F = \checkmark$)} and \emph{Multi-Task
+($\mathcal{L}_F = \checkmark$)} conditions (Table~5). The author-released
+checkpoints for both variants are used throughout and kept fixed across
+all downstream experiments.
 
 % -----------------------------------------------------------------------------
 \section{Multi-Task Learning and PAD-Net}
@@ -337,27 +431,28 @@ starting point for the downstream segmentation task.
 \subsection{Multi-Task Learning}
 
 Multi-task learning (MTL) trains a single model on multiple related tasks
-simultaneously by sharing representations across them. In this project,
-semantic segmentation and depth estimation are trained jointly. The shared
-encoder receives gradient signals from both tasks and is guided to learn
-features that are useful for both geometry and semantics. Compared to
-transfer learning, where SDE pre-trained weights are used only to
-initialise the segmentation model, MTL maintains the depth supervision
-signal throughout the entire training process, providing a continuous
-source of geometric supervision that is especially valuable when labelled
-segmentation data is scarce.
+simultaneously by sharing representations across
+them~\cite{caruana1997multitask}. In this project, semantic segmentation
+and depth estimation are trained jointly. The shared encoder receives
+gradient signals from both tasks and is guided to learn features that are
+useful for both geometry and semantics. Compared to transfer learning,
+where SDE pre-trained weights are used only to initialise the
+segmentation model, MTL maintains the depth supervision signal throughout
+the entire training process, providing a continuous source of geometric
+supervision that is especially valuable when labelled segmentation data
+is scarce.
 
 \subsection{Attention Mechanism}
 
 The attention mechanism allows a model to dynamically focus on the most
-relevant parts of its input. Self-attention lets every position in a
-feature map interact with every other position, computing a weighted
-representation where the weights reflect pairwise relevance between
-locations. This allows the network to capture long-range dependencies ---
-for example, relating the appearance of a distant vehicle to nearby road
-markings. In the context of multi-task learning, attention can selectively
-transfer relevant information between the feature representations of
-different tasks.
+relevant parts of its input~\cite{vaswani2017attention}. Self-attention
+lets every position in a feature map interact with every other position,
+computing a weighted representation where the weights reflect pairwise
+relevance between locations. This allows the network to capture
+long-range dependencies --- for example, relating the appearance of a
+distant vehicle to nearby road markings. In the context of multi-task
+learning, attention can selectively transfer relevant information between
+the feature representations of different tasks.
 
 \subsection{PAD-Net}
 
@@ -377,13 +472,18 @@ attended features via element-wise addition:
     \tilde{f}_\text{depth} = f_\text{depth} +
         \mathrm{SA}_\text{seg}(f_\text{seg}),
 \]
-where $\mathrm{SA}_\text{seg}(\cdot)$ and $\mathrm{SA}_\text{depth}(\cdot)$
-are the self-attention modules of the segmentation and depth branches
-respectively, and $f_\text{seg}$, $f_\text{depth}$ are the branch features
-at the distillation layer. The updated features $\tilde{f}$ are then passed
-through the remaining decoder layers to produce the final predictions. This
-design allows each task to selectively absorb geometric or semantic cues
-from the other branch without directly coupling the final prediction heads.
+where $\mathrm{SA}_\text{seg}(\cdot)$ and
+$\mathrm{SA}_\text{depth}(\cdot)$ are the self-attention modules of the
+segmentation and depth branches respectively, $f_\text{seg}$ and
+$f_\text{depth}$ are the intermediate feature maps produced by each
+branch at the distillation layer, and $\tilde{f}$ denotes the updated
+features after cross-task information exchange. In plain terms: the
+segmentation branch looks at what the depth branch has learned about
+scene geometry and incorporates it into its own features, and vice versa.
+The updated features $\tilde{f}$ are then passed through the remaining
+decoder layers to produce the final predictions. This design allows each
+task to selectively absorb geometric or semantic cues from the other
+branch without directly coupling the final prediction heads.
 
 % -----------------------------------------------------------------------------
 \section{SDE-Guided Data Selection and Geometry-Aware Mixing}
@@ -392,22 +492,23 @@ from the other branch without directly coupling the final prediction heads.
 \subsection{Active Learning and SDE-Guided Data Selection}
 
 When annotation budgets are limited, randomly choosing which images to
-label is not the most efficient strategy, since different images contribute
-very differently to model training. Active learning addresses this by
-iteratively selecting the most informative samples based on the model's
-current state, allowing a given budget to go further.
+label is not the most efficient strategy, since different images
+contribute very differently to model training. Active
+learning~\cite{settles2009activelearning} addresses this by iteratively
+selecting the most informative samples based on the model's current
+state, allowing a given budget to go further.
 
 Traditional active learning for segmentation relies on the segmentation
-model's own prediction uncertainty to guide selection, which still requires
-a human annotator for each selected sample. Hoyer et
+model's own prediction uncertainty to guide selection, which still
+requires a human annotator for each selected sample. Hoyer et
 al.~\cite{hoyer2023ijcv_sde} replace the human annotator with SDE as a
 proxy task. Diversity sampling (DS) uses SDE features to select images
-covering a diverse range of scene content, while uncertainty sampling (US)
-selects images where the current depth model is least confident. Because
-depth estimation and semantic segmentation share similar notions of sample
-difficulty, SDE-based selection signals transfer well to the segmentation
-task without requiring any human involvement. Combining both criteria
-(DS+US) consistently outperforms using either alone.
+covering a diverse range of scene content, while uncertainty sampling
+(US) selects images where the current depth model is least confident.
+Because depth estimation and semantic segmentation share similar notions
+of sample difficulty, SDE-based selection signals transfer well to the
+segmentation task without requiring any human involvement. Combining both
+criteria (DS+US) consistently outperforms using either alone.
 
 \subsection{DepthMix}
 
@@ -459,14 +560,14 @@ to different amounts of labelled data.
 This last point is directly relevant here. The depth decoder receives
 self-supervised training signals from all available unlabelled frames,
 while the segmentation decoder is only supervised on the small labelled
-subset. This asymmetry means the depth branch accumulates richer geometric
-representations than the segmentation branch. By explicitly aligning their
-intermediate features, the depth decoder can act as a continuously
-available, label-free teacher for the segmentation branch, transferring
-geometric knowledge into the segmentation feature space without requiring
-any additional annotations. This is the core motivation behind the
-Cross-Task Consistency Loss $\mathcal{L}_\text{ct}$ proposed in this
-project.
+subset. This asymmetry means the depth branch accumulates richer
+geometric representations than the segmentation branch. By explicitly
+aligning their intermediate features, the depth decoder can act as a
+continuously available, label-free teacher for the segmentation branch,
+transferring geometric knowledge into the segmentation feature space
+without requiring any additional annotations. This is the core
+motivation behind the Cross-Task Consistency Loss $\mathcal{L}_\text{ct}$
+proposed in this project.
 
 \subsection{Feature Alignment Loss Functions: Normalised MSE and Cosine Similarity}
 \label{sec:ct-losses}
@@ -495,8 +596,8 @@ two normalised vectors:
 The normalisation step removes the influence of scale differences between
 the two branches, so the loss focuses purely on directional alignment.
 
-Cosine similarity loss measures the angle between two vectors directly and
-is used in its loss form as $1 - \cos(\cdot,\cdot)$:
+Cosine similarity loss measures the angle between two vectors directly
+and is used in its loss form as $1 - \cos(\cdot,\cdot)$:
 \[
     \mathcal{L}_\text{cos}
         = \frac{1}{HW}\sum_{i}
@@ -510,7 +611,7 @@ is used in its loss form as $1 - \cos(\cdot,\cdot)$:
 This value is zero when the two feature vectors point in the same
 direction, one when they are orthogonal, and two when they are opposed.
 Both formulations work towards aligning the segmentation features with
-the depth features, but differ in their gradient behaviour and sensitivity
-to outlier activations. Both are included in the experimental comparison,
-with results reported in Chapters~\ref{chap:execution}
-and~\ref{chap:evaluation}.
+the depth features, but differ in their gradient behaviour and
+sensitivity to outlier activations. Both are included in the
+experimental comparison, with results reported in
+Chapters~\ref{chap:execution} and~\ref{chap:evaluation}.
