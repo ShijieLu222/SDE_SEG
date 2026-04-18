@@ -17,21 +17,18 @@ and multi-task learning.
 The reproduction experiments (exp~210--213, corresponding to Tables~1, 3,
 5, and~7) were run on the University of Bristol's Isambard-AI
 platform~\cite{isambard_ai}, using a single GPU per job. The subsequent
-cross-task consistency loss extension experiments (exp~219--221) were run
-on the University of Bristol's BluePebble high-performance computing
-platform~(BP1) under the SLURM workload manager. Both sets of experiments
-followed the same configuration management and random seed control
-procedures to ensure traceability and reproducibility.
+cross-task consistency loss extension experiments (exp~219, exp~220, and
+exp~222) were run on the University of Bristol's BluePebble high-performance
+computing platform~(BP1) under the SLURM workload manager. Both sets of
+experiments followed the same configuration management and random seed
+control procedures to ensure traceability and reproducibility.
 
 On BluePebble, each SLURM job was allocated one GPU, eight physical cores,
-and 64\,GB of system memory. Phase~I single-seed runs used a wall-time
-limit of 24~hours, while Phase~II (exp~220) and exp~221 three-seed runs
-used 40~hours, with all three seeds executed sequentially within a single
-job. BP1 is a heterogeneous cluster and node assignment is managed
-automatically by SLURM. The cross-task loss experiments were run
-predominantly on V100 nodes with 32\,GB VRAM. All experiments ran within a
-dedicated Conda environment with pinned dependencies to ensure consistent
-behaviour across node types.
+and 64\,GB of system memory. BP1 is a heterogeneous cluster and node
+assignment is managed automatically by SLURM. The cross-task loss
+experiments were run predominantly on V100 nodes with 32\,GB VRAM. All
+experiments ran within a dedicated Conda environment with pinned
+dependencies to ensure consistent behaviour across node types.
 
 Random seeds were fixed across Python, NumPy, and PyTorch at the start of
 every run. Each experiment's full configuration, including experiment ID,
@@ -97,10 +94,13 @@ In this project's configuration, the distillation layer is placed at
 decoder upsampling layer~7, producing feature maps of spatial resolution
 $128\!\times\!128$ with 128 channels. The depth features $f_\text{depth}$
 and segmentation features $f_\text{seg}$ at this layer serve as the inputs
-to $\mathcal{L}_\text{ct}$. By explicitly encouraging alignment between
-these two intermediate representations, the loss is intended to promote
-the transfer of geometric information from the depth branch to the
-segmentation branch at the feature level.
+to $\mathcal{L}_\text{ct}$. The $1\!\times\!1$ convolutional projection
+head used by $\mathcal{L}_\text{ct}$ preserves the channel dimensionality
+of its input, so its input and output feature maps both have 128 channels.
+By explicitly encouraging alignment between the projected depth
+representation and the segmentation representation, the loss is intended
+to promote the transfer of geometric information from the depth branch to
+the segmentation branch at the feature level.
 
 % ============================================================================
 \section{Configuration Architecture}
@@ -114,17 +114,31 @@ discrete experiment IDs to fully specified hyperparameter dictionaries,
 thereby reducing configuration drift across runs and making individual
 results reproducible from their experiment IDs.
 
-The mapping is as follows. Exp~210 covers the baseline and mixing strategy
-variants for Table~3 and the baseline and transfer variants for Table~5.
-Exp~211 covers the SDE-guided data selection variants for Table~1.
-Exp~212 covers the multi-task learning configurations for Tables~5 and~7.
-Exp~213 covers the full component ablation for Table~7. Exp~219 is the
-Phase~I cross-task consistency loss sweep, scanning all 32 combinations of
-loss type, projection layout, warmup schedule, and $\lambda_\text{ct}$
-under a single seed. Exp~220 is the Phase~II three-seed validation of
-candidates identified in exp~219. Exp~221 is the extended PAD-MTL
-component ablation covering MTL\,+\,DX, MTL\,+\,S, and MTL\,+\,DX\,+\,S,
-each validated with three independent seeds.
+Table~\ref{tab:exp_id_mapping} summarises the mapping between experiment
+IDs, their purposes, and the result tables to which they contribute.
+
+\begin{table}[H]
+\centering
+\caption{Mapping between experiment IDs and the corresponding purposes.
+Reproduction experiments target specific tables of the original
+paper~\cite{hoyer2023ijcv_sde}; extension experiments evaluate the
+proposed $\mathcal{L}_\text{ct}$.}
+\label{tab:exp_id_mapping}
+\small
+\begin{tabular}{lll}
+\toprule
+\textbf{Exp ID} & \textbf{Scope} & \textbf{Purpose} \\
+\midrule
+exp~210 & Reproduction & Table~3 (mixing), Table~5 (baseline, transfer) \\
+exp~211 & Reproduction & Table~1 (data selection) \\
+exp~212 & Reproduction & Tables~5 \& 7 (MTL configurations) \\
+exp~213 & Reproduction & Table~7 (8-cell component ablation) \\
+exp~219 & Extension    & $\mathcal{L}_\text{ct}$ Phase~I sweep (32 configs, 1 seed) \\
+exp~220 & Extension    & $\mathcal{L}_\text{ct}$ Phase~II validation (3 seeds) \\
+exp~222 & Extension    & $\mathcal{L}_\text{ct}$ component-level ablation (3 seeds) \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 % ============================================================================
 \section{Experiment Groups}
@@ -169,9 +183,9 @@ Table~7 requires eight distinct configurations to isolate the contribution
 of each component; each is trained with three independent seeds~(7, 25,
 42) and results are reported as mean\,$\pm$\,std.
 
-\subsection{Cross-Task Consistency Loss (exp~219, exp~220)}
+\subsection{Cross-Task Consistency Loss Calibration (exp~219, exp~220)}
 
-The cross-task consistency loss experiments follow a two-phase design that
+The calibration of $\mathcal{L}_\text{ct}$ follows a two-phase design that
 balances hyperparameter search coverage against result stability within a
 limited computing budget.
 
@@ -185,21 +199,35 @@ out settings that do not show competitive performance under the shared
 single-seed condition.
 
 Phase~II (exp~220) retrains the candidates selected from Phase~I using
-three independent seeds~(7, 25, 42) to assess reproducibility. The
-PAD-MTL baseline (without $\mathcal{L}_\text{ct}$) is retrained with the
-same three seeds in the same submission batch, providing a consistent
-per-seed reference for paired comparisons. Each configuration is submitted
-as an independent SLURM job with a 40-hour wall-time limit, running all
-three seeds sequentially.
+three independent seeds~(7, 25, 42) to assess reproducibility. A PAD-MTL
+baseline (without $\mathcal{L}_\text{ct}$) is retrained with the same
+three seeds in the same submission batch, providing a consistent per-seed
+reference for paired comparisons. Each configuration is submitted as an
+independent SLURM job, running all three seeds sequentially.
 
-\subsection{Extended Component Ablation (exp~221)}
+\subsection{Component-Level Ablation of $\mathcal{L}_\text{ct}$ (exp~222)}
 
-Exp~221 evaluates three PAD-MTL component combinations, MTL\,+\,DX,
-MTL\,+\,S, and MTL\,+\,DX\,+\,S, each with three independent seeds on
-the 372-label setting, using the same pipeline as exp~219 and~220 to
-ensure direct comparability with the cross-task loss results. At the time
-of writing, exp~221 has been configured and submitted, but its results
-have not yet been incorporated into the current analysis.
+Exp~222 evaluates whether the cross-task consistency loss composes well
+with the existing framework components (data selection~S, DepthMix~DX,
+and multi-task learning~MTL). The ablation covers three component
+combinations on the 372-label setting: MTL\,+\,DX, MTL\,+\,S, and
+MTL\,+\,DX\,+\,S. For each combination, two $\mathcal{L}_\text{ct}$
+variants are trained---normalised MSE and cosine similarity---yielding
+six ablation configurations in total. For each of the three component
+combinations, a matching baseline without $\mathcal{L}_\text{ct}$ is
+trained under the same pipeline and in the same submission batch,
+providing a paired per-seed reference for each ablation cell and removing
+the need for cross-batch comparisons.
+
+All six $\mathcal{L}_\text{ct}$ configurations use the Phase~II best-performing
+hyperparameter setting: a single $1\!\times\!1$ convolutional projection
+head, $\lambda_\text{ct}=1.0$, no warm-up, and bidirectional gradient flow
+(no stop-gradient applied to either branch). The only variable within the
+six $\mathcal{L}_\text{ct}$ configurations is the loss formulation (MSE
+versus cosine), so that any performance difference is attributable to the
+loss formulation itself rather than to auxiliary hyperparameter effects.
+Each configuration is trained with the same three seeds (7, 25, 42) as
+the paired baseline, enabling direct per-seed comparisons.
 
 % ============================================================================
 \section{Summary}
@@ -209,7 +237,8 @@ This chapter has outlined how the experiments were organised in practice,
 including the computing environment, dataset setup, model configuration,
 and the correspondence between experiment IDs and the reproduced result
 tables. The reproduction experiments (exp~210--213) were run on the
-Isambard-AI platform and the extension experiments (exp~219--221) on
-BluePebble, with both sets managed through consistent configuration
-control and fixed random seeds. These details provide the implementation
-context for the results presented in Chapter~\ref{chap:evaluation}.
+Isambard-AI platform and the extension experiments (exp~219, exp~220, and
+exp~222) on BluePebble, with both sets managed through consistent
+configuration control and fixed random seeds. These details provide the
+implementation context for the results presented in
+Chapter~\ref{chap:evaluation}.

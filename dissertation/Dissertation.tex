@@ -296,29 +296,175 @@ $\alpha$    &:& EMA smoothing coefficient                         \\
 \chapter{Conclusion}
 \label{chap:conclusion}
 
+% ============================================================
+\section{Summary of Contributions}
+
 \noindent
-The concluding chapter of a dissertation is often underutilised because it 
-is too often left too close to the deadline: it is important to allocate
-enough attention to it.  Ideally, the chapter will consist of three parts:
+This project had two primary goals: to reproduce the SDE-enhanced
+label-efficient segmentation framework of \cite{hoyer2023ijcv_sde} under
+a constrained single-GPU environment, and to extend the multi-task
+architecture with a novel Cross-Task Consistency Loss
+($\mathcal{L}_\text{ct}$) that provides an explicit feature-alignment
+objective between the segmentation and depth decoder branches. The main
+contributions of the project are as follows.
+
+\begin{itemize}
+
+\item \textbf{Faithful reproduction of four result tables.}
+  The data selection (Table~1), mixing strategy (Table~3), SDE feature
+  transfer (Table~5), and full framework component ablation (Table~7) from
+  \cite{hoyer2023ijcv_sde} were all reproduced on Cityscapes at the
+  1/8-label (372-label) regime. Despite operating under a single-GPU
+  constraint with batch size~2 (versus the authors' multi-GPU batch
+  size~8), the reproduced results recover the qualitative performance
+  trends reported in the paper across all four tables. The systematic
+  under-reproduction gap ranges from approximately $0.2$ to $1.6$\,pp,
+  consistent with the well-documented sensitivity of semi-supervised
+  methods to effective batch size.
+
+\item \textbf{Design and implementation of
+  $\mathcal{L}_\text{ct}$.}
+  A lightweight cross-task projection module and associated training
+  objective were implemented within the PAD multi-task decoder. Two
+  loss formulations---$\ell_2$-normalised MSE and cosine
+  similarity---were systematically evaluated through a two-phase
+  calibration procedure covering 32 Phase~I configurations and a
+  full three-seed Phase~II validation. The design incurs a minimal
+  parameter overhead of $16{,}512$ additional parameters (single
+  projection) and no additional forward pass through the depth branch,
+  making it well-suited to resource-constrained settings.
+
+\item \textbf{Calibration of $\mathcal{L}_\text{ct}$ hyperparameters.}
+  Phase~I (exp~219) identified single-projection cosine loss with no
+  warmup ($w0$) and $\lambda_\text{ct}=1.00$ as the most stable
+  configuration on top of the PAD-MTL baseline. Phase~II (exp~220)
+  confirmed that this configuration produces consistent, low-variance
+  improvements across three independent random seeds
+  (std~$0.17$\,\%), providing the first systematic empirical
+  characterisation of the $\lambda_\text{ct}$ operating range for
+  this architecture.
+
+\item \textbf{Component-level composability evaluation (exp~222).}
+  $\mathcal{L}_\text{ct}$ was evaluated on top of three component
+  combinations: MTL\,+\,DX, MTL\,+\,S, and MTL\,+\,DX\,+\,S. In
+  every paired per-seed comparison, both loss formulations improved
+  over the matching baseline, with gains of $+0.10$ to
+  $+0.97$\,pp. The strongest configuration---MSE on
+  MTL\,+\,DX\,+\,S---achieved $68.19$\,\% mIoU, exceeding the
+  reproduced full-framework baseline by $+0.53$\,pp and the
+  paper's reported value~\cite{hoyer2023ijcv_sde} by $+0.18$\,pp,
+  demonstrating that a single-GPU reproduction enhanced with
+  $\mathcal{L}_\text{ct}$ can match or marginally exceed a
+  multi-GPU reference under the best component configuration.
+
+\end{itemize}
+
+% ============================================================
+\section{Evaluation Against Aims and Objectives}
+
+\noindent
+Chapter~\ref{chap:context} set out four specific objectives. Each is
+evaluated below.
 
 \begin{enumerate}
-\item (Re)summarise the main contributions and achievements, in essence
-      summing up the content.
-\item Clearly state the current project status (e.g., ``X is working, Y 
-      is not'') and evaluate what has been achieved with respect to the 
-      initial aims and objectives (e.g., ``I completed aim X outlined 
-      previously, the evidence for this is within Chapter Y'').  There 
-      is no problem including aims which were not completed, but it is 
-      important to evaluate and/or justify why this is the case.
-\item Outline any open problems or future plans.  Rather than treat this
-      only as an exercise in what you {\em could} have done given more 
-      time, try to focus on any unexplored options or interesting outcomes
-      (e.g., ``my experiment for X gave counter-intuitive results, this 
-      could be because Y and would form an interesting area for further 
-      study'' or ``users found feature Z of my software difficult to use,
-      which is obvious in hindsight but not during at design stage; to 
-      resolve this, I could clearly apply the technique of Smith [7]'').
+
+\item \textbf{Reproduce Stage~(a)~[Completed].}
+  The data selection experiment (Table~1) was fully reproduced
+  (Section~\ref{sec:stage_a_table1}). All four selection strategies
+  (Random, Entropy, DS, DS+US) were verified, with DS+US consistently
+  achieving the highest mIoU in line with the paper. Absolute values
+  are within $1.2$\,pp of the paper across all label regimes, and
+  the relative ordering of methods is preserved.
+
+\item \textbf{Reproduce Stage~(b)~[Completed].}
+  Tables~3, 5, and~7 were reproduced in
+  Sections~\ref{sec:stage_ab_table3}, \ref{sec:stage_ab_table5},
+  and~\ref{sec:stage_b_table7} respectively.
+  The mixing strategy, SDE transfer, and component ablation
+  experiments all confirm the qualitative trends of the paper.
+  The most notable deviation is in the MTL\,+\,DX configuration
+  (Table~7), where the reproduced mean falls $1.55$\,pp below the
+  paper value, a discrepancy attributed to the reduced batch size
+  degrading the implicit cross-task signal that DepthMix relies on.
+
+\item \textbf{Design, implement, and evaluate
+  $\mathcal{L}_\text{ct}$~[Completed].}
+  The cross-task consistency loss was fully implemented, calibrated
+  over two phases, and validated with three independent seeds
+  (Sections~\ref{sec:ct-calibration-ablation}). The calibrated loss
+  consistently improves over the PAD-MTL baseline, with the best
+  stable configuration (single cosine, $w0$, $\lambda=1.00$)
+  achieving a mean mIoU of $63.73$\,\% on top of PAD-MTL, compared
+  with the baseline of $62.82$\,\%. The improvement is stable across
+  seeds and the $\lambda$ operating range is identified as
+  $[0.75, 1.00]$.
+
+\item \textbf{Evaluate the full combined framework~[Completed].}
+  Exp~222 (Section~\ref{sec:ct-component-ablation}) evaluated
+  $\mathcal{L}_\text{ct}$ on all three target component combinations.
+  The composability objective was fully met: all six
+  $\mathcal{L}_\text{ct}$ configurations (three combinations $\times$
+  two loss types) improved over their paired baseline. The complete
+  system with MSE loss, data selection, DepthMix, and multi-task
+  learning achieved $68.19$\,\% mIoU, the highest result obtained
+  in this project.
+
 \end{enumerate}
+
+% ============================================================
+\section{Open Problems and Future Directions}
+
+\noindent
+Several findings from the evaluation open directions for further
+investigation.
+
+\paragraph{Component-conditioned $\lambda$ scheduling.}
+The composability ablation (Section~\ref{sec:ct-component-ablation})
+showed that the MSE--cosine ordering reverses depending on whether
+DepthMix is present: MSE is preferable without DepthMix, while
+cosine is more robust to DepthMix-induced activation perturbations.
+A natural extension would be to treat $\lambda_\text{ct}$ as a
+component-conditioned hyperparameter---for instance, applying a lower
+$\lambda$ or switching to cosine whenever DepthMix is active---rather
+than using a fixed scalar throughout training. A simple scheduled
+version in which $\lambda$ is annealed over the first 5,000
+iterations when DX is present would be straightforward to implement
+and could reduce the variance currently observed in the MSE
+MTL\,+\,DX\,+\,S configuration (std $1.03$).
+
+\paragraph{Dual projection revisited.}
+Phase~II found that dual projection consistently underperforms single
+projection at higher parameter cost. However, dual projection was
+only evaluated at the same $\lambda_\text{ct}$ values used for single
+projection. Because dual projection introduces a symmetric alignment
+constraint with twice the gradient magnitude, it is possible that
+lower $\lambda$ values (e.g., $0.25$ or $0.50$) would produce a more
+stable training regime. A targeted search in this lower-$\lambda$
+region---feasible within a single additional Phase~I sweep---could
+determine whether dual projection is fundamentally inferior or merely
+over-regularised at the current $\lambda$ range.
+
+\paragraph{Generalisation beyond Cityscapes.}
+All experiments in this project were conducted on Cityscapes at the
+1/8-label regime, where the structural correlation between depth and
+segmentation is particularly strong due to the urban driving domain.
+It is an open question whether $\mathcal{L}_\text{ct}$ transfers to
+domains with weaker depth-semantics correlation (e.g., indoor scenes
+or aerial imagery), where the geometric prior exploited by the
+proposed loss is less informative. Evaluating the loss on the
+ADE20K~\cite{zhou2019ade20k} or PASCAL VOC datasets at comparable
+label regimes would provide a direct test of domain generality.
+
+\paragraph{Extension to additional auxiliary tasks.}
+The current design uses monocular depth as the sole auxiliary task.
+The cross-task projection framework is in principle applicable to
+any pair of decoders sharing a common encoder. Extending
+$\mathcal{L}_\text{ct}$ to surface normal estimation or optical
+flow---both of which are geometrically related to semantic
+segmentation and available as self-supervised signals---could further
+enrich the label-free supervision available to the segmentation branch
+and represents a natural next step within the same multi-task
+architecture.
 
 % =============================================================================
 

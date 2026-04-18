@@ -11,17 +11,25 @@ This chapter is organised in two parts. The first part
 critical evaluation of the reproduction results for Stage~(a) (standard
 supervised learning) and Stage~(b) (semi-supervised and multi-task
 learning) based on the framework proposed by \cite{hoyer2023ijcv_sde}.
-The second part (Section~\ref{sec:ct-calibration-ablation}) evaluates the
-proposed Cross-Task Consistency Loss ($\mathcal{L}_\text{ct}$), which
-introduces an explicit feature-alignment objective between the
-segmentation and depth decoder branches of the PAD architecture.
+The second part (Sections~\ref{sec:ct-calibration-ablation}
+and~\ref{sec:ct-component-ablation}) evaluates the proposed Cross-Task
+Consistency Loss ($\mathcal{L}_\text{ct}$), which introduces an explicit
+feature-alignment objective between the segmentation and depth decoder
+branches of the PAD architecture.
+Section~\ref{sec:ct-calibration-ablation} calibrates the loss
+hyperparameters against the PAD-MTL baseline to select the most stable
+configuration, and Section~\ref{sec:ct-component-ablation} evaluates
+whether the calibrated loss composes with the remaining framework
+components (data selection and DepthMix).
 
 The primary objectives are: (i)~to verify whether the reported
 performance trends of \cite{hoyer2023ijcv_sde} are consistent under a
 constrained single-GPU academic computing environment; and
 (ii)~to evaluate whether $\mathcal{L}_\text{ct}$ yields reliable,
 statistically stable improvements over the reproduced multi-task baseline
-under label-efficient conditions. All experiments are conducted on the
+under label-efficient conditions, and whether the benefit persists when
+$\mathcal{L}_\text{ct}$ is combined with the existing framework
+components (data selection and DepthMix). All experiments are conducted on the
 Cityscapes dataset at the 372-label (1/8) regime unless otherwise stated,
 with results reported as mean mIoU~(\%) $\pm$ standard deviation across
 three independent seeds (7, 25, 42). Reproduction entries are presented
@@ -698,3 +706,167 @@ The two-phase evaluation supports the following conclusions:
   this range.
 
 \end{enumerate}
+
+% ============================================================
+\section{Cross-Task Consistency Loss: Composability with Framework Components}
+\label{sec:ct-component-ablation}
+
+\noindent
+The calibration study in Section~\ref{sec:ct-calibration-ablation}
+identified single projection with cosine similarity, $w0$, and
+$\lambda_\text{ct}=1.00$ as the most reliable configuration on top of
+the PAD-MTL baseline. This section evaluates whether the benefit of
+$\mathcal{L}_\text{ct}$ persists when it is combined with the remaining
+framework components, namely data selection~(S) and DepthMix~(DX).
+
+\vspace{4pt}
+\noindent
+\textbf{Objective.}
+We ask whether $\mathcal{L}_\text{ct}$ continues to improve segmentation
+performance once stronger baselines are introduced, or whether its
+benefit is subsumed by other components. This is a composability
+question: even if $\mathcal{L}_\text{ct}$ improves over pure PAD-MTL,
+its contribution could be redundant with the geometric priors
+introduced by DepthMix or with the higher-quality supervision introduced
+by data selection. The ablation therefore covers three component
+combinations on top of PAD-MTL: MTL\,+\,DX, MTL\,+\,S, and
+MTL\,+\,DX\,+\,S. For each combination, three variants are trained under
+the same three seeds (7, 25, 42): a baseline without $\mathcal{L}_\text{ct}$,
+a variant with normalised MSE, and a variant with cosine similarity.
+Both $\mathcal{L}_\text{ct}$ variants use the Phase~II best-performing
+hyperparameters (single $1\!\times\!1$ projection, $\lambda_\text{ct}=1.00$,
+no warmup, bidirectional gradient flow), so that the loss formulation
+is the only variable within each row group.
+
+\vspace{4pt}
+\noindent
+\textbf{Design of the paired comparison.}
+The baseline rows in each row group of
+Table~\ref{tab:ct-component-ablation} are trained under the same
+pipeline and in the same submission batch as the corresponding
+$\mathcal{L}_\text{ct}$ variants. This means each $\Delta$ is obtained
+from a paired per-seed comparison against the matching baseline rather
+than against a cross-batch reference, which removes pipeline-level
+confounds and isolates the effect of $\mathcal{L}_\text{ct}$.
+
+\begin{table}[H]
+\centering
+\caption{Component-level ablation of $\mathcal{L}_\text{ct}$ on top of
+three PAD-MTL component combinations (372 labels, 3 seeds). Both
+$\mathcal{L}_\text{ct}$ variants use single projection,
+$\lambda_\text{ct}=1.00$, no warmup, and bidirectional gradient flow.
+$\Delta$ is measured against the matching $\mathcal{L}_\text{ct}$-free
+baseline within the same row group (paired per-seed comparison).
+The $\mathbf{bold}$ row is the strongest full-framework configuration.}
+\label{tab:ct-component-ablation}
+\renewcommand{\arraystretch}{1.3}
+\small
+\begin{tabularx}{\textwidth}{cccXcccccr}
+\toprule
+\textbf{S} & \textbf{DX} & \textbf{MTL} &
+\textbf{$\mathcal{L}_\text{ct}$} &
+Seed~7 & Seed~25 & Seed~42 & Mean & Std & $\Delta$\,(pp) \\
+\midrule
+-- & \checkmark & \checkmark & none &
+-- & -- & -- & 65.11 & 0.51 & -- \\
+-- & \checkmark & \checkmark & MSE &
+65.20 & 65.93 & 66.18 & 65.77 & 0.51 & $+0.66$ \\
+-- & \checkmark & \checkmark & Cosine &
+65.55 & 65.24 & 67.44 & 66.08 & 1.19 & $+0.97$ \\
+\midrule
+\checkmark & -- & \checkmark & none &
+-- & -- & -- & 66.35 & 0.76 & -- \\
+\checkmark & -- & \checkmark & MSE &
+67.12 & 66.76 & 66.96 & 66.95 & 0.18 & $+0.60$ \\
+\checkmark & -- & \checkmark & Cosine &
+67.02 & 66.73 & 65.61 & 66.45 & 0.75 & $+0.10$ \\
+\midrule
+\checkmark & \checkmark & \checkmark & none &
+-- & -- & -- & 67.66 & 0.47 & -- \\
+\textbf{\checkmark} & \textbf{\checkmark} & \textbf{\checkmark} &
+\textbf{MSE} &
+\textbf{68.52} & \textbf{67.00} & \textbf{69.05} & \textbf{68.19} &
+\textbf{1.03} & $\mathbf{+0.53}$ \\
+\checkmark & \checkmark & \checkmark & Cosine &
+68.55 & 67.38 & 67.85 & 67.93 & 0.59 & $+0.27$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\vspace{4pt}
+\noindent
+\textbf{Findings.}
+\begin{itemize}
+
+\item \textit{$\mathcal{L}_\text{ct}$ is additive across all three
+  component combinations.}
+  All six $\mathcal{L}_\text{ct}$ cells improve over their matching
+  baseline, with gains ranging from $+0.10$ to $+0.97$\,pp. The
+  improvement therefore persists under stronger baselines and is not
+  subsumed by data selection or DepthMix. MSE yields an average gain
+  of $+0.60$\,pp across the three combinations and cosine yields
+  $+0.45$\,pp, indicating that the proposed loss composes with the
+  remaining framework components rather than providing redundant
+  signal.
+
+\item \textit{The largest benefit arises on MTL\,+\,DX, which is the
+  configuration with the largest reproduction gap.}
+  The reproduced MTL\,+\,DX baseline lies $1.55$\,pp below the paper
+  (Table~\ref{tab:table7_repro}), the most pronounced discrepancy
+  in the Table~7 reproduction. Under the same batch size and seeds,
+  adding $\mathcal{L}_\text{ct}$ recovers a substantial fraction of
+  this gap: cosine closes it by $+0.97$\,pp and MSE by $+0.66$\,pp.
+  This is consistent with the interpretation introduced in
+  Section~\ref{sec:stage_b_table7}: DepthMix produces mixed-geometry
+  boundary regions whose depth supervision is noisier than in unmixed
+  samples, and under a small batch size this noise degrades the implicit
+  cross-task signal carried through the shared encoder. An explicit
+  alignment loss operating on decoder representations appears to
+  provide a more stable channel for geometric knowledge transfer when
+  this implicit path is disrupted.
+
+\item \textit{The MSE--cosine ordering depends on whether DepthMix is
+  present.}
+  On MTL\,+\,S, where training samples contain no mixed-geometry
+  boundaries, MSE achieves $+0.60$\,pp with very low variance (std
+  $0.18$), while cosine yields only $+0.10$\,pp. When DepthMix is
+  introduced, the ordering reverses: on MTL\,+\,DX cosine attains the
+  largest absolute gain ($+0.97$\,pp), and on MTL\,+\,DX\,+\,S
+  cosine also exhibits a lower standard deviation ($0.59$ vs.\ $1.03$
+  for MSE). One plausible explanation is that normalised MSE, despite
+  its $\ell_2$-normalisation step, still carries residual sensitivity
+  to feature magnitude through the bounded-magnitude geometry of the
+  unit sphere, whereas cosine depends only on direction. DepthMix
+  perturbs the activation statistics of the depth branch through
+  mixed-geometry samples, which may amplify the magnitude-dependent
+  component of MSE's gradient, while cosine remains unaffected.
+
+\item \textit{The strongest single configuration is MSE on
+  MTL\,+\,DX\,+\,S.}
+  This configuration attains $68.19$\,\%, exceeding the reproduced
+  full-framework baseline (67.66\,\%) by $+0.53$\,pp and the paper's
+  reported S\,+\,DX\,+\,MTL value (68.01\,\%) by $+0.18$\,pp, despite
+  being trained under the more constrained single-GPU setting. The
+  cosine variant on the same combination attains $67.93$\,\%, within
+  $0.08$\,pp of the paper value and with substantially lower standard
+  deviation than MSE ($0.59$ vs.\ $1.03$). Taken together, these two
+  full-framework results indicate that $\mathcal{L}_\text{ct}$ allows
+  the single-GPU reproduction to reach---and in the MSE case marginally
+  exceed---the multi-GPU reference under the best component
+  configuration.
+
+\end{itemize}
+
+\vspace{4pt}
+\noindent
+\textbf{Summary.}
+This ablation confirms that the benefit of $\mathcal{L}_\text{ct}$
+observed in Section~\ref{sec:ct-calibration-ablation} is not specific
+to the pure PAD-MTL setting. All three component combinations benefit
+from the proposed loss in a paired per-seed comparison; the gain is
+largest precisely where the reproduction is weakest (MTL\,+\,DX); and
+the best full-framework configuration with $\mathcal{L}_\text{ct}$
+slightly surpasses the paper's reported value. The choice between MSE
+and cosine is not uniform across the three combinations: MSE is
+preferable when DepthMix is absent, while cosine appears more robust in
+the presence of DepthMix-induced activation perturbations.
