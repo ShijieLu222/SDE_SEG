@@ -1,6 +1,6 @@
 #!/bin/bash
-# BluePebble: PAD-MTL baseline（exp213 runs 6,7,8），与 train_baseline_mtl372_3seeds.slurm 相同；
-# log 前缀 r3，便于与 r2 / 旧 job 区分。
+# BluePebble: PAD-MTL baseline (Exp 213 runs 6,7,8), same as train_baseline_mtl372_3seeds.slurm.
+# Log prefix r3 to distinguish from r2 / older jobs.
 #
 # Submit:  sbatch slurm/bp1/train_baseline_mtl372_3seeds_r3.slurm
 

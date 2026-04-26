@@ -9,9 +9,9 @@
 
 set -euo pipefail
 
-# ===== Table 3 实验配置 =====
+# ===== Table 3 experiment config =====
 EXP_TYPE="DepthMix"
-MIXING_STRATEGY="DepthMix (scratch_depthmixgt) - 本文算法"
+MIXING_STRATEGY="DepthMix (scratch_depthmixgt) - proposed method"
 N_LABELS=372
 RUN_IDS="4,11,18"  # seeds 7, 25, 42
 FRACTION="1/8"

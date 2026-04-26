@@ -544,7 +544,7 @@ def generate_experiment_cfgs(base_cfg, id):
                         cfgs.append(cfg)
     # exp 219: No-detach projection ablation (single vs dual, cosine/mse, warmup, λ search), 1 seed
     # projection_mode × ct_type × warmup_iters × lambda_ct = 2×2×2×4 = 32 runs. Seed=7.
-    # λ 作为超参数在 {0.25, 0.5, 0.75, 1.0} 上搜索
+    # Search lambda as a hyperparameter over {0.25, 0.5, 0.75, 1.0}.
     elif id == 219:
         dataset = "cityscapes"
         mono_pretrain = 'mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4'
@@ -645,9 +645,10 @@ def generate_experiment_cfgs(base_cfg, id):
                     'projection_mode': 'single_rev',
                 }
                 cfgs.append(cfg)
-    # exp 220: 3-seeds 验证 exp219 候选配置（λ 细扫 + MSE 对照）
-    # 配置：single_cosine w0 (0.75,1.0,1.25); single_mse w5k/w0 λ=1.0; dual_cosine w0/w5k (0.5,0.75,1.0,1.25)
-    # 每个配置 3 seeds (7,25,42)，共 13 组 × 3 = 39 runs
+    # Exp 220: validate selected Exp 219 candidates with 3 seeds
+    # (lambda sweep + MSE control settings).
+    # Configs: single_cosine w0 (0.75,1.0,1.25); single_mse w5k/w0 lambda=1.0;
+    # dual_cosine w0/w5k (0.5,0.75,1.0,1.25). Total: 13 groups x 3 seeds = 39 runs.
     elif id == 220:
         dataset = "cityscapes"
         mono_pretrain = 'mono_cityscapes_1024x512_r101dil_aspp_dec6_lr5_fd2_crop512x512bs4'
@@ -680,7 +681,7 @@ def generate_experiment_cfgs(base_cfg, id):
             ("dual", "cosine", 5000, 0.75),       # runs 30-32
             ("dual", "cosine", 5000, 1.0),        # runs 33-35
             ("dual", "cosine", 5000, 1.25),       # runs 36-38
-            # single_rev (seg→depth) 3-seed 验证，runs 39-56
+            # single_rev (seg->depth) 3-seed validation, runs 39-56
             ("single_rev", "cosine", 0, 0.5),    # runs 39-41
             ("single_rev", "cosine", 0, 0.75),   # runs 42-44
             ("single_rev", "cosine", 0, 1.0),    # runs 45-47
@@ -730,8 +731,8 @@ def generate_experiment_cfgs(base_cfg, id):
                 cfgs.append(cfg)
 
     # exp 221: MTL + DepthMix / MTL + Selection / MTL + DepthMix + Selection
-    # 全部 N=372，3 seeds (7, 25, 42)，共 3 组 × 3 = 9 runs
-    # 基础设置与 exp213 MTL 分支完全一致
+    # N=372 for all settings, 3 seeds (7, 25, 42), 3 groups x 3 = 9 runs.
+    # Base setup matches the Exp 213 MTL branch.
     elif id == 221:
         dataset = "cityscapes"
         pres_method = "ds_us"
@@ -811,8 +812,9 @@ def generate_experiment_cfgs(base_cfg, id):
                 }
                 cfgs.append(cfg)
 
-    # exp 222: 完整模型 = exp221 三组配置 + cross-task projection loss (single, w0, λ=1.0)
-    # 两种 loss 类型都测试：MSE λ=1.0 和 Cosine λ=1.0，均无 warm-up
+    # Exp 222: full model = Exp 221 three-group setup + cross-task projection loss
+    # (single mode, w0, lambda=1.0).
+    # Test both loss types: MSE lambda=1.0 and Cosine lambda=1.0, both without warm-up.
     # projection_mode='single'
     # Run IDs:
     #   MSE    λ=1.0: 0-2  = MTL+DX,  3-5  = MTL+Sel,  6-8  = MTL+DX+Sel

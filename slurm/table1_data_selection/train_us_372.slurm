@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-# ===== 实验配置信息 =====
+# ===== Experiment configuration =====
 EXP_TYPE="US"
 N_LABELS=372
 RUN_IDS="7,22,37"   # 3 seeds (7, 25, 42) -> mIoU mean±std

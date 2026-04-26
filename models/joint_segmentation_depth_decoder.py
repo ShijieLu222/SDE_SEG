@@ -95,7 +95,8 @@ class PAD(nn.Module):
         self.dec_n_upconv = depth_args.get("n_upconv", 4)
         distillation_ch = self.layer_channels(self.distillation_layer)
         final_ch = self.layer_channels(self.final_layer)
-        # single: depth 投影到 seg 空间；single_rev: seg（有GT）投影到 depth 空间；dual: 两边都投影
+        # single: depth -> seg space; single_rev: seg (with GT) -> depth space;
+        # dual: project both branches.
         self.projection_mode = projection_mode
 
         num_scales = 4
@@ -107,7 +108,7 @@ class PAD(nn.Module):
 
         self.sa_depth = SelfAttention(distillation_ch, distillation_ch)
         self.sa_seg = SelfAttention(distillation_ch, distillation_ch)
-        # single/single_rev 各用一个投影头；dual 两边各一个
+        # single/single_rev use one projection head; dual uses one head per branch.
         self.cross_task_proj = nn.Conv2d(distillation_ch, distillation_ch, 1)
         if projection_mode == "dual":
             self.cross_task_proj_seg = nn.Conv2d(distillation_ch, distillation_ch, 1)

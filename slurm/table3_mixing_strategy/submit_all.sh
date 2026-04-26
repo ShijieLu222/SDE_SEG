@@ -1,6 +1,6 @@
 #!/bin/bash
 # Batch submit script for Table 3 experiments (Data Mixing Strategy)
-# 复刻论文 Table 3: Baseline, Pseudo-Labels, ClassMix, DepthMix
+# Reproduce paper Table 3: Baseline, Pseudo-Labels, ClassMix, DepthMix.
 
 set -euo pipefail
 
@@ -11,7 +11,7 @@ echo "=========================================="
 echo "Submitting Table 3 Mixing Strategy Experiments"
 echo "=========================================="
 echo ""
-echo "Table 3: 每脚本跑 3 个种子 (7,25,42)，共 21 个 config"
+echo "Table 3: 3 seeds per script (7,25,42), 21 configs total"
 echo "  Baseline 372:      Run 0,7,14"
 echo "  Baseline 2975:     Run 1,8,15"
 echo "  Pseudo-Labels 372: Run 2,9,16"

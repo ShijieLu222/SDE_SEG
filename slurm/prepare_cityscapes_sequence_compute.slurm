@@ -1,6 +1,6 @@
 #!/bin/bash
-# 纯 CPU 预处理 sequence；用 compute 分区，避免与训练抢 gpu 队列。
-# sinfo: compute* 最长 14 天，无 GRES。若 sbatch 被拒再改 --time / --mem。
+# CPU-only sequence preprocessing; use compute partition to avoid GPU queue contention.
+# compute* allows up to 14 days without GRES. If sbatch rejects, adjust --time / --mem.
 #SBATCH --job-name=prep_cs_seq
 #SBATCH --partition=compute
 #SBATCH --account=coms037985

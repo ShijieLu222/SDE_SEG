@@ -1,15 +1,15 @@
-# single_rev 实验完整结果表（exp 219 / 220 / 222）
+# Full single_rev Results (exp 219 / 220 / 222)
 
-> 更新：2026-04-23  
-> **single_rev**：分割侧蒸馏特征投影到 depth 空间后再与 depth 特征计算 $\mathcal{L}_\text{ct}$（seg→depth）。  
-> **指标**：各次训练全程 **best validation mIoU**（Cityscapes val）。  
-> **共同设置**：PAD-MTL，N=372，40k iter；warmup **w0**（无 CT warmup）。
+> Updated: 2026-04-23  
+> **single_rev**: project segmentation distillation features to depth space, then compute $\mathcal{L}_\text{ct}$ against depth features (seg->depth).  
+> **Metric**: **best validation mIoU** over the full training run (Cityscapes val).  
+> **Shared setup**: PAD-MTL, N=372, 40k iter, warmup **w0** (no CT warmup).
 
 ---
 
-## Exp 219 — Phase I（仅 seed 7）
+## Exp 219 — Phase I (seed 7 only)
 
-Phase I 为单 seed 扫描；**single_rev** 子实验共 **8** 组（runs **32–39**），**无** 25 / 42。
+Phase I is a single-seed sweep. The **single_rev** subset has **8** settings (runs **32-39**) with no seed 25 / 42.
 
 | Run ID | CT | $\lambda_\text{ct}$ | Seed 7 best val mIoU |
 |--------|-----|---------------------|----------------------|
@@ -25,9 +25,9 @@ Phase I 为单 seed 扫描；**single_rev** 子实验共 **8** 组（runs **32�
 
 ---
 
-## Exp 220 — Phase II（seeds 7 / 25 / 42）
+## Exp 220 — Phase II (seeds 7 / 25 / 42)
 
-**single_rev** $\lambda$ 细扫共 **6** 组（runs **39–56**）；每行三 seed 顺序为 **7 → 25 → 42**。mean / std 为三点的算术平均与总体标准差（pstdev）。
+**single_rev** lambda sweep includes **6** settings (runs **39-56**). Seed order is **7 -> 25 -> 42**. mean / std are arithmetic mean and population std (pstdev).
 
 | CT | $\lambda_\text{ct}$ | Slurm JOBID | Run IDs | Seed 7 | Seed 25 | Seed 42 | Mean | Std |
 |----|---------------------|-------------|---------|--------|---------|---------|------|-----|
@@ -41,12 +41,12 @@ Phase I 为单 seed 扫描；**single_rev** 子实验共 **8** 组（runs **32�
 
 ---
 
-## Exp 222 — MTL 组件 × CT（$\lambda_\text{ct}=1.0$，w0）
+## Exp 222 — MTL Components × CT ($\lambda_\text{ct}=1.0$, w0)
 
-**single_rev** 下 **6** 组配置（runs **18–35**）；**mIoU 以百分比** 给出（与 `RESULTS_single_rev.md` 一致）。mean / std 为三 seed 的均值与标准差。
+Under **single_rev**, there are **6** settings (runs **18-35**). **mIoU is shown as percentages** (consistent with `RESULTS_single_rev.md`). mean / std are computed over three seeds.
 
-| CT | 配置 | Run IDs | Seed 7 | Seed 25 | Seed 42 | Mean | Std |
-|----|------|---------|--------|---------|---------|------|-----|
+| CT | Setting | Run IDs | Seed 7 | Seed 25 | Seed 42 | Mean | Std |
+|----|---------|---------|--------|---------|---------|------|-----|
 | mse | MTL+DX | 18,19,20 | 65.23% | 66.02% | 66.26% | 65.84% | ±0.44% |
 | mse | MTL+Sel | 21,22,23 | 67.02% | 66.21% | 65.90% | 66.38% | ±0.47% |
 | mse | MTL+DX+Sel | 24,25,26 | 68.37% | 67.29% | 67.91% | 67.86% | ±0.44% |

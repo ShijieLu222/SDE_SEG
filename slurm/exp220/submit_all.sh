@@ -1,5 +1,5 @@
 #!/bin/bash
-# 提交 exp220 全部 13 个脚本
+# Submit all 13 Exp 220 scripts
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 for f in slurm/exp220_projection/train_*.slurm; do

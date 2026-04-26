@@ -1,6 +1,6 @@
 #!/bin/bash
 # Batch submit script for Table 7 (Framework Component Ablation)
-# 复刻论文 Table 7: S (Data Selection), DX (DepthMix), MTL (SDE Multi-Task Learning) 组合比较
+# Reproduce paper Table 7: combinations of S (Data Selection), DX (DepthMix), and MTL (SDE Multi-Task Learning).
 
 set -euo pipefail
 

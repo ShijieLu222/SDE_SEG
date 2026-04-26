@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-# ===== Table 3 实验配置 =====
+# ===== Table 3 experiment config =====
 EXP_TYPE="Baseline"
 MIXING_STRATEGY="Supervised only (scratch)"
 N_LABELS=372

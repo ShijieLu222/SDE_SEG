@@ -1,6 +1,6 @@
 #!/bin/bash
-# BluePebble: PAD-MTL baseline（exp213 runs 6,7,8），第5次独立提交；
-# log 前缀 r5，便于区分。
+# BluePebble: PAD-MTL baseline (Exp 213 runs 6,7,8), 5th independent submission.
+# Log prefix r5 for clear tracking.
 #
 # Submit:  sbatch slurm/bp1/train_baseline_mtl372_3seeds_r5.slurm
 

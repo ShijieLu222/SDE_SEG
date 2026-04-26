@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-# ===== Table 3 实验配置 =====
+# ===== Table 3 experiment config =====
 EXP_TYPE="ClassMix-GT"
 MIXING_STRATEGY="ClassMix-GT (scratch_classmixgt, 2975 full)"
 N_LABELS=2975

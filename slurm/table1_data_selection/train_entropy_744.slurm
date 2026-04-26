@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-# ===== 实验配置信息 =====
+# ===== Experiment configuration =====
 EXP_TYPE="Entropy"
 N_LABELS=744
 RUN_IDS="5,20,35"   # 3 seeds (7, 25, 42) -> mIoU mean±std

@@ -1,7 +1,7 @@
-# Exp 219 — single_rev（临时摘录）
+# Exp 219 — single_rev (interim excerpt)
 
-**已合并至主结果文件。**
+**Merged into the main results file.**
 
-完整表格、与 single/dual 对照及论文口径说明见：
+For the full table, single/dual comparison, and paper-ready wording, see:
 
-- [`exp219_projection_results.md`](exp219_projection_results.md) **§10 Single-rev（seg→depth），runs 32–39**
+- [`exp219_projection_results.md`](exp219_projection_results.md) **Section 10 Single-rev (seg->depth), runs 32-39**

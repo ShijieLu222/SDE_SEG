@@ -1,6 +1,6 @@
 #!/bin/bash
 # Batch submit script for Table 5 (SDE Feature Transfer)
-# 复刻论文 Table 5: Baseline, Transfer (no F), Transfer (F=✓), Multi-Task (F=✓)
+# Reproduce paper Table 5: Baseline, Transfer (no F), Transfer (F=yes), Multi-Task (F=yes).
 
 set -euo pipefail
 
