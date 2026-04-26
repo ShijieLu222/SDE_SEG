@@ -34,15 +34,18 @@ def process_images(fs, in_dir, out_dir, res, replace=False):
                 # compared with downscaled png
                 img.save(new_f, subsampling=0, quality=98)
 
+
 def to_iterator(obj_ids):
     while obj_ids:
         done, obj_ids = ray.wait(obj_ids)
         yield ray.get(done[0])
 
+
 # Downscale images
 @ray.remote(num_cpus=4)
 def process_images_ray(*args, **kwargs):
     return process_images(*args, **kwargs)
+
 
 # Check for corrupted files
 @ray.remote(num_cpus=4)
