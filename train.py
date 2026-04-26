@@ -524,11 +524,16 @@ class Trainer():
                     feat_s = outputs["feat_seg_distill"]
                     feat_d = outputs["feat_depth_distill"]
                     # 不再使用 detach：L_ct 对 seg 与 depth 两边都回传梯度（exp218 消融表明 no-detach 更优）
-                    if getattr(mtl_dec, "projection_mode", "single") == "dual":
+                    proj_mode = getattr(mtl_dec, "projection_mode", "single")
+                    if proj_mode == "dual":
                         # dual: 两边都投影到 shared alignment space 再比较
                         z_seg = mtl_dec.cross_task_proj_seg(feat_s)
                         z_dep = mtl_dec.cross_task_proj(feat_d)
                         left, right = z_seg, z_dep
+                    elif proj_mode == "single_rev":
+                        # single_rev: 把 seg（有GT）投影到 depth 空间，depth 作为被对齐目标
+                        z_seg = mtl_dec.cross_task_proj(feat_s)
+                        left, right = feat_d, z_seg
                     else:
                         # single: 仅把 depth 投影到 segmentation 空间，与 feat_seg 比较
                         z_dep = mtl_dec.cross_task_proj(feat_d)

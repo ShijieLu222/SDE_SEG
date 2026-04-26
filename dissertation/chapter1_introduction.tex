@@ -151,11 +151,15 @@ Loss.} Inspired by cross-task consistency
 learning~\cite{nakano2021crosstask,zamir2020crosstask} and multi-task
 learning with partial annotations~\cite{li2022mtl}, propose and implement
 $\mathcal{L}_\text{ct}$ within the PAD-Net~\cite{hoyer2023ijcv_sde}
-multi-task architecture. Two loss formulations are investigated: normalised
-MSE and cosine similarity. A loss-scale calibration procedure followed by a
-$\lambda$ sweep is used to identify the best candidates, and three
-independent random seeds are used to verify whether the mIoU improvements
-over the Stage~(b) MTL baseline are stable and reproducible.
+multi-task architecture. Two loss formulations (normalised MSE and cosine similarity) and two
+projection directions---single~$(d{\rightarrow}s)$, which projects depth
+features into the segmentation space, and single~$(s{\rightarrow}d)$,
+which projects segmentation features into the depth space---are
+investigated. A loss-scale calibration procedure followed by a
+$\lambda$ sweep and a projection direction ablation are used to identify
+the best design choices, and three independent random seeds are used to
+verify whether the mIoU improvements over the Stage~(b) MTL baseline
+are stable and reproducible.
 
 \item \textbf{Evaluate the full combined framework.} Integrate
 $\mathcal{L}_\text{ct}$ into three configurations: MTL with DepthMix, MTL

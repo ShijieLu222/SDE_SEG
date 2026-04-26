@@ -1,6 +1,6 @@
 # Exp 219 Projection Ablation（**已完成**）
 
-**状态**：32 个配置 **全部跑满**（每 run **33 次验证** / 40k iter）；**单 seed S7**；指标均为 log 内 **best val mIoU**。  
+**状态**：共 **40** 个 run **全部跑满**（原 **32**：single/dual × cosine/mse × warmup × λ；新增 **8**：single_rev × cosine/mse × λ）。每 run **33 次验证** / 40k iter；指标均为 log 内 **best val mIoU**。默认 **单 seed S7**（runs 32–39 亦为 S7）。  
 **Baseline 对照**：论文用 **exp217**（旧 HPC）三 seed **mean = 0.6269**（见 §5）。
 
 ---
@@ -157,7 +157,8 @@ exp219（32 格，1 seed）✓
 
 ## 8. 小结
 
-- **exp219 已全部完成**；**全局最优**：**single_cosine w0 λ=1.0 → 0.6377**；**dual 最优**：**dual_cosine w0 λ=0.5 → 0.6366**。  
+- **exp219 已全部完成**；**全局最优（single/dual 原 32 run）**：**single_cosine w0 λ=1.0 → 0.6377**；**dual 最优**：**dual_cosine w0 λ=0.5 → 0.6366**。  
+- **single_rev（runs 32–39）**：本组最优为 **mse w0 λ=1.0 → 0.6308**，未超过上述 **single depth→seg** 峰值（见 **§10**）。  
 - 相对 **baseline mean 0.6269**，最优 cosine 配置在 **S7 上约 +0.011**；与 **baseline 单 seed best 0.6385** 几乎持平。  
 - **下一步**：**λ 细扫用 1 seed** 收窄区间 → **候选 λ 用 3 seeds 定稿** → 再考虑 **DepthMix** 与 **selection**，且 **后两者应在 λ 与主结构稳定之后**再做。
 
@@ -175,5 +176,24 @@ exp219（32 格，1 seed）✓
 | dual_cosine w5k | λ 细扫 | 0.5, 0.75, 1.0, 1.25 | 4 |
 
 - **experiments.py**：`id == 220`
-- **脚本**：`slurm/exp220_projection/train_*.slurm`，共 **13 个**
-- **README**：`slurm/exp220_projection/README.md`
+- **脚本**：`slurm/exp220/train_*.slurm`，共 **19** 个（含 **6** 个 **single_rev**，runs 39–56）
+- **README / 汇总表**：`slurm/exp220/README.md`、`slurm/exp220/exp220_results.md`
+
+---
+
+## 10. Single-rev（seg→depth），runs 32–39
+
+**含义**：**segmentation 蒸馏特征经投影头映射到 depth 侧**，再与 depth 蒸馏特征算 \( \mathcal{L}_\text{ct} \)；与原来 **single（depth→seg）** 方向相反。全部为 **warmup=0**，**seed=7**，**λ_ct ∈ {0.25, 0.5, 0.75, 1.0}**。
+
+| Run ID | ct_type | λ_ct | best val mIoU |
+|--------|---------|------|---------------|
+| 32 | cosine | 0.25 | **0.6270** |
+| 33 | cosine | 0.50 | 0.6255 |
+| 34 | cosine | 0.75 | 0.6126 |
+| 35 | cosine | 1.00 | 0.6130 |
+| 36 | mse | 0.25 | 0.6208 |
+| 37 | mse | 0.50 | 0.6264 |
+| 38 | mse | 0.75 | 0.6183 |
+| 39 | mse | 1.00 | **0.6308** |
+
+**小结（Phase I，S7）**：single_rev 本组 **mse λ=1.0** 与 **cosine λ=0.25** 相对较高；仍未超过 §1 中 **single cosine w0 λ=1.0（0.6377）**。三 seed 验证见 **`slurm/exp220/exp220_results.md` §10**。

@@ -95,7 +95,7 @@ class PAD(nn.Module):
         self.dec_n_upconv = depth_args.get("n_upconv", 4)
         distillation_ch = self.layer_channels(self.distillation_layer)
         final_ch = self.layer_channels(self.final_layer)
-        # single: 只把 depth 特征投影到 seg 空间再比较；dual: 两边都投影到 shared alignment space 再比较（无 detach）
+        # single: depth 投影到 seg 空间；single_rev: seg（有GT）投影到 depth 空间；dual: 两边都投影
         self.projection_mode = projection_mode
 
         num_scales = 4
@@ -107,9 +107,8 @@ class PAD(nn.Module):
 
         self.sa_depth = SelfAttention(distillation_ch, distillation_ch)
         self.sa_seg = SelfAttention(distillation_ch, distillation_ch)
-        # depth 分支投影（single/dual 都用）
+        # single/single_rev 各用一个投影头；dual 两边各一个
         self.cross_task_proj = nn.Conv2d(distillation_ch, distillation_ch, 1)
-        # dual 时 seg 分支也投影到 shared space
         if projection_mode == "dual":
             self.cross_task_proj_seg = nn.Conv2d(distillation_ch, distillation_ch, 1)
         if self.side_output:

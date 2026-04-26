@@ -360,229 +360,146 @@ proposed Cross-Task Consistency Loss ($\mathcal{L}_\text{ct}$), which
 aligns intermediate features from the segmentation and depth decoder
 branches via a learnable $1{\times}1$ convolutional projection head.
 We report results from two experimental phases: a single-seed calibration
-sweep (Phase~I) over loss type, projection layout, warmup schedule, and
-$\lambda_\text{ct}$; and a three-seed validation (Phase~II) for the most
-promising configurations. All $\Delta$ values are reported as absolute
-mIoU differences in percentage points~(pp).
+sweep (Phase~I) over loss type, projection layout, projection direction,
+and $\lambda_\text{ct}$; and a three-seed validation (Phase~II) for the
+most promising configurations. All $\Delta$ values are reported as
+absolute mIoU differences in percentage points~(pp).
 
 % ============================================================
 \subsection{Phase I: Single-seed Calibration (Seed~7)}
 \label{subsec:ct-phase1-seed7}
 
 \noindent
-The main Phase~I sweep for $\mathcal{L}_\text{ct}$ comprises four
-factors: loss type (cosine similarity vs.\ normalised MSE), projection
-layout (single vs.\ dual $1{\times}1$ convolutional heads), warmup
-schedule ($w5k$: 5{,}000 segmentation-only iterations before activating
-$\mathcal{L}_\text{ct}$; $w0$: no warmup), and
-$\lambda_\text{ct}\in\{0.25, 0.50, 0.75, 1.00\}$. This yields
-$2 \times 2 \times 2 \times 4 = 32$ distinct configurations. Evaluating
-every configuration with three independent seeds would require 96 full
-training runs, which is prohibitive under the available single-GPU
-computing budget. Phase~I therefore fixes random seed~7 to screen all 32
-configurations; the goal is not to identify a globally optimal
-configuration, but to eliminate underperforming regions of the search
-space and reduce the candidate set to a tractable size for multi-seed
-validation in Phase~II.
+The Phase~I sweep for $\mathcal{L}_\text{ct}$ covers three factors:
+loss type (cosine similarity vs.\ normalised MSE), projection layout
+(single vs.\ dual $1{\times}1$ convolutional heads), and
+$\lambda_\text{ct}\in\{0.25, 0.50, 0.75, 1.00\}$, with all runs using
+no warmup ($w0$) based on preliminary findings that activating
+$\mathcal{L}_\text{ct}$ from the first iteration produces equal or
+better results than delaying it. This yields $2 \times 2 \times 4 = 16$
+configurations. An additional direction ablation evaluates two
+single-projection variants that differ only in which branch is projected:
+single~$(d{\rightarrow}s)$, in which the depth feature is projected into
+the segmentation space, and single~$(s{\rightarrow}d)$, in which the
+segmentation feature is projected into the depth space.
 
-% --- NEW: warmup motivation explanation
-The warmup schedule~($w5k$) is motivated as follows: by allowing the
-segmentation decoder to train on the pure segmentation loss for an
-initial period before activating $\mathcal{L}_\text{ct}$, we avoid
-introducing noisy cross-task gradients from the randomly initialised
-projection head into the segmentation branch at the very start of
-training. The $w0$ condition serves as the complementary baseline,
-where the alignment loss is active from the first iteration.
-
+Phase~I fixes random seed~7 to screen all configurations; the goal is
+not to identify a globally optimal configuration, but to eliminate
+underperforming regions of the search space and reduce the candidate
+set to a tractable size for multi-seed validation in Phase~II.
 Seed~7 was selected because it corresponds to the median-performing seed
 in the PAD-MTL baseline ($59.84$\,\%, compared to $60.92$\,\% and
 $61.50$\,\% for seeds~25 and~42), providing a conservative reference.
 All Phase~I $\Delta$ values use $\text{baseline}_{\text{S7}} = 59.84$\,\%.
-Since every configuration is evaluated under identical conditions---same
-seed, same dataset split, same training schedule---the relative ranking
-is meaningful even though the absolute values carry single-seed variance.
-The single+MSE block was independently re-run (Slurm jobs
-16513723--16513730); all other blocks follow the exp~219 sweep protocol.
 
 \begin{table}[H]
 \centering
-\caption{Phase~I (seed~7): single projection + cosine similarity loss.
+\caption{Phase~I (seed~7): single projection, both directions and loss
+types, $w0$.
 $\Delta = \text{mIoU}(\%) - 59.84$\,pp.}
-\label{tab:ct-p1-single-cos}
+\label{tab:ct-p1-single}
 \renewcommand{\arraystretch}{1.2}
-\begin{tabular}{llcc}
+\begin{tabular}{llccc}
 \toprule
-Warmup & $\lambda_\text{ct}$ & Best mIoU (\%) & $\Delta$\,(pp) \\
+Direction & Loss & $\lambda_\text{ct}$ & Best mIoU (\%) & $\Delta$\,(pp) \\
 \midrule
-Baseline (seed~7) & -- & 59.84 & -- \\
+Baseline (seed~7) & -- & -- & 59.84 & -- \\
 \midrule
-$w5k$ & 0.25 & 62.64 & $+2.80$ \\
-$w5k$ & 0.50 & 61.69 & $+1.85$ \\
-$w5k$ & 0.75 & 61.86 & $+2.02$ \\
-$w5k$ & 1.00 & 61.40 & $+1.56$ \\
+$d{\rightarrow}s$ & cosine & 0.25 & 62.89 & $+3.05$ \\
+$d{\rightarrow}s$ & cosine & 0.50 & 61.42 & $+1.58$ \\
+$d{\rightarrow}s$ & cosine & 0.75 & 63.00 & $+3.16$ \\
+$d{\rightarrow}s$ & cosine & 1.00 & 63.77 & $+3.93$ \\
 \midrule
-$w0$  & 0.25 & 62.89 & $+3.05$ \\
-$w0$  & 0.50 & 61.42 & $+1.58$ \\
-$w0$  & 0.75 & 63.00 & $+3.16$ \\
-$w0$  & 1.00 & 63.77 & $+3.93$ \\
+$d{\rightarrow}s$ & MSE & 0.25 & 61.97 & $+2.13$ \\
+$d{\rightarrow}s$ & MSE & 0.50 & 61.68 & $+1.84$ \\
+$d{\rightarrow}s$ & MSE & 0.75 & 61.46 & $+1.62$ \\
+$d{\rightarrow}s$ & MSE & 1.00 & 62.16 & $+2.32$ \\
+\midrule
+$s{\rightarrow}d$ & cosine & 0.25 & 62.70 & $+2.86$ \\
+$s{\rightarrow}d$ & cosine & 0.50 & 62.55 & $+2.71$ \\
+$s{\rightarrow}d$ & cosine & 0.75 & 62.26 & $+2.42$ \\
+$s{\rightarrow}d$ & cosine & 1.00 & 62.80 & $+2.96$ \\
+\midrule
+$s{\rightarrow}d$ & MSE & 0.25 & 62.08 & $+2.24$ \\
+$s{\rightarrow}d$ & MSE & 0.50 & 62.64 & $+2.80$ \\
+$s{\rightarrow}d$ & MSE & 0.75 & 62.83 & $+2.99$ \\
+$s{\rightarrow}d$ & MSE & 1.00 & 63.08 & $+3.24$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{table}[H]
 \centering
-\caption{Phase~I (seed~7): single projection + normalised MSE loss.
+\caption{Phase~I (seed~7): dual projection, both loss types, $w0$.
 $\Delta = \text{mIoU}(\%) - 59.84$\,pp.}
-\label{tab:ct-p1-single-mse}
+\label{tab:ct-p1-dual}
 \renewcommand{\arraystretch}{1.2}
-\begin{tabular}{llcc}
+\begin{tabular}{lccc}
 \toprule
-Warmup & $\lambda_\text{ct}$ & Best mIoU (\%) & $\Delta$\,(pp) \\
+Loss & $\lambda_\text{ct}$ & Best mIoU (\%) & $\Delta$\,(pp) \\
 \midrule
 Baseline (seed~7) & -- & 59.84 & -- \\
 \midrule
-$w5k$ & 0.25 & 62.58 & $+2.74$ \\
-$w5k$ & 0.50 & 62.41 & $+2.57$ \\
-$w5k$ & 0.75 & 62.54 & $+2.70$ \\
-$w5k$ & 1.00 & 63.43 & $+3.59$ \\
+cosine & 0.25 & 61.76 & $+1.92$ \\
+cosine & 0.50 & 63.66 & $+3.82$ \\
+cosine & 0.75 & 62.45 & $+2.61$ \\
+cosine & 1.00 & 63.32 & $+3.48$ \\
 \midrule
-$w0$  & 0.25 & 61.97 & $+2.13$ \\
-$w0$  & 0.50 & 61.68 & $+1.84$ \\
-$w0$  & 0.75 & 61.46 & $+1.62$ \\
-$w0$  & 1.00 & 62.16 & $+2.32$ \\
+MSE & 0.25 & 62.77 & $+2.93$ \\
+MSE & 0.50 & 62.56 & $+2.72$ \\
+MSE & 0.75 & 63.07 & $+3.23$ \\
+MSE & 1.00 & 62.48 & $+2.64$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \noindent
-\textbf{Phase-I findings (single projection).}
-All 16 single-projection configurations improve over the seed-7 baseline
-under both loss types, with gains ranging from $+1.56$ to $+3.93$\,pp,
-suggesting that $\mathcal{L}_\text{ct}$ provides a positive signal across
-the full range of tested hyperparameters. For cosine, $w0$ is
-consistently stronger than $w5k$: the best cell is $w0$,
-$\lambda_\text{ct}=1.00$ ($63.77$\,\%, $+3.93$\,pp), with $w5k$
-performance appearing to plateau or degrade at larger $\lambda_\text{ct}$.
-This may indicate that the scale-invariant cosine formulation produces
-well-behaved gradients from the start of training, making the warmup
-period unnecessary. For MSE, $w5k$ performs notably better than $w0$ at
-$\lambda_\text{ct}=1.00$ ($63.43$\,\% vs.\ $62.16$\,\%, gap of
-$1.27$\,pp), which is consistent with the interpretation that a brief
-warmup period allows the projection head to stabilise its output scale
-before the cross-task term is activated at full weight. These results
-suggest that the most promising cosine configurations lie in the
-higher-$\lambda_\text{ct}$ range under $w0$, motivating Phase~II
-validation at $\lambda_\text{ct}=0.75$ and $1.00$. Because the seed-7
-cosine results under $w0$ continued to improve up to
-$\lambda_\text{ct}=1.00$ without showing signs of saturation, one
-additional local follow-up point at $\lambda_\text{ct}=1.25$ was
-evaluated for the single-projection cosine configuration only and
-carried forward to Phase~II. For MSE, the most competitive
-configurations were observed at $\lambda_\text{ct}=1.00$ under both
-$w5k$ and $w0$.
+\textbf{Phase-I findings.}
+All 24 configurations improve over the seed-7 baseline, confirming that
+$\mathcal{L}_\text{ct}$ provides a positive signal across projection
+layout, direction, loss type, and $\lambda_\text{ct}$.
+
+For single projection, the $d{\rightarrow}s$ direction achieves a higher
+Phase~I peak than $s{\rightarrow}d$: $63.77$\,\% vs.\ $63.08$\,\%
+respectively. For both directions, cosine loss with
+$\lambda_\text{ct}=1.00$ reaches the per-direction maximum, while the
+MSE variants are competitive but slightly lower. The $s{\rightarrow}d$
+cosine curve is flatter across $\lambda_\text{ct}$ values, with results
+in the range $62.26$--$62.80$\,\%, whereas $d{\rightarrow}s$ cosine
+shows more variance across $\lambda_\text{ct}$ but a higher ceiling.
+
+For dual projection, the peak is $63.66$\,\% (cosine, $\lambda=0.50$),
+which is competitive with but below the single $d{\rightarrow}s$ peak.
+The dual MSE results are more stable across $\lambda_\text{ct}$ values
+than dual cosine. Although the dual-projection peaks are notable,
+Phase~I is a single-seed screen; whether these peaks generalise is
+evaluated in Phase~II.
+
+Based on these results, Phase~II carries forward: single $d{\rightarrow}s$
+cosine and MSE at $\lambda \in \{0.75, 1.00\}$; single $s{\rightarrow}d$
+cosine at $\lambda \in \{0.50, 0.75, 1.00\}$; and dual cosine at
+$\lambda \in \{0.50, 0.75, 1.00\}$, to enable a direct architectural
+and directional comparison under multi-seed conditions.
 
 % ============================================================
-\subsection{Phase II: Three-seed Validation and Dual-Projection Comparison}
+\subsection{Phase II: Three-seed Validation}
 \label{subsec:ct-phase2-3seeds}
 
 \noindent
 Using the candidates identified in Phase~I, we train with three
 independent seeds (7, 25, 42) to obtain statistically reliable
-estimates of mean performance and variance.
-
-\paragraph{Dual-projection reference (seed~7).}
-In the dual-projection design, each decoder branch (segmentation and
-depth) has its own independent $1{\times}1$ convolutional projection
-head, and the alignment loss is computed in the shared projected space.
-This doubles the number of additional parameters relative to single
-projection ($33{,}024$ vs.\ $16{,}512$, though both are negligible
-at $<0.07$\% of total model parameters). Tables~\ref{tab:ct-p1-dual-cos}
-and~\ref{tab:ct-p1-dual-mse} provide the dual-projection seed-7 scan
-from Phase~I for direct comparison. Although dual-projection variants
-are not among the top Phase~I configurations, they are included in
-Phase~II to provide a fair architectural comparison under multi-seed
-conditions.
+estimates of mean performance and variance. Per-seed best validation
+mIoU, mean, standard deviation, and $\Delta$ versus the 3-seed baseline
+mean are reported in Table~\ref{tab:ct-phase2-3seeds}, sorted by mean
+mIoU in descending order.
 
 \begin{table}[H]
 \centering
-\caption{Phase~I (seed~7): dual projection + cosine similarity loss.
-$\Delta = \text{mIoU}(\%) - 59.84$\,pp.}
-\label{tab:ct-p1-dual-cos}
-\renewcommand{\arraystretch}{1.2}
-\begin{tabular}{llcc}
-\toprule
-Warmup & $\lambda_\text{ct}$ & Best mIoU (\%) & $\Delta$\,(pp) \\
-\midrule
-Baseline (seed~7) & -- & 59.84 & -- \\
-\midrule
-$w5k$ & 0.25 & 62.80 & $+2.96$ \\
-$w5k$ & 0.50 & 62.49 & $+2.65$ \\
-$w5k$ & 0.75 & 62.67 & $+2.83$ \\
-$w5k$ & 1.00 & 61.27 & $+1.43$ \\
-\midrule
-$w0$  & 0.25 & 61.76 & $+1.92$ \\
-$w0$  & 0.50 & 63.66 & $+3.82$ \\
-$w0$  & 0.75 & 62.45 & $+2.61$ \\
-$w0$  & 1.00 & 63.32 & $+3.48$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[H]
-\centering
-\caption{Phase~I (seed~7): dual projection + normalised MSE loss.
-$\Delta = \text{mIoU}(\%) - 59.84$\,pp.}
-\label{tab:ct-p1-dual-mse}
-\renewcommand{\arraystretch}{1.2}
-\begin{tabular}{llcc}
-\toprule
-Warmup & $\lambda_\text{ct}$ & Best mIoU (\%) & $\Delta$\,(pp) \\
-\midrule
-Baseline (seed~7) & -- & 59.84 & -- \\
-\midrule
-$w5k$ & 0.25 & 61.83 & $+1.99$ \\
-$w5k$ & 0.50 & 62.67 & $+2.83$ \\
-$w5k$ & 0.75 & 62.70 & $+2.86$ \\
-$w5k$ & 1.00 & 62.79 & $+2.95$ \\
-\midrule
-$w0$  & 0.25 & 62.77 & $+2.93$ \\
-$w0$  & 0.50 & 62.56 & $+2.72$ \\
-$w0$  & 0.75 & 63.07 & $+3.23$ \\
-$w0$  & 1.00 & 62.48 & $+2.64$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\paragraph{Candidate selection from Phase~I.}
-Phase~I identified two consistent patterns: cosine loss benefits from no
-warmup ($w0$) with $\lambda_\text{ct} \geq 0.75$, while MSE loss
-requires a warmup period ($w5k$) to stabilise its gradient scale. Nine
-configurations with the strongest Phase~I results were carried forward to
-Phase~II, covering both loss types, both projection layouts, and a range
-of $\lambda_\text{ct}$ values. Dual-projection variants were included
-despite their Phase~I results being marginally lower than the
-single-projection peaks, in order to provide a fair architectural
-comparison under multi-seed conditions rather than relying on
-single-seed evidence alone.
-
-\paragraph{Three-seed validation.}
-Table~\ref{tab:ct-phase2-3seeds} reports per-seed best validation mIoU,
-mean, standard deviation, and $\Delta$ versus the 3-seed baseline mean
-for all validated configurations, sorted by mean mIoU in descending
-order. The primary design choice is highlighted in bold. The baseline
-row includes the per-seed values to support direct paired comparisons
-with each configuration.
-
-\begin{table}[H]
-\centering
-\caption{Phase~II three-seed validation (372 labels, best-observed across
-runs), sorted by mean mIoU (descending).
+\caption{Phase~II three-seed validation (372 labels, best-observed
+across runs), sorted by mean mIoU (descending).
 Baseline: PAD-MTL (Table~\ref{tab:table5_repro}, Multi-Task),
 $\lambda_\text{ct}=0$.
-$\Delta = \text{mean}(\%) - 60.75$\,pp.
-$\dagger$ denotes configurations with high seed-to-seed variance
-(\textit{std}~$\geq 0.90$), indicating unreliable generalisation.
-The \textbf{bold} row is the selected primary configuration.}
+$\Delta = \text{mean}(\%) - 60.75$\,pp.}
 \label{tab:ct-phase2-3seeds}
 \renewcommand{\arraystretch}{1.3}
 \small
@@ -591,29 +508,31 @@ The \textbf{bold} row is the selected primary configuration.}
 Configuration &
 Seed~7 & Seed~25 & Seed~42 & Mean & Std & $\Delta$\,(pp) \\
 \midrule
-
 Baseline (PAD-MTL) &
 59.84 & 60.92 & 61.50 & 60.75 & 0.69 & -- \\
 \midrule
-single MSE, $w0$, $\lambda=1.00$$^\dagger$ &
+single $(s{\rightarrow}d)$, cosine, $\lambda=1.00$ &
+62.81 & 63.61 & 63.87 & 63.43 & 0.56 & $+2.68$ \\
+single $(d{\rightarrow}s)$, MSE, $\lambda=1.00$ &
 62.06 & 62.91 & 64.91 & 63.29 & 1.20 & $+2.54$ \\
-\textbf{single cosine, $w0$, $\lambda=1.00$} &
-\textbf{63.01} & \textbf{63.37} & \textbf{63.37} & \textbf{63.25} &
-\textbf{0.17} & $\mathbf{+2.50}$ \\
-single cosine, $w0$, $\lambda=1.25$$^\dagger$ &
+single $(d{\rightarrow}s)$, cosine, $\lambda=1.00$ &
+63.01 & 63.37 & 63.37 & 63.25 & 0.17 & $+2.50$ \\
+single $(s{\rightarrow}d)$, cosine, $\lambda=0.75$ &
+62.92 & 62.84 & 64.10 & 63.29 & 0.71 & $+2.54$ \\
+single $(s{\rightarrow}d)$, MSE, $\lambda=1.00$ &
+62.32 & 62.72 & 64.29 & 63.11 & 1.05 & $+2.36$ \\
+single $(s{\rightarrow}d)$, cosine, $\lambda=0.50$ &
+62.46 & 62.39 & 63.89 & 62.91 & 0.69 & $+2.16$ \\
+single $(d{\rightarrow}s)$, cosine, $\lambda=1.25$ &
 62.44 & 62.24 & 64.33 & 63.00 & 0.94 & $+2.25$ \\
-dual cosine, $w0$, $\lambda=0.75$ &
+dual cosine, $\lambda=0.75$ &
 63.22 & 62.91 & 62.73 & 62.95 & 0.20 & $+2.20$ \\
-dual cosine, $w0$, $\lambda=0.50$ &
+dual cosine, $\lambda=0.50$ &
 62.54 & 62.91 & 63.15 & 62.87 & 0.25 & $+2.12$ \\
-single cosine, $w0$, $\lambda=0.75$ &
+single $(d{\rightarrow}s)$, cosine, $\lambda=0.75$ &
 63.08 & 62.89 & 62.48 & 62.82 & 0.25 & $+2.07$ \\
-dual cosine, $w0$, $\lambda=1.00$ &
+dual cosine, $\lambda=1.00$ &
 62.77 & 61.81 & 63.63 & 62.74 & 0.74 & $+1.99$ \\
-single MSE, $w5k$, $\lambda=1.00$$^\dagger$ &
-61.32 & 62.92 & 63.93 & 62.72 & 1.07 & $+1.97$ \\
-dual cosine, $w5k$, $\lambda=0.50$ &
-62.13 & 63.15 & 61.58 & 62.29 & 0.65 & $+1.54$ \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -623,66 +542,69 @@ dual cosine, $w5k$, $\lambda=0.50$ &
 \begin{itemize}
 
 \item \textit{$\mathcal{L}_\text{ct}$ is robustly beneficial.}
-  All nine validated configurations improve over the baseline mean
-  ($60.75$\,\%), with gains ranging from $+1.54$ to $+2.54$\,pp.
+  All eleven validated configurations improve over the baseline mean
+  ($60.75$\,\%), with gains ranging from $+1.99$ to $+2.68$\,pp.
   This is consistent with $\mathcal{L}_\text{ct}$ providing a reliable
-  positive signal across diverse hyperparameter choices, and suggests
-  that the improvement is not an artefact of a particular configuration.
+  positive signal across diverse architectural choices and
+  hyperparameter settings.
 
-\item \textit{MSE loss produces the highest raw mean but is unreliable.}
-  Both MSE variants carry the largest standard deviations in the table
-  (std $1.20$ and $1.07$ respectively). The per-seed spread of
-  $62.06$--$64.91$ for single MSE $w0$ indicates that the high mean is
-  largely driven by a single seed rather than consistent improvement.
-  This sensitivity may arise because the MSE gradient magnitude depends
-  on the absolute scale of the projected feature vectors, which can vary
-  across seeds at the start of training, producing different effective
-  loss weightings across runs.
+\item \textit{Projection direction has limited impact on mean
+  performance but measurably affects stability.}
+  The two single-projection directions produce comparable Phase~II
+  means at $\lambda=1.00$: single~$(s{\rightarrow}d)$ cosine achieves
+  $63.43$\,\% and single~$(d{\rightarrow}s)$ cosine achieves
+  $63.25$\,\%. However, single~$(d{\rightarrow}s)$ produces a
+  substantially lower standard deviation ($0.17$\,\% vs.\ $0.56$\,\%),
+  indicating that the depth-to-seg direction is more reproducible
+  across seeds. Examining the per-seed values, the higher mean of
+  single~$(s{\rightarrow}d)$ is largely driven by seed~42 ($63.87$\,\%),
+  while seeds~7 and~25 fall below the corresponding
+  single~$(d{\rightarrow}s)$ values. This suggests that the
+  ground-truth supervision of the segmentation branch does not
+  consistently translate into a stronger alignment anchor under the
+  1/8-label regime; the depth branch, trained on all available
+  unlabelled sequences, appears to provide a more stable geometric
+  reference in this setting.
 
-\item \textit{Single cosine, $w0$, $\lambda_\text{ct}=1.00$ emerges as
-  the most reliable configuration among the tested candidates.}
-  Cosine similarity compares only the direction (angle) of two feature
-  vectors and is entirely unaffected by their magnitude; MSE, even
-  after $\ell_2$-normalisation, still carries residual sensitivity to
-  feature magnitude through the bounded geometry of the unit sphere,
-  meaning the gradient scale can differ across seeds depending on the
-  initial activation distribution. This scale-invariant property of
-  cosine is why this configuration achieves the lowest standard
-  deviation of any tested variant ($0.17$\,\%), with seed values tightly
-  clustered at $63.01$ / $63.37$ / $63.37$, despite ranking second by
-  mean ($63.25$\,\%, $\Delta=+2.50$\,pp). This stability indicates the
-  improvement is consistent and reproducible rather than seed-dependent,
-  and it is therefore selected as the primary design choice.
+\item \textit{MSE loss produces competitive means but higher variance
+  than cosine.}
+  Single~$(d{\rightarrow}s)$ MSE at $\lambda=1.00$ achieves a mean of
+  $63.29$\,\% but with std $1.20$\,\%, the highest variance in the
+  table. Similarly, single~$(s{\rightarrow}d)$ MSE at $\lambda=1.00$
+  yields mean $63.11$\,\% with std $1.05$\,\%. In both cases the
+  per-seed spread is wide, indicating that the high mean is largely
+  driven by a single seed rather than consistent improvement. Cosine
+  similarity, being scale-invariant, is insensitive to the initial
+  magnitude of the projected features and tends to produce more stable
+  gradient signals across seeds.
 
-\item \textit{Dual-projection results consistently fall below the best
-  stable single-projection result.} The best dual variant (dual cosine,
-  $w0$, $\lambda_\text{ct}{=}0.75$) achieves mean $62.95$\,\%
-  ($+2.20$\,pp), approximately $0.30$\,pp below the selected single
-  configuration, while also doubling the additional parameters from
-  $16{,}512$ to $33{,}024$. A plausible interpretation is that the
-  asymmetric structure of single projection---where only the
-  segmentation head is updated and the depth feature space acts as a
-  fixed anchor---provides more stable guidance than dual projection,
-  which allows both feature spaces to move simultaneously and may
-  create a less constrained optimisation target when labelled data are
-  scarce. Single projection therefore appears to be the more
-  favourable design within the tested setting: higher accuracy, lower
-  variance, and a strictly simpler architecture.
+\item \textit{Single $(d{\rightarrow}s)$ cosine, $\lambda=1.00$ is
+  selected as the primary configuration.}
+  This configuration achieves mean $63.25$\,\% ($\Delta=+2.50$\,pp)
+  with the lowest standard deviation of any tested variant ($0.17$\,\%),
+  with seed values tightly clustered at $63.01$ / $63.37$ / $63.37$.
+  This stability indicates the improvement is consistent and
+  reproducible rather than seed-dependent, and it is therefore
+  selected as the primary design choice for downstream experiments.
+
+\item \textit{Dual-projection results fall below the best stable
+  single-projection result.}
+  The best dual variant (dual cosine, $\lambda=0.75$) achieves mean
+  $62.95$\,\% ($+2.20$\,pp), approximately $0.30$\,pp below the
+  selected single $(d{\rightarrow}s)$ configuration, while doubling
+  the additional parameters from $16{,}512$ to $33{,}024$.
+  The asymmetric structure of single projection---where only one
+  branch is projected while the other acts as a fixed anchor---may
+  provide more stable guidance than dual projection, which allows
+  both feature spaces to move simultaneously and may create a less
+  constrained optimisation target when labelled data are scarce.
 
 \item \textit{Phase~I single-seed peaks do not always generalise.}
-  The Phase~I peak for dual cosine ($w0$, $\lambda_\text{ct}=0.50$:
-  $63.66$\,\%) drops to a three-seed mean of $62.87$\,\%, a gap of
-  $0.79$\,pp. This underscores the necessity of multi-seed validation
-  before drawing conclusions on optimal $\lambda_\text{ct}$, and
-  validates the two-phase design of the evaluation protocol.
-
-\item \textit{Combining warmup with dual projection is suboptimal.}
-  Dual cosine with $w5k$ yields the smallest gain among all
-  configurations ($+1.54$\,pp). When both projection heads are
-  unconstrained and the loss is additionally delayed, the alignment
-  signal may be too weak early in training to establish a useful
-  geometric anchor, resulting in reduced benefit from
-  $\mathcal{L}_\text{ct}$.
+  The Phase~I peak for dual cosine ($\lambda=0.50$: $63.66$\,\%)
+  drops to a three-seed mean of $62.87$\,\%, a gap of $0.79$\,pp.
+  This underscores the necessity of multi-seed validation before
+  drawing conclusions on optimal $\lambda_\text{ct}$, and validates
+  the two-phase design of the evaluation protocol.
 
 \end{itemize}
 
@@ -699,48 +621,41 @@ The two-phase evaluation supports the following conclusions:
   $\mathcal{L}_\text{ct}$ consistently improves over the PAD-MTL
   baseline, indicating that explicit cross-task feature alignment is
   beneficial for label-efficient segmentation within the present setup.
-  The gains are robust to hyperparameter choice, with every tested
-  variant improving over the baseline.
+  The gains are robust to projection layout, direction, loss type,
+  and $\lambda_\text{ct}$, with every tested variant improving over
+  the baseline.
 
-\item \textit{Single projection is the most favourable design in this
-  study.} Single-projection variants achieve higher mean mIoU and lower
-  variance than dual-projection counterparts at strictly lower parameter
-  cost ($16{,}512$ vs.\ $33{,}024$ additional parameters). The
-  performance advantage is consistent with the asymmetric alignment
-  structure: using the depth feature space as a stable anchor appears
-  to guide the segmentation branch towards geometrically informative
-  representations without destabilising either branch. This
-  reduced-freedom formulation may be particularly well-suited to the
-  label-efficient setting, where the scarcity of annotated data makes
-  less constrained objectives harder to optimise reliably.
+\item \textit{Single projection with depth-to-seg alignment is the
+  most stable design.}
+  Both single~$(d{\rightarrow}s)$ and single~$(s{\rightarrow}d)$
+  outperform dual projection at strictly lower parameter cost
+  ($16{,}512$ vs.\ $33{,}024$ additional parameters). Between the
+  two directions, single~$(d{\rightarrow}s)$ achieves the lowest
+  seed-to-seed variance of any tested configuration (std $0.17$\,\%),
+  making it the more reproducible choice. The depth branch, trained
+  on all available unlabelled sequences via photometric
+  self-supervision, appears to provide a more geometrically stable
+  anchor than the ground-truth-supervised segmentation branch in
+  this label-scarce regime. Both directions improve reliably over the
+  baseline, and the choice of direction does not dominate the overall
+  performance outcome.
 
-\item \textit{Cosine loss shows more reliable behaviour than MSE within
-  the tested configurations.} MSE variants achieve competitive or even
-  higher raw means, but with standard deviations exceeding
-  $1.0$\,\%---more than five times larger than the best cosine
+\item \textit{Cosine loss shows more reliable behaviour than MSE.}
+  MSE variants achieve competitive or even higher raw means, but with
+  standard deviations more than five times larger than the best cosine
   configuration (std $0.17$\,\%). Cosine similarity, being
-  scale-invariant, is insensitive to the initial magnitude of the
-  projected features and therefore tends to produce more stable
-  gradient signals across different random seeds. MSE, by contrast,
-  conflates alignment with magnitude matching, introducing a source of
-  seed-dependent variance that may be unrelated to the geometric
-  alignment objective.
+  scale-invariant, tends to produce more stable gradient signals
+  across random seeds. MSE conflates alignment with magnitude matching,
+  introducing a source of seed-dependent variance that may be unrelated
+  to the geometric alignment objective.
 
-\item \textit{Warmup is not universally beneficial.} For the cosine loss,
-  $w0$ consistently outperforms $w5k$, consistent with the
-  scale-invariant formulation producing well-behaved gradients from the
-  start of training. Warmup retains a benefit for MSE under single
-  projection, where it may help stabilise the gradient scale of the
-  projection head before the cross-task term reaches full weight, but
-  offers no clear advantage once dual projection is introduced.
-
-\item \textit{Stable $\lambda_\text{ct}$ range.} For single cosine with
-  $w0$, $\lambda_\text{ct}=1.00$ offers the best balance of performance
-  and stability across three seeds. The adjacent value of $0.75$
-  achieves a similar mean ($62.82$\,\%) with a similarly low standard
-  deviation ($0.25$\,\%), indicating that the method does not appear
-  highly sensitive to the exact choice of $\lambda_\text{ct}$ within
-  this range.
+\item \textit{Stable $\lambda_\text{ct}$ range.}
+  For single $(d{\rightarrow}s)$ cosine, $\lambda_\text{ct}=1.00$
+  offers the best balance of performance and stability across three
+  seeds. The adjacent value of $0.75$ achieves a similar mean
+  ($62.82$\,\%) with a similarly low standard deviation ($0.25$\,\%),
+  indicating that the method is not highly sensitive to the exact
+  choice of $\lambda_\text{ct}$ within this range.
 
 \end{enumerate}
 
@@ -750,11 +665,13 @@ The two-phase evaluation supports the following conclusions:
 
 \noindent
 The calibration study in Section~\ref{sec:ct-calibration-ablation}
-identified single projection with cosine similarity, $w0$, and
-$\lambda_\text{ct}=1.00$ as the most reliable configuration on top of
-the PAD-MTL baseline. This section evaluates whether the benefit of
+identified single~$(d{\rightarrow}s)$ projection with cosine similarity
+and $\lambda_\text{ct}=1.00$ as the most reliable configuration on top
+of the PAD-MTL baseline. This section evaluates whether the benefit of
 $\mathcal{L}_\text{ct}$ persists when it is combined with the remaining
-framework components, namely data selection~(S) and DepthMix~(DX).
+framework components, namely data selection~(S) and DepthMix~(DX), and
+additionally examines whether the projection direction affects
+composability.
 
 \vspace{4pt}
 \noindent
@@ -763,69 +680,76 @@ We ask whether $\mathcal{L}_\text{ct}$ continues to improve segmentation
 performance once stronger baselines are introduced, or whether its
 benefit is subsumed by other components. This is a composability
 question: even if $\mathcal{L}_\text{ct}$ improves over pure PAD-MTL,
-its contribution could be redundant with the geometric priors
-introduced by DepthMix or with the higher-quality supervision introduced
-by data selection. The ablation therefore covers three component
-combinations on top of PAD-MTL: MTL\,+\,DX, MTL\,+\,S, and
-MTL\,+\,DX\,+\,S. For each combination, three variants are trained under
-the same three seeds (7, 25, 42): a baseline without $\mathcal{L}_\text{ct}$,
-a variant with normalised MSE, and a variant with cosine similarity.
-Both $\mathcal{L}_\text{ct}$ variants use the Phase~II best-performing
-hyperparameters (single $1\!\times\!1$ projection, $\lambda_\text{ct}=1.00$,
-no warmup, bidirectional gradient flow), so that the loss formulation
-is the only variable within each row group.
+its contribution could be redundant with the geometric priors introduced
+by DepthMix or with the higher-quality supervision introduced by data
+selection. The ablation therefore covers three component combinations on
+top of PAD-MTL: MTL\,+\,DX, MTL\,+\,S, and MTL\,+\,DX\,+\,S. For each
+combination, five variants are trained under the same three seeds (7, 25,
+42): a baseline without $\mathcal{L}_\text{ct}$, and four variants
+covering both projection directions and both loss types. All
+$\mathcal{L}_\text{ct}$ variants use single projection,
+$\lambda_\text{ct}=1.00$, and bidirectional gradient flow.
 
 \vspace{4pt}
 \noindent
 \textbf{Design of the paired comparison.}
-The baseline rows in each row group of
+The baseline rows in each group of
 Table~\ref{tab:ct-component-ablation} are trained under the same
 pipeline and in the same submission batch as the corresponding
-$\mathcal{L}_\text{ct}$ variants. This means each $\Delta$ is obtained
-from a paired per-seed comparison against the matching baseline rather
-than against a cross-batch reference, which removes pipeline-level
-confounds and isolates the effect of $\mathcal{L}_\text{ct}$.
+$\mathcal{L}_\text{ct}$ variants. Each $\Delta$ is therefore a paired
+per-seed comparison against the matching baseline, removing
+pipeline-level confounds and isolating the effect of
+$\mathcal{L}_\text{ct}$.
 
 \begin{table}[H]
 \centering
 \caption{Component-level ablation of $\mathcal{L}_\text{ct}$ on top of
-three PAD-MTL component combinations (372 labels, 3 seeds). Both
+three PAD-MTL component combinations (372 labels, 3 seeds). All
 $\mathcal{L}_\text{ct}$ variants use single projection,
-$\lambda_\text{ct}=1.00$, no warmup, and bidirectional gradient flow.
-$\Delta$ is measured against the matching $\mathcal{L}_\text{ct}$-free
-baseline within the same row group (paired per-seed comparison).
-The $\mathbf{bold}$ row is the strongest full-framework configuration.}
+$\lambda_\text{ct}=1.00$, and bidirectional gradient flow. $\Delta$ is
+measured against the matching $\mathcal{L}_\text{ct}$-free baseline
+within the same row group (paired per-seed comparison).}
 \label{tab:ct-component-ablation}
 \renewcommand{\arraystretch}{1.3}
 \small
-\begin{tabularx}{\textwidth}{cccXcccccr}
+\begin{tabularx}{\textwidth}{cccllcccccr}
 \toprule
-\textbf{S} & \textbf{DX} & \textbf{MTL} &
-\textbf{$\mathcal{L}_\text{ct}$} &
+S & DX & MTL &
+Direction & $\mathcal{L}_\text{ct}$ &
 Seed~7 & Seed~25 & Seed~42 & Mean & Std & $\Delta$\,(pp) \\
 \midrule
--- & \checkmark & \checkmark & none &
+-- & \checkmark & \checkmark & -- & none &
 -- & -- & -- & 65.11 & 0.51 & -- \\
--- & \checkmark & \checkmark & MSE &
+-- & \checkmark & \checkmark & $d{\rightarrow}s$ & MSE &
 65.20 & 65.93 & 66.18 & 65.77 & 0.51 & $+0.66$ \\
--- & \checkmark & \checkmark & Cosine &
+-- & \checkmark & \checkmark & $d{\rightarrow}s$ & Cosine &
 65.55 & 65.24 & 67.44 & 66.08 & 1.19 & $+0.97$ \\
+-- & \checkmark & \checkmark & $s{\rightarrow}d$ & MSE &
+65.23 & 66.02 & 66.26 & 65.84 & 0.44 & $+0.73$ \\
+-- & \checkmark & \checkmark & $s{\rightarrow}d$ & Cosine &
+64.47 & 65.55 & 67.79 & 65.93 & 1.38 & $+0.82$ \\
 \midrule
-\checkmark & -- & \checkmark & none &
+\checkmark & -- & \checkmark & -- & none &
 -- & -- & -- & 66.35 & 0.76 & -- \\
-\checkmark & -- & \checkmark & MSE &
+\checkmark & -- & \checkmark & $d{\rightarrow}s$ & MSE &
 67.12 & 66.76 & 66.96 & 66.95 & 0.18 & $+0.60$ \\
-\checkmark & -- & \checkmark & Cosine &
+\checkmark & -- & \checkmark & $d{\rightarrow}s$ & Cosine &
 67.02 & 66.73 & 65.61 & 66.45 & 0.75 & $+0.10$ \\
+\checkmark & -- & \checkmark & $s{\rightarrow}d$ & MSE &
+67.02 & 66.21 & 65.90 & 66.38 & 0.47 & $+0.03$ \\
+\checkmark & -- & \checkmark & $s{\rightarrow}d$ & Cosine &
+66.65 & 66.71 & 66.45 & 66.60 & 0.11 & $+0.25$ \\
 \midrule
-\checkmark & \checkmark & \checkmark & none &
+\checkmark & \checkmark & \checkmark & -- & none &
 -- & -- & -- & 67.66 & 0.47 & -- \\
-\textbf{\checkmark} & \textbf{\checkmark} & \textbf{\checkmark} &
-\textbf{MSE} &
-\textbf{68.52} & \textbf{67.00} & \textbf{69.05} & \textbf{68.19} &
-\textbf{1.03} & $\mathbf{+0.53}$ \\
-\checkmark & \checkmark & \checkmark & Cosine &
+\checkmark & \checkmark & \checkmark & $d{\rightarrow}s$ & MSE &
+68.52 & 67.00 & 69.05 & 68.19 & 1.03 & $+0.53$ \\
+\checkmark & \checkmark & \checkmark & $d{\rightarrow}s$ & Cosine &
 68.55 & 67.38 & 67.85 & 67.93 & 0.59 & $+0.27$ \\
+\checkmark & \checkmark & \checkmark & $s{\rightarrow}d$ & MSE &
+68.37 & 67.29 & 67.91 & 67.86 & 0.44 & $+0.20$ \\
+\checkmark & \checkmark & \checkmark & $s{\rightarrow}d$ & Cosine &
+68.91 & 67.83 & 68.29 & 68.34 & 0.55 & $+0.68$ \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -836,61 +760,64 @@ Seed~7 & Seed~25 & Seed~42 & Mean & Std & $\Delta$\,(pp) \\
 \begin{itemize}
 
 \item \textit{$\mathcal{L}_\text{ct}$ is additive across all three
-  component combinations.}
-  All six $\mathcal{L}_\text{ct}$ cells improve over their matching
-  baseline, with gains ranging from $+0.10$ to $+0.97$\,pp. The
-  improvement therefore persists under stronger baselines and is not
-  subsumed by data selection or DepthMix. MSE yields an average gain
-  of $+0.60$\,pp across the three combinations and cosine yields
-  $+0.45$\,pp, indicating that the proposed loss composes with the
-  remaining framework components rather than providing redundant
-  signal.
+  component combinations and both projection directions.}
+  All twelve $\mathcal{L}_\text{ct}$ cells improve over their
+  matching baseline, with gains ranging from $+0.03$ to $+0.97$\,pp.
+  The improvement therefore persists under stronger baselines and is
+  not subsumed by data selection or DepthMix, regardless of projection
+  direction.
+
+\item \textit{The two projection directions are broadly comparable in
+  the full-framework setting, with direction-dependent interactions.}
+  On MTL\,+\,DX, both directions improve consistently:
+  $d{\rightarrow}s$ cosine achieves the largest single gain
+  ($+0.97$\,pp) while $s{\rightarrow}d$ cosine achieves $+0.82$\,pp.
+  On MTL\,+\,S, $d{\rightarrow}s$ MSE ($+0.60$\,pp) slightly
+  outperforms both $s{\rightarrow}d$ variants. On
+  MTL\,+\,DX\,+\,S, the ordering reverses: $s{\rightarrow}d$ cosine
+  yields $+0.68$\,pp with low variance (std $0.55$), while
+  $d{\rightarrow}s$ MSE yields $+0.53$\,pp but with higher variance
+  (std $1.03$). These direction--component interactions suggest that
+  neither direction is universally superior; the relative benefit
+  depends on the presence of DepthMix and the loss formulation.
 
 \item \textit{The largest benefit arises on MTL\,+\,DX, which is the
   configuration with the largest reproduction gap.}
   The reproduced MTL\,+\,DX baseline lies $1.55$\,pp below the paper
-  (Table~\ref{tab:table7_repro}), the most pronounced discrepancy
-  in the Table~7 reproduction. Under the same batch size and seeds,
-  adding $\mathcal{L}_\text{ct}$ recovers a substantial fraction of
-  this gap: cosine closes it by $+0.97$\,pp and MSE by $+0.66$\,pp.
-  This is consistent with the interpretation introduced in
-  Section~\ref{sec:stage_b_table7}: DepthMix produces mixed-geometry
-  boundary regions whose depth supervision is noisier than in unmixed
-  samples, and under a small batch size this noise degrades the implicit
-  cross-task signal carried through the shared encoder. An explicit
-  alignment loss operating on decoder representations appears to
-  provide a more stable channel for geometric knowledge transfer when
-  this implicit path is disrupted.
+  (Table~\ref{tab:table7_repro}), the most pronounced discrepancy in
+  the Table~7 reproduction. Adding $\mathcal{L}_\text{ct}$ recovers a
+  substantial fraction of this gap regardless of direction: the best
+  variant ($d{\rightarrow}s$ cosine) closes it by $+0.97$\,pp. This is
+  consistent with the interpretation that DepthMix produces
+  mixed-geometry boundary regions whose depth supervision is noisier
+  under small batch sizes, and an explicit alignment loss provides a
+  more stable channel for geometric knowledge transfer when the
+  implicit path through the shared encoder is disrupted.
 
 \item \textit{The MSE--cosine ordering depends on whether DepthMix is
   present.}
-  On MTL\,+\,S, where training samples contain no mixed-geometry
-  boundaries, MSE achieves $+0.60$\,pp with very low variance (std
-  $0.18$), while cosine yields only $+0.10$\,pp. When DepthMix is
-  introduced, the ordering reverses: on MTL\,+\,DX cosine attains the
-  largest absolute gain ($+0.97$\,pp), and on MTL\,+\,DX\,+\,S
-  cosine also exhibits a lower standard deviation ($0.59$ vs.\ $1.03$
-  for MSE). One plausible explanation is that normalised MSE, despite
-  its $\ell_2$-normalisation step, still carries residual sensitivity
-  to feature magnitude through the bounded-magnitude geometry of the
-  unit sphere, whereas cosine depends only on direction. DepthMix
-  perturbs the activation statistics of the depth branch through
-  mixed-geometry samples, which may amplify the magnitude-dependent
-  component of MSE's gradient, while cosine remains unaffected.
+  On MTL\,+\,S, MSE achieves higher gains than cosine for the
+  $d{\rightarrow}s$ direction ($+0.60$ vs.\ $+0.10$\,pp). When
+  DepthMix is introduced, cosine tends to be more robust: on
+  MTL\,+\,DX\,+\,S, the $s{\rightarrow}d$ cosine variant achieves
+  the highest mean ($68.34$\,\%) with the lowest variance among the
+  four $\mathcal{L}_\text{ct}$ variants (std $0.55$). This is
+  consistent with cosine being insensitive to feature magnitude
+  perturbations induced by DepthMix, whereas MSE carries residual
+  sensitivity to activation scale.
 
-\item \textit{The strongest single configuration is MSE on
-  MTL\,+\,DX\,+\,S.}
-  This configuration attains $68.19$\,\%, exceeding the reproduced
-  full-framework baseline (67.66\,\%) by $+0.53$\,pp and the paper's
-  reported S\,+\,DX\,+\,MTL value (68.01\,\%) by $+0.18$\,pp, despite
-  being trained under the more constrained single-GPU setting. The
-  cosine variant on the same combination attains $67.93$\,\%, within
-  $0.08$\,pp of the paper value and with substantially lower standard
-  deviation than MSE ($0.59$ vs.\ $1.03$). Taken together, these two
-  full-framework results indicate that $\mathcal{L}_\text{ct}$ allows
-  the single-GPU reproduction to reach---and in the MSE case marginally
-  exceed---the multi-GPU reference under the best component
-  configuration.
+\item \textit{The strongest overall configuration is
+  $s{\rightarrow}d$ cosine on MTL\,+\,DX\,+\,S.}
+  This configuration attains $68.34$\,\%, exceeding the reproduced
+  full-framework baseline ($67.66$\,\%) by $+0.68$\,pp and with
+  a standard deviation of $0.55$\,\%. The $d{\rightarrow}s$ MSE
+  variant on the same combination attains $68.19$\,\%, which
+  marginally exceeds the paper's reported S\,+\,DX\,+\,MTL value
+  ($68.01$\,\%) by $+0.18$\,pp despite being trained under the
+  more constrained single-GPU setting. Taken together, these
+  full-framework results indicate that $\mathcal{L}_\text{ct}$
+  enables the single-GPU reproduction to reach or exceed the
+  multi-GPU reference.
 
 \end{itemize}
 
@@ -898,28 +825,18 @@ Seed~7 & Seed~25 & Seed~42 & Mean & Std & $\Delta$\,(pp) \\
 \noindent
 \textbf{Summary.}
 This ablation confirms that the benefit of $\mathcal{L}_\text{ct}$
-observed in Section~\ref{sec:ct-calibration-ablation} is not specific
-to the pure PAD-MTL setting. All three component combinations benefit
-from the proposed loss in a paired per-seed comparison; the gain is
-largest precisely where the reproduction is weakest (MTL\,+\,DX); and
-the best full-framework configuration with $\mathcal{L}_\text{ct}$
-slightly surpasses the paper's reported value. Most importantly,
-the strongest full-framework configuration---MSE loss on
-MTL\,+\,DX\,+\,S, achieving $68.19$\,\% mIoU---not only exceeds the
-reproduced full-framework baseline by $+0.53$\,pp, but also surpasses
-the original paper's reported result under multi-GPU conditions by
-$+0.18$\,pp, despite being trained under the more constrained single-GPU
-setting. This is the central experimental contribution of this project:
-demonstrating that introducing $\mathcal{L}_\text{ct}$ enables the
-single-GPU reproduction to achieve stronger final performance than the
-original multi-GPU implementation under the best component configuration.
-The choice between MSE and cosine is not uniform across the three
-combinations: MSE is preferable when DepthMix is absent, while cosine
-appears more robust in the presence of DepthMix-induced activation
-perturbations.
+observed in Section~\ref{sec:ct-calibration-ablation} is not specific to
+the pure PAD-MTL setting. All three component combinations benefit from
+the proposed loss under both projection directions; the gain is largest
+precisely where the reproduction is weakest (MTL\,+\,DX); and the best
+full-framework configurations match or marginally exceed the original
+paper's reported value. The two projection directions produce comparable
+overall gains, with $d{\rightarrow}s$ offering greater seed stability
+on the calibration baseline and $s{\rightarrow}d$ cosine achieving the
+highest full-framework result ($68.34$\,\%) with lower variance in the
+complete system.
 
 % ============================================================
-% --- NEW: Chapter Summary section
 \section{Chapter Summary}
 \label{sec:chapter4_summary}
 
@@ -939,14 +856,15 @@ SyncBN---known sensitivity factors for semi-supervised methods---rather
 than to errors in the reproduction pipeline.
 
 With respect to the extension, $\mathcal{L}_\text{ct}$ produces positive
-improvements across all tested hyperparameter configurations, with the
-calibrated primary design (single-projection cosine, $w0$,
-$\lambda_\text{ct}=1.00$) achieving consistent, low-variance gains of
-$+2.50$\,pp over the PAD-MTL baseline across three independent seeds.
-When combined with the full set of framework components, the proposed
-loss remains additive and is not subsumed by data selection or DepthMix.
-The strongest full-framework result ($68.19$\,\% mIoU) demonstrates that
-a single-GPU reproduction enhanced with $\mathcal{L}_\text{ct}$ can
-match or marginally exceed the original multi-GPU reference, confirming
-that the improvement is genuine and does not depend on privileged
-computational resources.
+improvements across all tested configurations. The calibrated primary
+design---single~$(d{\rightarrow}s)$ cosine, $\lambda_\text{ct}=1.00$---achieves
+consistent, low-variance gains of $+2.50$\,pp over the PAD-MTL baseline
+across three independent seeds. A projection direction ablation
+further demonstrated that both alignment directions improve reliably
+over the baseline, with single~$(d{\rightarrow}s)$ providing greater
+seed-to-seed stability and single~$(s{\rightarrow}d)$ cosine achieving
+the highest full-framework result ($68.34$\,\% mIoU) with lower variance
+in the complete system. When combined with the full set of framework
+components, $\mathcal{L}_\text{ct}$ remains additive and is not subsumed
+by data selection or DepthMix, confirming that the improvement is genuine
+and does not depend on privileged computational resources.

@@ -565,8 +565,14 @@ geometric representations than the segmentation branch. By explicitly
 aligning their intermediate features, the depth decoder can act as a
 continuously available, label-free teacher for the segmentation branch,
 transferring geometric knowledge into the segmentation feature space
-without requiring any additional annotations. This is the core
-motivation behind the Cross-Task Consistency Loss $\mathcal{L}_\text{ct}$
+without requiring any additional annotations. An equally valid question
+is whether the reverse direction is more principled: since the
+segmentation branch receives direct supervision from ground-truth labels,
+its features are semantically grounded, and projecting them into the
+depth feature space would instead treat the annotated segmentation branch
+as the semantic anchor. Both alignment directions are evaluated
+empirically in Chapter~\ref{chap:evaluation}. This investigation forms
+the core of the Cross-Task Consistency Loss $\mathcal{L}_\text{ct}$
 proposed in this project.
 
 \subsection{Feature Alignment Loss Functions: Normalised MSE and Cosine Similarity}
@@ -588,9 +594,9 @@ two normalised vectors:
     \mathcal{L}_\text{nMSE}
         = \frac{1}{HW}\sum_{i}
           \left\|
-              \frac{f_\text{seg}^{i}}{\|f_\text{seg}^{i}\|}
+              \frac{f_A^{i}}{\|f_A^{i}\|}
               -
-              \frac{f_\text{depth}^{i}}{\|f_\text{depth}^{i}\|}
+              \frac{f_B^{i}}{\|f_B^{i}\|}
           \right\|^2.
 \]
 The normalisation step removes the influence of scale differences between
@@ -604,14 +610,20 @@ and is used in its loss form as $1 - \cos(\cdot,\cdot)$:
           \left(
               1
               -
-              \frac{f_\text{seg}^{i} \cdot f_\text{depth}^{i}}
-                   {\|f_\text{seg}^{i}\|\,\|f_\text{depth}^{i}\|}
+              \frac{f_A^{i} \cdot f_B^{i}}
+                   {\|f_A^{i}\|\,\|f_B^{i}\|}
           \right).
 \]
 This value is zero when the two feature vectors point in the same
 direction, one when they are orthogonal, and two when they are opposed.
-Both formulations work towards aligning the segmentation features with
-the depth features, but differ in their gradient behaviour and
-sensitivity to outlier activations. Both are included in the
+Here, $f_A$ denotes the anchor feature (the branch whose features are
+not projected) and $f_B$ denotes the projected feature. Depending on
+the alignment direction, $f_A$ is $f_\text{depth}$ in the
+single~$(d{\rightarrow}s)$ configuration, where the depth feature is
+projected into the segmentation space, or $f_A$ is $f_\text{seg}$ in
+the single~$(s{\rightarrow}d)$ configuration, where the segmentation
+feature is projected into the depth space. Both formulations work
+towards aligning the two branches but differ in their gradient behaviour
+and sensitivity to outlier activations. Both are included in the
 experimental comparison, with results reported in
 Chapters~\ref{chap:execution} and~\ref{chap:evaluation}.

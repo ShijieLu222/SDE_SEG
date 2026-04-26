@@ -74,12 +74,14 @@ batch size.
 
 Despite these hardware constraints, all qualitative performance trends are
 preserved. More importantly, the proposed $\mathcal{L}_\text{ct}$ under
-its best configuration---MSE loss on top of MTL\,+\,DX\,+\,S---achieves
-$68.19$\,\% mIoU, which exceeds both the reproduced full-framework baseline
-under the same configuration by $+0.53$\,pp and the original paper's
-reported value under multi-GPU conditions by $+0.18$\,pp. This
-demonstrates that the proposed extension produces genuine improvements that
-do not depend on the availability of abundant computational resources.
+its best full-framework configuration---$s{\rightarrow}d$ cosine on top of
+MTL\,+\,DX\,+\,S---achieves $68.34$\,\% mIoU, which exceeds the reproduced
+full-framework baseline under the same configuration by $+0.68$\,pp. The
+$d{\rightarrow}s$ MSE variant on the same combination attains $68.19$\,\%,
+surpassing the original paper's reported value under multi-GPU conditions
+by $+0.18$\,pp. This demonstrates that the proposed extension produces
+genuine improvements that do not depend on the availability of abundant
+computational resources.
 
 % --- NEW: configuration management moved here from former Section 3.4 ---
 All experiment configurations are managed through a centralised
@@ -106,7 +108,7 @@ exp~210 & Reproduction & Table~3 (mixing), Table~5 (baseline, transfer) \\
 exp~211 & Reproduction & Table~1 (data selection) \\
 exp~212 & Reproduction & Tables~5 \& 7 (MTL configurations) \\
 exp~213 & Reproduction & Table~7 (8-cell component ablation) \\
-exp~219 & Extension    & $\mathcal{L}_\text{ct}$ Phase~I sweep (32 configs, 1 seed) \\
+exp~219 & Extension    & $\mathcal{L}_\text{ct}$ Phase~I sweep (1 seed) \\
 exp~220 & Extension    & $\mathcal{L}_\text{ct}$ Phase~II validation (3 seeds) \\
 exp~222 & Extension    & $\mathcal{L}_\text{ct}$ component-level ablation (3 seeds) \\
 \bottomrule
@@ -174,10 +176,18 @@ and segmentation features $f_\text{seg}$ at this layer serve as the inputs
 to $\mathcal{L}_\text{ct}$. The $1\!\times\!1$ convolutional projection
 head used by $\mathcal{L}_\text{ct}$ preserves the channel dimensionality
 of its input, so its input and output feature maps both have 128 channels.
-By explicitly encouraging alignment between the projected depth
-representation and the segmentation representation, the loss is intended
-to promote the transfer of geometric information from the depth branch to
-the segmentation branch at the feature level.
+
+Two projection directions are evaluated. In single~$(d{\rightarrow}s)$,
+the depth feature $f_\text{depth}$ is passed through the projection head
+to produce a projected representation $z = \phi(f_\text{depth})$, and
+the loss aligns $f_\text{seg}$ towards $z$. In single~$(s{\rightarrow}d)$,
+the segmentation feature $f_\text{seg}$---which receives direct gradient
+signal from ground-truth labels---is projected to produce
+$z = \phi(f_\text{seg})$, and the loss aligns $f_\text{depth}$ towards
+$z$. Both variants share the same $1\!\times\!1$ projection head
+architecture and identical parameter count ($16{,}512$ additional
+parameters). The relative effectiveness of these two directions is
+evaluated empirically in Section~\ref{sec:ct-calibration-ablation}.
 
 % ============================================================================
 \section{Experiment Groups}
@@ -229,21 +239,24 @@ balances hyperparameter search coverage against result stability within a
 limited computing budget.
 
 Running all candidate configurations with three independent seeds from the
-outset would require $32 \times 3 = 96$ full training runs of 40{,}000
+outset would require a large number of full training runs of 40{,}000
 iterations each, a cost that exceeds the available compute allocation for
 this project. The two-phase strategy therefore first uses a single seed to
 screen the full search space efficiently, and then applies multi-seed
 validation only to the most promising candidates, providing a principled
 balance between hyperparameter coverage and statistical reliability.
 
-Phase~I (exp~219) trains all 32 configurations formed by four factors---loss
-type, projection layout, warmup schedule, and $\lambda_\text{ct}$---for
-the full 40{,}000 iterations under a single seed. Seed~7 is used
-throughout Phase~I so that all configurations are compared under identical
-random initialisation conditions. The purpose of this phase is to identify
-configurations that merit further multi-seed validation, while filtering
-out settings that do not show competitive performance under the shared
-single-seed condition.
+Phase~I (exp~219) trains configurations formed by three factors---loss
+type (cosine similarity vs.\ normalised MSE), projection layout (single
+vs.\ dual), and $\lambda_\text{ct} \in \{0.25, 0.50, 0.75, 1.00\}$---for
+the full 40{,}000 iterations under a single seed. An additional direction
+ablation within the single-projection layout evaluates both
+$d{\rightarrow}s$ and $s{\rightarrow}d$ variants, as described in
+Section~\ref{sec:pad-decoder}. Seed~7 is used throughout Phase~I so that
+all configurations are compared under identical random initialisation
+conditions. The purpose of this phase is to identify configurations that
+merit further multi-seed validation, while filtering out settings that do
+not show competitive performance under the shared single-seed condition.
 
 Phase~II (exp~220) retrains the candidates selected from Phase~I using
 three independent seeds~(7, 25, 42) to assess reproducibility. A PAD-MTL
@@ -258,23 +271,24 @@ Exp~222 evaluates whether the cross-task consistency loss composes well
 with the existing framework components (data selection~S, DepthMix~DX,
 and multi-task learning~MTL). The ablation covers three component
 combinations on the 372-label setting: MTL\,+\,DX, MTL\,+\,S, and
-MTL\,+\,DX\,+\,S. For each combination, two $\mathcal{L}_\text{ct}$
-variants are trained---normalised MSE and cosine similarity---yielding
-six ablation configurations in total. For each of the three component
-combinations, a matching baseline without $\mathcal{L}_\text{ct}$ is
-trained under the same pipeline and in the same submission batch,
-providing a paired per-seed reference for each ablation cell and removing
-the need for cross-batch comparisons.
+MTL\,+\,DX\,+\,S. For each combination, four $\mathcal{L}_\text{ct}$
+variants are trained---covering both projection directions
+($d{\rightarrow}s$ and $s{\rightarrow}d$) and both loss types (normalised
+MSE and cosine similarity)---yielding twelve ablation configurations in
+total. For each of the three component combinations, a matching baseline
+without $\mathcal{L}_\text{ct}$ is trained under the same pipeline and in
+the same submission batch, providing a paired per-seed reference for each
+ablation cell and removing the need for cross-batch comparisons.
 
-All six $\mathcal{L}_\text{ct}$ configurations use the Phase~II best-performing
-hyperparameter setting: a single $1\!\times\!1$ convolutional projection
-head, $\lambda_\text{ct}=1.0$, no warm-up, and bidirectional gradient flow
-(no stop-gradient applied to either branch). The only variable within the
-six $\mathcal{L}_\text{ct}$ configurations is the loss formulation (MSE
-versus cosine), so that any performance difference is attributable to the
-loss formulation itself rather than to auxiliary hyperparameter effects.
-Each configuration is trained with the same three seeds (7, 25, 42) as
-the paired baseline, enabling direct per-seed comparisons.
+All $\mathcal{L}_\text{ct}$ configurations use a single $1\!\times\!1$
+convolutional projection head, $\lambda_\text{ct}=1.0$, and bidirectional
+gradient flow (no stop-gradient applied to either branch). The variables
+within the ablation are the loss formulation (MSE versus cosine) and the
+projection direction ($d{\rightarrow}s$ versus $s{\rightarrow}d$), so
+that any performance difference is attributable to these factors rather
+than to auxiliary hyperparameter effects. Each configuration is trained
+with the same three seeds (7, 25, 42) as the paired baseline, enabling
+direct per-seed comparisons.
 
 % ============================================================================
 \section{Summary}
