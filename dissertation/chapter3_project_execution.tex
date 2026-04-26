@@ -6,15 +6,18 @@ consistency loss extension were carried out in practice, including the
 computing environment, dataset configuration, training pipeline, use of the
 PAD multi-task decoder, and the organisation of individual experiment
 groups. Throughout, this project adopts the terminology of the original
-paper: \textbf{Stage~(a)} refers to standard supervised learning using all
-available annotated data as the baseline, while \textbf{Stage~(b)}
-encompasses semi-supervised extension mechanisms, including automatic data
-selection~(S), DepthMix data augmentation~(DX), and multi-task
+paper: Stage~(a) refers to standard supervised learning using all available 
+annotated data as the baseline, while Stage~(b) encompasses 
+semi-supervised extension mechanisms, including automatic data 
+selection~(S), DepthMix data augmentation~(DX), and multi-task 
 learning~(MTL).
 
 % ============================================================================
 \section{Experimental Setup}
 \label{sec:setup}
+
+\subsection{Computing Environment}
+\label{sec:computing-environment}
 
 The reproduction experiments (exp~210--213, corresponding to Tables~1, 3,
 5, and~7) were run on the University of Bristol's Isambard-AI
@@ -31,6 +34,9 @@ assignment is managed automatically by SLURM. The cross-task loss
 experiments were run predominantly on V100 nodes with 32\,GB VRAM. All
 experiments ran within a dedicated Conda environment with pinned
 dependencies to ensure consistent behaviour across node types.
+
+\subsection{Training Configuration and Reproducibility}
+\label{sec:training-config}
 
 Random seeds were fixed across Python, NumPy, and PyTorch at the start of
 every run. Each experiment's full configuration, including experiment ID,
@@ -72,18 +78,11 @@ range of approximately $0.2$ to $1.6$\,pp---a discrepancy consistent with
 the well-documented sensitivity of semi-supervised methods to effective
 batch size.
 
-Despite these hardware constraints, all qualitative performance trends are
-preserved. More importantly, the proposed $\mathcal{L}_\text{ct}$ under
-its best full-framework configuration---$s{\rightarrow}d$ cosine on top of
-MTL\,+\,DX\,+\,S---achieves $68.34$\,\% mIoU, which exceeds the reproduced
-full-framework baseline under the same configuration by $+0.68$\,pp. The
-$d{\rightarrow}s$ MSE variant on the same combination attains $68.19$\,\%,
-surpassing the original paper's reported value under multi-GPU conditions
-by $+0.18$\,pp. This demonstrates that the proposed extension produces
-genuine improvements that do not depend on the availability of abundant
-computational resources.
+The practical impact of these hardware constraints is analysed in
+Chapter~\ref{chap:evaluation}, where the reproduced results are compared
+against the original paper and the proposed $\mathcal{L}_\text{ct}$
+variants are evaluated under the same experimental protocol.
 
-% --- NEW: configuration management moved here from former Section 3.4 ---
 All experiment configurations are managed through a centralised
 \texttt{experiments.py} module, which maps discrete experiment IDs to
 fully specified hyperparameter dictionaries. This acts as the central
@@ -177,16 +176,29 @@ to $\mathcal{L}_\text{ct}$. The $1\!\times\!1$ convolutional projection
 head used by $\mathcal{L}_\text{ct}$ preserves the channel dimensionality
 of its input, so its input and output feature maps both have 128 channels.
 
-Two projection directions are evaluated. In single~$(d{\rightarrow}s)$,
-the depth feature $f_\text{depth}$ is passed through the projection head
-to produce a projected representation $z = \phi(f_\text{depth})$, and
-the loss aligns $f_\text{seg}$ towards $z$. In single~$(s{\rightarrow}d)$,
-the segmentation feature $f_\text{seg}$---which receives direct gradient
-signal from ground-truth labels---is projected to produce
-$z = \phi(f_\text{seg})$, and the loss aligns $f_\text{depth}$ towards
-$z$. Both variants share the same $1\!\times\!1$ projection head
-architecture and identical parameter count ($16{,}512$ additional
-parameters). The relative effectiveness of these two directions is
+Two projection directions are evaluated under the single-projection
+layout. In single~$(d{\rightarrow}s)$, the depth feature
+$f_\text{depth}$ is passed through the projection head to produce a
+projected representation $z = \phi(f_\text{depth})$, and the loss
+penalises the discrepancy between $f_\text{seg}$ and $z$. In
+single~$(s{\rightarrow}d)$, the segmentation feature $f_\text{seg}$---
+which receives direct gradient signal from ground-truth labels---is
+projected to produce $z = \phi(f_\text{seg})$, and the loss penalises the
+discrepancy between $f_\text{depth}$ and $z$. Both variants share the
+same $1\!\times\!1$ projection head architecture and identical parameter
+count ($16{,}512$ additional parameters).
+
+In addition to the two single-projection variants, a dual-projection
+layout is also evaluated. In this setting, two independent
+$1\!\times\!1$ convolutional projection heads are used: one projects
+$f_\text{depth}$ and the other projects $f_\text{seg}$, and the
+consistency loss is computed between the two projected representations.
+This doubles the number of additional parameters to $33{,}024$ and
+introduces a symmetric alignment constraint in which both feature spaces
+are allowed to adapt simultaneously, in contrast to the single-projection
+design where one branch remains in its original feature space.
+
+The relative effectiveness of these projection layouts and directions is
 evaluated empirically in Section~\ref{sec:ct-calibration-ablation}.
 
 % ============================================================================
@@ -282,9 +294,8 @@ ablation cell and removing the need for cross-batch comparisons.
 
 All $\mathcal{L}_\text{ct}$ configurations use a single $1\!\times\!1$
 convolutional projection head, $\lambda_\text{ct}=1.0$, and bidirectional
-gradient flow (no stop-gradient applied to either branch). The variables
-within the ablation are the loss formulation (MSE versus cosine) and the
-projection direction ($d{\rightarrow}s$ versus $s{\rightarrow}d$), so
+gradient flow. The variables within the ablation are the loss formulation 
+(MSE versus cosine) and the projection direction ($d{\rightarrow}s$ versus $s{\rightarrow}d$), so
 that any performance difference is attributable to these factors rather
 than to auxiliary hyperparameter effects. Each configuration is trained
 with the same three seeds (7, 25, 42) as the paired baseline, enabling
@@ -294,15 +305,14 @@ direct per-seed comparisons.
 \section{Summary}
 \label{sec:exec_summary}
 
-This chapter has outlined how the experiments were organised in practice,
-including the computing environment, dataset setup, model configuration,
-and the correspondence between experiment IDs and the reproduced result
-tables. The reproduction experiments (exp~210--213) were run on the
-Isambard-AI platform and the extension experiments (exp~219, exp~220, and
-exp~222) on BluePebble, with both sets managed through consistent
-configuration control and fixed random seeds. The single-GPU constraint,
-while limiting effective batch size and precluding SyncBN, was a
-deliberate resource trade-off to maximise experiment throughput; the
-impact of this constraint on reproduced results is analysed in
-Chapter~\ref{chap:evaluation}. These details provide the implementation
-context for the results presented in Chapter~\ref{chap:evaluation}.
+This chapter has described how the experiments were implemented and
+organised in practice. It covered the computing environment, dataset
+configuration, model setup, experiment ID mapping, and the design of the
+reproduction and extension experiment groups. The reproduction experiments
+(exp~210--213) were run on Isambard-AI, while the extension experiments
+(exp~219, exp~220, and exp~222) were run on BluePebble. Although the
+single-GPU constraint limited the effective batch size and prevented the
+use of SyncBN, it allowed a larger number of configurations to be evaluated
+within the available project timeline. The effect of this constraint, as
+well as the quantitative outcomes of the experiments, is analysed in
+Chapter~\ref{chap:evaluation}.
