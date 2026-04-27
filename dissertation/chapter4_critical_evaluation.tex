@@ -27,15 +27,17 @@ The primary objectives are: (i)~to verify whether the reported
 performance trends of \cite{hoyer2023ijcv_sde} are consistent under a
 constrained single-GPU academic computing environment; and
 (ii)~to evaluate whether $\mathcal{L}_\text{ct}$ yields reliable,
-statistically stable improvements over the reproduced multi-task baseline
+seed-consistent improvements over the reproduced multi-task baseline
 under label-efficient conditions, and whether the benefit persists when
 $\mathcal{L}_\text{ct}$ is combined with the existing framework
-components (data selection and DepthMix). All experiments are conducted
-on the Cityscapes dataset at the 372-label (1/8) regime unless otherwise
-stated, with results reported as mean mIoU~(\%) $\pm$ standard deviation
-across three independent seeds (7, 25, 42). Reproduction entries are
-presented as ours~/~{\scriptsize (paper)}, followed by the absolute
-discrepancy $\Delta = \text{ours} - \text{paper}$.
+components (data selection and DepthMix). The main cross-task loss
+experiments are conducted on the Cityscapes dataset at the 372-label
+(1/8) regime, while the reproduction tables also include the additional
+label regimes reported in the original paper. Results are reported as
+mean mIoU~(\%) $\pm$ standard deviation across three independent seeds
+(7, 25, 42). Reproduction entries are presented as
+ours~/~{\scriptsize (paper)}, followed by the absolute discrepancy
+$\Delta = \text{ours} - \text{paper}$.
 
 % ============================================================
 \section{Reproduction Protocol}
@@ -59,7 +61,6 @@ configuration. When baseline values differ across tables, this reflects
 differences in the surrounding training pipeline rather than implying
 direct numerical comparability across tables.
 
-% --- NEW: single-GPU context stated once here to avoid per-table repetition
 All experiments in this chapter were conducted under the single-GPU
 constraint described in Section~\ref{sec:setup}: batch size~2 without
 Synchronised Batch Normalisation~(SyncBN). As discussed in
@@ -97,7 +98,7 @@ $\Delta$.}
 \midrule
 Random &
 \makecell[c]{$47.57 \pm 0.96$ \\ {\scriptsize ($48.75 \pm 1.61$), $\Delta=-1.18$}} &
-\makecell[c]{$58.63 \pm 0.67$ \\ {\scriptsize ($59.14 \pm 1.02$), $\Delta=-0.51$}} &
+\makecell[c]{$58.25 \pm 0.43$ \\ {\scriptsize ($59.14 \pm 1.02$), $\Delta=-0.89$}} &
 \makecell[c]{$63.22 \pm 0.30$ \\ {\scriptsize ($63.46 \pm 0.38$), $\Delta=-0.24$}} \\
 Entropy &
 \makecell[c]{$53.76 \pm 0.44$ \\ {\scriptsize ($53.63 \pm 0.77$), $\Delta=+0.13$}} &
@@ -133,9 +134,10 @@ model-based uncertainty alone provides a reasonably strong selection
 signal when annotations are extremely scarce, without necessarily
 requiring depth-guided refinement. The remaining absolute gaps to the
 paper are consistent with the single-GPU constraint described in
-Section~\ref{sec:repro_protocol}, with most configurations falling
-within $\pm$1\,mIoU of the paper and the relative ordering of methods
-preserved throughout.
+Section~\ref{sec:repro_protocol}, with most configurations falling within
+$\pm$1\,mIoU of the paper. Although the exact ranking among the selection
+strategies is not fully preserved, the broader trend that informed
+selection improves over random sampling is consistently reproduced.
 
 \clearpage
 % ============================================================
@@ -186,17 +188,18 @@ mixing mask may reduce the boundary artefacts typical of ClassMix, where
 semantically inconsistent regions can be introduced at the cut boundary.
 The largest deviation from the paper is observed for pseudo-labelling
 ($\Delta = -2.34$), which is considerably larger than all other gaps in
-this table. Pseudo-label self-training relies on per-batch confidence
-statistics to filter low-quality pseudo-labels at each update step; with
-a smaller batch, these statistics are estimated from fewer samples and
-are therefore less stable, allowing more erroneous pseudo-labels to enter
-training and making self-training more susceptible to confirmation bias.
-By contrast, the mixing masks of ClassMix and DepthMix are derived
-directly from class segments or geometric depth estimates, without
-depending on confidence statistics, and are thus more robust to batch
-size variation. This observation provides a practical motivation for
-considering augmentation-based and multi-task alternatives, which appear
-more stable under the same constraint.
+this table. One plausible explanation is that pseudo-label self-training
+relies on per-batch confidence statistics to filter low-quality
+pseudo-labels at each update step; with a smaller batch, these statistics
+are estimated from fewer samples and may therefore be less stable,
+allowing more erroneous pseudo-labels to enter training and making
+self-training more susceptible to confirmation bias. By contrast, the
+mixing masks of ClassMix and DepthMix are derived directly from class
+segments or geometric depth estimates, without depending on confidence
+statistics, and are thus likely to be more robust to batch size variation.
+This observation provides a practical motivation for considering
+augmentation-based and multi-task alternatives, which appear more stable
+under the same constraint.
 
 % ============================================================
 \section{Stage (b): SDE Feature Transfer Reproduction (Table 5)}
@@ -343,7 +346,7 @@ the original paper, larger effective batch sizes may smooth out this noise,
 whereas the single-GPU setup may amplify it.
 
 This pattern reinforces the structural gap identified in Table~5: under
-small-batch conditions, the implicit path through the shared encoder is
+small-batch conditions, the implicit path through the shared encoder may be
 particularly susceptible to gradient noise introduced by mixed-geometry
 samples. An explicit feature-level alignment loss operating directly on
 decoder representations---after the augmentation-induced noise has been
@@ -373,13 +376,15 @@ absolute mIoU differences in percentage points~(pp).
 The Phase~I sweep for $\mathcal{L}_\text{ct}$ covers three factors:
 loss type (cosine similarity vs.\ normalised MSE), projection layout
 (single vs.\ dual $1{\times}1$ convolutional heads), and
-$\lambda_\text{ct}\in\{0.25, 0.50, 0.75, 1.00\}$. This yields
-$2 \times 2 \times 4 = 16$
-configurations. An additional direction ablation evaluates two
-single-projection variants that differ only in which branch is projected:
+$\lambda_\text{ct}\in\{0.25, 0.50, 0.75, 1.00\}$. For the single
+projection layout, two projection directions are additionally evaluated:
 single~$(d{\rightarrow}s)$, in which the depth feature is projected into
 the segmentation space, and single~$(s{\rightarrow}d)$, in which the
-segmentation feature is projected into the depth space.
+segmentation feature is projected into the depth space. This yields
+$2 \times 2 \times 2 \times 4 = 32$ configurations in total, but since
+the dual projection layout has no direction variant, the effective count
+is $2 \times 4 + 2 \times 4 + 1 \times 2 \times 4 = 24$ distinct
+configurations.
 
 Phase~I fixes random seed~7 to screen all configurations; the goal is
 not to identify a globally optimal configuration, but to eliminate
@@ -393,8 +398,7 @@ All Phase~I $\Delta$ values use $\text{baseline}_{\text{S7}} = 59.84$\,\%.
 \begin{table}[H]
 \centering
 \caption{Phase~I (seed~7): single projection, both directions and loss
-types.
-$\Delta = \text{mIoU}(\%) - 59.84$\,pp.}
+types. $\Delta = \text{mIoU}(\%) - 59.84$\,pp.}
 \label{tab:ct-p1-single}
 \renewcommand{\arraystretch}{1.2}
 \begin{tabular}{llccc}
@@ -454,8 +458,8 @@ MSE & 1.00 & 62.48 & $+2.64$ \\
 \noindent
 \textbf{Phase-I findings.}
 All 24 configurations improve over the seed-7 baseline, confirming that
-$\mathcal{L}_\text{ct}$ provides a positive signal across projection
-layout, direction, loss type, and $\lambda_\text{ct}$.
+$\mathcal{L}_\text{ct}$ provides a positive signal across the tested
+projection layouts, directions, loss types, and $\lambda_\text{ct}$ values.
 
 For single projection, the $d{\rightarrow}s$ direction achieves a higher
 Phase~I peak than $s{\rightarrow}d$: $63.77$\,\% vs.\ $63.08$\,\%
@@ -487,19 +491,26 @@ multi-seed conditions.
 \label{subsec:ct-phase2-3seeds}
 
 \noindent
+Phase~I and Phase~II should be interpreted as two separate experimental
+stages. Phase~I is a single-seed screening stage used to identify promising
+regions of the search space, whereas Phase~II reruns the selected
+candidates under the finalised validation protocol across three seeds.
+Therefore, Phase~I values are used for candidate selection only and are not
+treated as directly paired with the corresponding seed-7 values in
+Phase~II.
+
 Using the candidates identified in Phase~I, we train with three
-independent seeds (7, 25, 42) to obtain statistically reliable
-estimates of mean performance and variance. Per-seed best validation
-mIoU, mean, standard deviation, and $\Delta$ versus the 3-seed baseline
-mean are reported in Table~\ref{tab:ct-phase2-3seeds}, sorted by mean
-mIoU in descending order.
+independent seeds (7, 25, 42) to obtain more reliable seed-level estimates
+of mean performance and variance. Per-seed best validation mIoU, mean,
+standard deviation, and $\Delta$ versus the 3-seed baseline mean are
+reported in Table~\ref{tab:ct-phase2-3seeds}, sorted by mean mIoU in
+descending order.
 
 \begin{table}[H]
 \centering
 \caption{Phase~II three-seed validation (372 labels, best-observed
-across runs), sorted by mean mIoU (descending).
-Baseline: PAD-MTL (Table~\ref{tab:table5_repro}, Multi-Task),
-$\lambda_\text{ct}=0$.
+across runs), sorted by mean mIoU (descending). Baseline: PAD-MTL
+(Table~\ref{tab:table5_repro}, Multi-Task), $\lambda_\text{ct}=0$.
 $\Delta = \text{mean}(\%) - 60.75$\,pp.}
 \label{tab:ct-phase2-3seeds}
 \renewcommand{\arraystretch}{1.3}
@@ -546,11 +557,12 @@ single $(s{\rightarrow}d)$, cosine, $\lambda=1.00$ &
 \textbf{Phase-II findings.}
 \begin{itemize}
 
-\item \textit{$\mathcal{L}_\text{ct}$ is robustly beneficial.}
+\item \textit{$\mathcal{L}_\text{ct}$ is robustly beneficial across the
+  tested configurations.}
   All thirteen validated configurations improve over the baseline mean
   ($60.75$\,\%), with gains ranging from $+1.55$ to $+2.81$\,pp.
   This is consistent with $\mathcal{L}_\text{ct}$ providing a reliable
-  positive signal across diverse architectural choices and
+  positive signal across the tested architectural choices and
   hyperparameter settings.
 
 \item \textit{The highest raw mean does not correspond to the most stable
@@ -614,7 +626,7 @@ single $(s{\rightarrow}d)$, cosine, $\lambda=1.00$ &
   (MSE, $\lambda=1.00$: $63.08$\,\%) reaches a lower three-seed mean
   of $62.88$\,\%. This underscores the necessity of multi-seed
   validation before drawing conclusions on optimal $\lambda_\text{ct}$,
-  and validates the two-phase design of the evaluation protocol.
+  and supports the two-phase design of the evaluation protocol.
 
 \end{itemize}
 
@@ -631,8 +643,8 @@ The two-phase evaluation supports the following conclusions:
   $\mathcal{L}_\text{ct}$ improves over the PAD-MTL baseline,
   indicating that explicit cross-task feature alignment is beneficial
   for label-efficient segmentation within the present setup. The gains
-  are robust across projection layout, projection direction, loss type,
-  and $\lambda_\text{ct}$.
+  are robust across the tested projection layouts, projection directions,
+  loss types, and $\lambda_\text{ct}$ values.
 
 \item \textit{Single projection with depth-to-seg alignment is the most
   reliable design on the PAD-MTL baseline.}
@@ -661,8 +673,10 @@ The two-phase evaluation supports the following conclusions:
   seeds. The adjacent value of $0.75$ still improves over the baseline
   with low variance, indicating that the method is not highly sensitive
   to the exact choice of $\lambda_\text{ct}$ within this range. However,
-  the $s{\rightarrow}d$ direction shows stronger sensitivity to the loss
-  scale, with cosine performance dropping at $\lambda_\text{ct}=1.00$.
+  as shown in Table~\ref{tab:ct-phase2-3seeds}, the $s{\rightarrow}d$
+  direction shows stronger sensitivity to the loss scale, with cosine
+  performance dropping notably at $\lambda_\text{ct}=1.00$ (from
+  $63.12$\,\% at $\lambda=0.75$ to $62.30$\,\% at $\lambda=1.00$).
 
 \end{enumerate}
 
@@ -703,55 +717,54 @@ $\lambda_\text{ct}=1.00$, and bidirectional gradient flow.
 
 \vspace{4pt}
 \noindent
-\textbf{Design of the paired comparison.}
+\textbf{Design of the mean-level comparison.}
 The baseline rows in each group of
 Table~\ref{tab:ct-component-ablation} are trained under the same
 pipeline and in the same submission batch as the corresponding
-$\mathcal{L}_\text{ct}$ variants. Each $\Delta$ is therefore a paired
-per-seed comparison against the matching baseline, removing
-pipeline-level confounds and isolating the effect of
-$\mathcal{L}_\text{ct}$.
+$\mathcal{L}_\text{ct}$ variants. Each $\Delta$ is reported as the
+difference between the three-seed mean of the $\mathcal{L}_\text{ct}$
+variant and the three-seed mean of the matching
+$\mathcal{L}_\text{ct}$-free baseline. This controls for the framework
+configuration, although the comparison should be interpreted as a
+mean-level component ablation rather than a formal statistical test.
 
 \begin{table}[H]
 \centering
-\caption{Component-level ablation of $\mathcal{L}_\text{ct}$ on top of
-three PAD-MTL component combinations (372 labels, 3 seeds), reported
-for the selected single-projection direction $d{\rightarrow}s$. All
-$\mathcal{L}_\text{ct}$ variants use single projection,
-$\lambda_\text{ct}=1.00$, and bidirectional gradient flow. $\Delta$ is
-measured against the matching $\mathcal{L}_\text{ct}$-free baseline
-within the same row group (paired per-seed comparison).}
+\caption{Component-level ablation of $\mathcal{L}_\text{ct}$ on three
+PAD-MTL component combinations at 372 labels. Results are reported for
+the selected single-projection direction $d{\rightarrow}s$ using
+three-seed mean mIoU.}
 \label{tab:ct-component-ablation}
 \renewcommand{\arraystretch}{1.3}
 \small
-\begin{tabularx}{\textwidth}{cccllcccccr}
+\begin{tabular}{cccccccc}
 \toprule
-S & DX & MTL &
-Direction & $\mathcal{L}_\text{ct}$ &
-Seed~7 & Seed~25 & Seed~42 & Mean & Std & $\Delta$\,(pp) \\
+\textbf{S} & \textbf{DX} & \textbf{MTL} &
+\textbf{Direction} & $\boldsymbol{\mathcal{L}_\text{ct}}$ &
+\textbf{Mean} & \textbf{Std} & $\boldsymbol{\Delta}$\textbf{(pp)} \\
 \midrule
 -- & \checkmark & \checkmark & -- & none &
--- & -- & -- & 65.11 & 0.51 & -- \\
+65.11 & 0.51 & -- \\
 -- & \checkmark & \checkmark & $d{\rightarrow}s$ & MSE &
-65.20 & 65.93 & 66.18 & 65.77 & 0.51 & $+0.66$ \\
+65.77 & 0.51 & $+0.66$ \\
 -- & \checkmark & \checkmark & $d{\rightarrow}s$ & Cosine &
-65.55 & 65.24 & 67.44 & 66.08 & 1.19 & $+0.97$ \\
+66.08 & 1.19 & $+0.97$ \\
 \midrule
 \checkmark & -- & \checkmark & -- & none &
--- & -- & -- & 66.35 & 0.76 & -- \\
+66.35 & 0.76 & -- \\
 \checkmark & -- & \checkmark & $d{\rightarrow}s$ & MSE &
-67.12 & 66.76 & 66.96 & 66.95 & 0.18 & $+0.60$ \\
+66.95 & 0.18 & $+0.60$ \\
 \checkmark & -- & \checkmark & $d{\rightarrow}s$ & Cosine &
-67.02 & 66.73 & 65.61 & 66.45 & 0.75 & $+0.10$ \\
+66.45 & 0.75 & $+0.10$ \\
 \midrule
 \checkmark & \checkmark & \checkmark & -- & none &
--- & -- & -- & 67.66 & 0.47 & -- \\
+67.66 & 0.47 & -- \\
 \checkmark & \checkmark & \checkmark & $d{\rightarrow}s$ & MSE &
-68.52 & 67.00 & 69.05 & 68.19 & 1.03 & $+0.53$ \\
+68.19 & 1.03 & $+0.53$ \\
 \checkmark & \checkmark & \checkmark & $d{\rightarrow}s$ & Cosine &
-68.55 & 67.38 & 67.85 & 67.93 & 0.59 & $+0.27$ \\
+67.93 & 0.59 & $+0.27$ \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{table}
 
 \vspace{4pt}
@@ -759,23 +772,27 @@ Seed~7 & Seed~25 & Seed~42 & Mean & Std & $\Delta$\,(pp) \\
 \textbf{Findings.}
 \begin{itemize}
 
-\item \textit{$\mathcal{L}_\text{ct}$ is additive across all three
-  component combinations in the selected $d{\rightarrow}s$ track.}
-  All six reported $\mathcal{L}_\text{ct}$ cells improve over their
-  matching baseline, with gains ranging from $+0.10$ to $+0.97$\,pp.
-  The improvement therefore persists under stronger baselines and is
-  not subsumed by data selection or DepthMix.
+\item \textit{$\mathcal{L}_\text{ct}$ shows positive mean-level gains
+  across all three component combinations in the selected
+  $d{\rightarrow}s$ track.}
+  All six reported $\mathcal{L}_\text{ct}$ variants improve over their
+  matching baselines in terms of three-seed mean mIoU, with gains ranging
+  from $+0.10$ to $+0.97$\,pp. However, the smallest gain is within the
+  observed seed variation and should be interpreted cautiously. Overall,
+  the mean-level trend suggests that the proposed loss can remain useful
+  under stronger baselines, rather than being fully subsumed by data
+  selection or DepthMix.
 
 \item \textit{$d{\rightarrow}s$ is retained as the primary direction for
   controlled composability analysis.}
   The Phase~II calibration identified single $(d{\rightarrow}s)$ cosine
   as the most reliable direction on the PAD-MTL baseline. In the
-  component-level ablation, the same direction remains consistently
-  positive across all three framework combinations: $+0.97$\,pp on
-  MTL\,+\,DX with cosine, $+0.60$\,pp on MTL\,+\,S with MSE, and
-  $+0.53$\,pp on MTL\,+\,DX\,+\,S with MSE. The main ablation table
-  therefore focuses on the calibration-selected $d{\rightarrow}s$
-  direction to keep the comparison controlled and interpretable.
+  component-level ablation, the same direction remains positive in mean
+  across all three framework combinations: $+0.97$\,pp on MTL\,+\,DX with
+  cosine, $+0.60$\,pp on MTL\,+\,S with MSE, and $+0.53$\,pp on
+  MTL\,+\,DX\,+\,S with MSE. The main ablation table therefore focuses
+  on the calibration-selected $d{\rightarrow}s$ direction to keep the
+  comparison controlled and interpretable.
 
 \item \textit{The largest benefit arises on MTL\,+\,DX, which is the
   configuration with the largest reproduction gap.}
@@ -784,9 +801,9 @@ Seed~7 & Seed~25 & Seed~42 & Mean & Std & $\Delta$\,(pp) \\
   the Table~7 reproduction. Adding $\mathcal{L}_\text{ct}$ recovers a
   substantial fraction of this gap: the best variant
   ($d{\rightarrow}s$ cosine) closes it by $+0.97$\,pp. This is
-  consistent with the interpretation that DepthMix produces
+  consistent with the interpretation that DepthMix may produce
   mixed-geometry boundary regions whose depth supervision is noisier
-  under small batch sizes, and an explicit alignment loss provides a
+  under small batch sizes, and an explicit alignment loss may provide a
   more stable channel for geometric knowledge transfer when the
   implicit path through the shared encoder is disrupted.
 
@@ -815,16 +832,16 @@ Seed~7 & Seed~25 & Seed~42 & Mean & Std & $\Delta$\,(pp) \\
 \vspace{4pt}
 \noindent
 \textbf{Summary.}
-This ablation confirms that the benefit of $\mathcal{L}_\text{ct}$
+This ablation suggests that the benefit of $\mathcal{L}_\text{ct}$
 observed in Section~\ref{sec:ct-calibration-ablation} is not specific to
-the pure PAD-MTL setting. All three component combinations benefit from
-the proposed loss within the selected $d{\rightarrow}s$ track; the gain is
-largest precisely where the reproduction is weakest (MTL\,+\,DX); and the
-best full-framework configuration within this selected track becomes
-comparable to the original paper's reported value under the constrained
-single-GPU setting. Accordingly, the main composability analysis retains
-only the calibration-selected $d{\rightarrow}s$ single-projection track
-for final comparison.
+the pure PAD-MTL setting. All three component combinations show positive
+mean-level gains from the proposed loss within the selected
+$d{\rightarrow}s$ track; the gain is largest where the reproduction is
+weakest (MTL\,+\,DX); and the best full-framework configuration within
+this selected track becomes comparable to the original paper's reported
+value under the constrained single-GPU setting. Accordingly, the main
+composability analysis retains only the calibration-selected
+$d{\rightarrow}s$ single-projection track for final comparison.
 
 % ============================================================
 \section{Chapter Summary}
@@ -835,9 +852,9 @@ This chapter has evaluated the project's experimental work from two
 perspectives: the quality of the reproduction of the original framework,
 and the effectiveness of the proposed $\mathcal{L}_\text{ct}$ extension.
 
-With respect to reproduction, all qualitative performance trends from the
-four result tables (Tables~1, 3, 5, and~7) are preserved under the
-single-GPU constraint. The reproduced results broadly recover the
+With respect to reproduction, the main qualitative performance trends from
+the four result tables (Tables~1, 3, 5, and~7) are largely preserved under
+the single-GPU constraint. The reproduced results broadly recover the
 findings of \cite{hoyer2023ijcv_sde}, with most configurations falling
 within $\pm$1\,mIoU of the paper and several single-GPU runs marginally
 exceeding the reported values. Where under-reproduction occurs, the
@@ -846,7 +863,7 @@ factors, since both are known to affect the stability of semi-supervised
 training.
 
 With respect to the extension, $\mathcal{L}_\text{ct}$ produces positive
-improvements across all validated configurations. The highest raw
+mean improvements across all validated configurations. The highest raw
 Phase~II mean is obtained by single~$(d{\rightarrow}s)$ MSE,
 $\lambda_\text{ct}=1.00$, but its higher variance makes it less reliable
 for model selection. The calibrated primary design---single
@@ -855,7 +872,7 @@ consistent, low-variance gain of $+2.50$\,pp over the PAD-MTL baseline
 across three independent seeds. Based on this calibration, the final
 composability analysis focuses on the selected $d{\rightarrow}s$
 single-projection track. When combined with data selection and DepthMix,
-$\mathcal{L}_\text{ct}$ remains additive within this selected track,
-supporting the conclusion that the improvement is not limited to the
-isolated PAD-MTL baseline and remains observable under the constrained
-single-GPU setting used in this project.
+$\mathcal{L}_\text{ct}$ shows positive mean-level gains within this
+selected track, supporting the conclusion that the improvement is not
+limited to the isolated PAD-MTL baseline and remains observable under the
+constrained single-GPU setting used in this project.

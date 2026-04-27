@@ -333,30 +333,29 @@ contributions of the project are as follows.
   objective were implemented within the PAD multi-task decoder. Two
   loss formulations---$\ell_2$-normalised MSE and cosine
   similarity---were systematically evaluated through a two-phase
-  calibration procedure covering 32 Phase~I configurations and a
+  calibration procedure covering 24 Phase~I configurations and a
   full three-seed Phase~II validation. The design incurs a minimal
   parameter overhead of $16{,}512$ additional parameters (single
   projection) and no additional forward pass through the depth branch,
   making it well-suited to resource-constrained settings.
 
 \item \textbf{Calibration of $\mathcal{L}_\text{ct}$ hyperparameters.}
-  Phase~I (exp~219) identified single-projection cosine loss with no
-  warmup ($w0$) and $\lambda_\text{ct}=1.00$ as the most stable
-  configuration on top of the PAD-MTL baseline. Phase~II (exp~220)
-  confirmed that this configuration produces consistent, low-variance
-  improvements across three independent random seeds
-  (std~$0.17$\,\%), providing the first systematic empirical
-  characterisation of the $\lambda_\text{ct}$ operating range for
-  this architecture.
+  Phase~I (exp~219) identified single-projection cosine loss with
+  $\lambda_\text{ct}=1.00$ as the most stable configuration on top of
+  the PAD-MTL baseline. Phase~II (exp~220) confirmed that this
+  configuration produces consistent, low-variance improvements across
+  three independent random seeds (std~$0.17$\,\%), providing the first
+  systematic empirical characterisation of the $\lambda_\text{ct}$
+  operating range for this architecture.
 
 \item \textbf{Component-level composability evaluation (exp~222).}
   $\mathcal{L}_\text{ct}$ was evaluated on top of three component
-  combinations: MTL\,+\,DX, MTL\,+\,S, and MTL\,+\,DX\,+\,S. In
-  every paired per-seed comparison, both loss formulations improved
-  over the matching baseline, with gains of $+0.10$ to
-  $+0.97$\,pp. The strongest configuration---MSE on
-  MTL\,+\,DX\,+\,S---achieved $68.19$\,\% mIoU, exceeding the
-  reproduced full-framework baseline by $+0.53$\,pp and the
+  combinations: MTL\,+\,DX, MTL\,+\,S, and MTL\,+\,DX\,+\,S. All six
+  $\mathcal{L}_\text{ct}$ configurations (three combinations $\times$
+  two loss types) showed positive mean-level gains over the matching
+  baseline, with gains of $+0.10$ to $+0.97$\,pp. The strongest
+  configuration---MSE on MTL\,+\,DX\,+\,S---achieved $68.19$\,\% mIoU,
+  exceeding the reproduced full-framework baseline by $+0.53$\,pp and the
   paper's reported value~\cite{hoyer2023ijcv_sde} by $+0.18$\,pp,
   demonstrating that a single-GPU reproduction enhanced with
   $\mathcal{L}_\text{ct}$ can match or marginally exceed a
@@ -379,7 +378,8 @@ evaluated below.
   (Random, Entropy, DS, DS+US) were verified, with DS+US consistently
   achieving the highest mIoU in line with the paper. Absolute values
   are within $1.2$\,pp of the paper across all label regimes, and
-  the relative ordering of methods is preserved.
+  the broader trend that informed selection improves over random
+  sampling is consistently reproduced.
 
 \item \textbf{Reproduce Stage~(b)~[Completed].}
   Tables~3, 5, and~7 were reproduced in
@@ -396,23 +396,23 @@ evaluated below.
   $\mathcal{L}_\text{ct}$~[Completed].}
   The cross-task consistency loss was fully implemented, calibrated
   over two phases, and validated with three independent seeds
-  (Sections~\ref{sec:ct-calibration-ablation}). The calibrated loss
+  (Section~\ref{sec:ct-calibration-ablation}). The calibrated loss
   consistently improves over the PAD-MTL baseline, with the best
-  stable configuration (single cosine, $w0$, $\lambda=1.00$)
-  achieving a mean mIoU of $63.73$\,\% on top of PAD-MTL, compared
-  with the baseline of $62.82$\,\%. The improvement is stable across
-  seeds and the $\lambda$ operating range is identified as
-  $[0.75, 1.00]$.
+  stable configuration (single $(d{\rightarrow}s)$ cosine,
+  $\lambda_\text{ct}=1.00$) achieving a mean mIoU of $63.25$\,\%,
+  compared with the PAD-MTL baseline of $60.75$\,\%. The improvement
+  is stable across seeds and the $\lambda_\text{ct}$ operating range
+  is identified as $[0.75, 1.00]$.
 
 \item \textbf{Evaluate the full combined framework~[Completed].}
   Exp~222 (Section~\ref{sec:ct-component-ablation}) evaluated
   $\mathcal{L}_\text{ct}$ on all three target component combinations.
-  The composability objective was fully met: all six
+  The composability objective was met: all six
   $\mathcal{L}_\text{ct}$ configurations (three combinations $\times$
-  two loss types) improved over their paired baseline. The complete
-  system with MSE loss, data selection, DepthMix, and multi-task
-  learning achieved $68.19$\,\% mIoU, the highest result obtained
-  in this project.
+  two loss types) showed positive mean-level gains over the matching
+  baseline. The complete system with MSE loss, data selection,
+  DepthMix, and multi-task learning achieved $68.19$\,\% mIoU, the
+  highest result obtained in this project.
 
 \end{enumerate}
 
