@@ -36,8 +36,10 @@ experiments are conducted on the Cityscapes dataset at the 372-label
 label regimes reported in the original paper. Results are reported as
 mean mIoU~(\%) $\pm$ standard deviation across three independent seeds
 (7, 25, 42). Reproduction entries are presented as
-ours~/~{\scriptsize (paper)}, followed by the absolute discrepancy
-$\Delta = \text{ours} - \text{paper}$.
+reproduced~/~{\scriptsize (reported)}, followed by the absolute
+discrepancy $\Delta = \text{reproduced} - \text{reported}$. Throughout
+this chapter, pp denotes percentage points: for example, an increase from
+60.0\,\% to 61.0\,\% mIoU is reported as a $+1.0$\,pp improvement.
 
 % ============================================================
 \section{Reproduction Protocol}
@@ -78,14 +80,20 @@ without repeating this explanation.
 \noindent
 \textbf{Objective.} Stage~(a) assesses the effectiveness of various data
 selection strategies under limited label budgets.
-Table~\ref{tab:table1_repro} compares the random baseline against
-entropy-based selection and the SDE-guided variants (US, DS, and DS+US).
+Table~\ref{tab:table1_repro} reproduces Table~1 of \cite{hoyer2023ijcv_sde},
+comparing the random baseline against entropy-based selection and the
+SDE-guided variants. DS denotes diversity sampling based on SDE feature
+distances; US denotes uncertainty sampling based on the depth-estimation
+proxy task; DS+US combines both criteria. These SDE-guided variants follow
+the data selection design of \cite{hoyer2023ijcv_sde}.
 
 \begin{table}[H]
 \centering
-\caption{Reproduction of Table~1 (Data Selection). mIoU~(\%) as
-mean$\pm$std (3 seeds). Each cell shows: ours / {\scriptsize (paper)},
-$\Delta$.}
+\caption{Reproduction of Table~1 from \cite{hoyer2023ijcv_sde}: data
+selection strategies on Cityscapes. mIoU~(\%) is reported as
+mean$\pm$std over three seeds. Each cell shows
+reproduced~/~{\scriptsize (reported)}, followed by $\Delta$ in
+percentage points~(pp).}
 \label{tab:table1_repro}
 \renewcommand{\arraystretch}{1.6}
 \small
@@ -104,15 +112,15 @@ Entropy &
 \makecell[c]{$53.76 \pm 0.44$ \\ {\scriptsize ($53.63 \pm 0.77$), $\Delta=+0.13$}} &
 \makecell[c]{$63.61 \pm 0.78$ \\ {\scriptsize ($63.51 \pm 0.68$), $\Delta=+0.10$}} &
 \makecell[c]{$65.57 \pm 0.62$ \\ {\scriptsize ($66.18 \pm 0.50$), $\Delta=-0.61$}} \\
-Ours (US) &
+US &
 \makecell[c]{$50.83 \pm 0.91$ \\ {\scriptsize ($51.75 \pm 1.12$), $\Delta=-0.92$}} &
 \makecell[c]{$63.07 \pm 0.11$ \\ {\scriptsize ($62.77 \pm 0.46$), $\Delta=+0.30$}} &
 \makecell[c]{$66.84 \pm 0.34$ \\ {\scriptsize ($66.76 \pm 0.45$), $\Delta=+0.08$}} \\
-Ours (DS) &
+DS &
 \makecell[c]{$52.67 \pm 0.14$ \\ {\scriptsize ($53.00 \pm 0.51$), $\Delta=-0.33$}} &
 \makecell[c]{$62.86 \pm 0.46$ \\ {\scriptsize ($63.23 \pm 0.69$), $\Delta=-0.37$}} &
 \makecell[c]{$66.74 \pm 0.15$ \\ {\scriptsize ($66.37 \pm 0.20$), $\Delta=+0.37$}} \\
-Ours (DS+US) &
+DS+US &
 \makecell[c]{$53.63 \pm 0.19$ \\ {\scriptsize ($54.37 \pm 0.36$), $\Delta=-0.74$}} &
 \makecell[c]{$63.38 \pm 0.92$ \\ {\scriptsize ($64.25 \pm 0.18$), $\Delta=-0.87$}} &
 \makecell[c]{$66.35 \pm 0.62$ \\ {\scriptsize ($66.94 \pm 0.59$), $\Delta=-0.59$}} \\
@@ -147,14 +155,21 @@ selection improves over random sampling is consistently reproduced.
 \noindent
 \textbf{Objective.} This section evaluates Stage~(b) mixing strategies
 applied to the subsets defined in Stage~(a).
-Table~\ref{tab:table3_repro} compares the baseline against
-pseudo-labelling, ClassMix, and the proposed geometry-aware
-DepthMix~(DX).
+Table~\ref{tab:table3_repro} reproduces Table~3 of
+\cite{hoyer2023ijcv_sde}, comparing four training strategies. DX denotes
+DepthMix, the geometry-aware mixing strategy introduced by
+\cite{hoyer2023ijcv_sde}; ClassMix is a class-segment-based mixing
+baseline from \cite{olsson2021classmix}; Pseudo-Labels refers to
+mean-teacher self-training without geometric mixing. The experimental
+setup follows \cite{hoyer2023ijcv_sde} throughout.
 
 \begin{table}[H]
 \centering
-\caption{Reproduction of Table~3 (Mixing Strategies). mIoU~(\%)
-mean$\pm$std (3 seeds). $\Delta$ reflects deviation from the paper.}
+\caption{Reproduction of Table~3 from \cite{hoyer2023ijcv_sde}: data
+mixing strategies on Cityscapes. mIoU~(\%) is reported as mean$\pm$std
+over three seeds. Each entry shows reproduced~/~{\scriptsize (reported)},
+followed by $\Delta$ in percentage points~(pp). DX denotes DepthMix, the
+geometry-aware mixing strategy introduced by \cite{hoyer2023ijcv_sde}.}
 \label{tab:table3_repro}
 \renewcommand{\arraystretch}{1.2}
 \begin{tabularx}{\textwidth}{lXX}
@@ -172,7 +187,7 @@ $60.05 \pm 0.92$ {\scriptsize ($62.39 \pm 0.86$), $\Delta=-2.34$} &
 ClassMix &
 $63.46 \pm 1.20$ {\scriptsize ($63.16 \pm 0.89$), $\Delta=+0.30$} &
 $69.23 \pm 0.51$ {\scriptsize ($69.60 \pm 0.32$), $\Delta=-0.37$} \\
-DepthMix &
+DX (DepthMix) &
 $64.57 \pm 1.12$ {\scriptsize ($64.14 \pm 1.34$), $\Delta=+0.43$} &
 $70.11 \pm 0.28$ {\scriptsize ($69.83 \pm 0.36$), $\Delta=+0.28$} \\
 \bottomrule
@@ -211,12 +226,22 @@ features to the segmentation task, specifically investigating the role of
 the feature-distance loss ($\mathcal{L}_F$) and multi-task learning.
 The \texttt{fd0} and \texttt{fd2} encoder variants and the
 feature-distance regularisation term~$\mathcal{L}_F$ are described in
-detail in Section~\ref{sec:fd0-fd2}.
+detail in Section~\ref{sec:fd0-fd2}. The Multi-Task
+($\mathcal{L}_F=\checkmark$) setting---joint segmentation and SDE
+training with the PAD decoder---is used as the no-$\mathcal{L}_\text{ct}$
+baseline for all cross-task loss experiments in
+Sections~\ref{sec:ct-calibration-ablation}
+and~\ref{sec:ct-component-ablation}.
 
 \begin{table}[H]
 \centering
-\caption{Reproduction of Table~5 (SDE Feature Transfer). mIoU~(\%)
-mean$\pm$std (3 seeds).}
+\caption{Reproduction of Table~5 from \cite{hoyer2023ijcv_sde}: SDE
+feature transfer methods on Cityscapes. mIoU~(\%) is reported as
+mean$\pm$std over three seeds. Each entry shows
+reproduced~/~{\scriptsize (reported)}, followed by $\Delta$ in
+percentage points~(pp). $\mathcal{L}_F$ denotes the feature-distance
+regularisation loss used to mitigate forgetting of SDE-derived
+representations during segmentation fine-tuning.}
 \label{tab:table5_repro}
 \renewcommand{\arraystretch}{1.2}
 \begin{tabularx}{\textwidth}{lXX}
@@ -245,9 +270,9 @@ $69.40 \pm 0.29$ {\scriptsize ($69.76 \pm 0.39$), $\Delta=-0.36$} \\
 \textbf{Observation and Analysis.}
 Our results are broadly consistent with the core scientific claims of the
 original paper: SDE pretraining appears to provide a stronger
-initialisation, and $\mathcal{L}_F$ may help prevent catastrophic
-forgetting of the geometric representations acquired during self-supervised
-depth estimation. The near-zero gap for Transfer ($\mathcal{L}_F=\checkmark$)
+initialisation, and $\mathcal{L}_F$ may help mitigate forgetting of the
+geometric representations acquired during self-supervised depth
+estimation. The near-zero gap for Transfer ($\mathcal{L}_F=\checkmark$)
 at 372 labels ($\Delta = +0.03$) is encouraging, suggesting that the
 benefit of SDE-derived features transfers robustly across training
 environments even under single-GPU constraints.
@@ -275,15 +300,21 @@ regularise the segmentation task under label-efficient conditions.
 \noindent
 \textbf{Objective.} We reproduce the full framework component ablation
 study to evaluate the synergistic effects of data selection~(S),
-DepthMix~(DX), and multi-task learning~(MTL).
-Table~\ref{tab:table7_repro} presents a direct comparison between our
-results and the values reported in \cite{hoyer2023ijcv_sde}.
+DepthMix~(DX), and multi-task learning~(MTL). S denotes the DS+US
+automatic data selection strategy; DX denotes DepthMix augmentation; MTL
+denotes joint segmentation and SDE training using the PAD decoder for
+cross-task feature exchange. Table~\ref{tab:table7_repro} presents a
+direct comparison between our results and the values reported in
+\cite{hoyer2023ijcv_sde}.
 
 \begin{table}[H]
 \centering
-\caption{Reproduction of Table~7 (Framework Ablation). mIoU~(\%)
-mean$\pm$std (3 seeds). Each cell shows: ours / {\scriptsize (paper)},
-$\Delta$.}
+\caption{Reproduction of Table~7 from \cite{hoyer2023ijcv_sde}: framework
+component ablation on Cityscapes. mIoU~(\%) is reported as mean$\pm$std
+over three seeds. Each cell shows reproduced~/~{\scriptsize (reported)},
+followed by $\Delta$ in percentage points~(pp). S~=~data selection
+(DS+US); DX~=~DepthMix; MTL~=~multi-task learning with the PAD decoder.
+Tick marks indicate a component is active; dashes indicate it is absent.}
 \label{tab:table7_repro}
 \renewcommand{\arraystretch}{2.0}
 \small
@@ -333,7 +364,7 @@ and S\,+\,DX (without MTL, $\Delta = +0.51$\,pp)---which may reflect
 favourable random-seed interactions under the fixed subset indices.
 
 A notable discrepancy arises in the DX+MTL configuration at 372 labels,
-where our result ($65.11$) falls $1.55$\,mIoU below the paper ($66.66$),
+where our result ($65.11$) falls $1.55$\,pp below the paper ($66.66$),
 despite exceeding the DX-only result ($64.57$). One plausible explanation
 is that the joint optimisation of DepthMix augmentation and the auxiliary
 depth objective is more sensitive to batch size than either component in
@@ -345,13 +376,14 @@ the segmentation branch via the shared encoder. In the multi-GPU setup of
 the original paper, larger effective batch sizes may smooth out this noise,
 whereas the single-GPU setup may amplify it.
 
-This pattern reinforces the structural gap identified in Table~5: under
-small-batch conditions, the implicit path through the shared encoder may be
-particularly susceptible to gradient noise introduced by mixed-geometry
-samples. An explicit feature-level alignment loss operating directly on
-decoder representations---after the augmentation-induced noise has been
-absorbed by the task-specific heads---may therefore provide a more stable
-channel for cross-task knowledge transfer in this setting.
+This pattern reinforces the structural gap discussed after
+Table~\ref{tab:table5_repro}: under small-batch conditions, the implicit
+path through the shared encoder may be particularly susceptible to
+gradient noise introduced by mixed-geometry samples. An explicit
+feature-level alignment loss operating directly on decoder
+representations---after the augmentation-induced noise has been absorbed
+by the task-specific heads---may therefore provide a more stable channel
+for cross-task knowledge transfer in this setting.
 
 % ============================================================
 \section{Cross-Task Consistency Loss: Calibration and Ablation}
@@ -368,6 +400,25 @@ and $\lambda_\text{ct}$; and a three-seed validation (Phase~II) for the
 most promising configurations. All $\Delta$ values are reported as
 absolute mIoU differences in percentage points~(pp).
 
+\noindent
+\textbf{Notation for this section.}
+Throughout Sections~\ref{sec:ct-calibration-ablation}
+and~\ref{sec:ct-component-ablation}, the following terms are used
+consistently. \textit{Single projection} denotes a layout with one
+$1{\times}1$ convolutional projection head. The direction of projection is
+written as $d{\rightarrow}s$ when depth decoder features
+($f_\text{depth}$) are projected into the segmentation feature space, and
+$s{\rightarrow}d$ for the reverse direction. \textit{Dual projection} uses
+two independent $1{\times}1$ projection heads applied simultaneously in
+both directions, so both consistency losses are summed; this doubles the
+additional parameter count from $16{,}512$ to $33{,}024$. Unless otherwise
+stated, the baseline for the cross-task loss experiments is the reproduced
+PAD-MTL configuration (Multi-Task, $\mathcal{L}_F=\checkmark$, no
+$\mathcal{L}_\text{ct}$) from Table~\ref{tab:table5_repro}. For the
+component-level ablation in Section~\ref{sec:ct-component-ablation}, each
+$\mathcal{L}_\text{ct}$ variant is compared against its matching
+no-$\mathcal{L}_\text{ct}$ baseline under the same framework components.
+
 % ============================================================
 \subsection{Phase I: Single-seed Calibration (Seed~7)}
 \label{subsec:ct-phase1-seed7}
@@ -380,11 +431,14 @@ $\lambda_\text{ct}\in\{0.25, 0.50, 0.75, 1.00\}$. For the single
 projection layout, two projection directions are additionally evaluated:
 single~$(d{\rightarrow}s)$, in which the depth feature is projected into
 the segmentation space, and single~$(s{\rightarrow}d)$, in which the
-segmentation feature is projected into the depth space. This yields
-$2 \times 2 \times 2 \times 4 = 32$ configurations in total, but since
-the dual projection layout has no direction variant, the effective count
-is $2 \times 4 + 2 \times 4 + 1 \times 2 \times 4 = 24$ distinct
-configurations.
+segmentation feature is projected into the depth space.
+
+For the single-projection setting, this gives two directions, two loss
+types, and four values of $\lambda_\text{ct}$, resulting in
+$2 \times 2 \times 4 = 16$ configurations. For the dual-projection
+setting, there is no separate direction choice, resulting in
+$2 \times 4 = 8$ configurations. Therefore, Phase~I evaluates
+24 distinct configurations in total.
 
 Phase~I fixes random seed~7 to screen all configurations; the goal is
 not to identify a globally optimal configuration, but to eliminate
@@ -397,13 +451,18 @@ All Phase~I $\Delta$ values use $\text{baseline}_{\text{S7}} = 59.84$\,\%.
 
 \begin{table}[H]
 \centering
-\caption{Phase~I (seed~7): single projection, both directions and loss
-types. $\Delta = \text{mIoU}(\%) - 59.84$\,pp.}
+\caption{Phase~I single-seed calibration (\textit{seed}~$=7$): single
+projection layout, both directions and both loss types, across
+$\lambda_\text{ct} \in \{0.25, 0.50, 0.75, 1.00\}$. Baseline is
+PAD-MTL without $\mathcal{L}_\text{ct}$ at seed~7 (59.84\,\%). $\Delta$
+values are in percentage points~(pp) relative to this baseline. See the
+notation paragraph above for definitions of $d{\rightarrow}s$ and
+$s{\rightarrow}d$.}
 \label{tab:ct-p1-single}
 \renewcommand{\arraystretch}{1.2}
 \begin{tabular}{llccc}
 \toprule
-Direction & Loss & $\lambda_\text{ct}$ & Best mIoU (\%) & $\Delta$\,(pp) \\
+Direction & Loss & $\lambda_\text{ct}$ & mIoU (\%) & $\Delta$\,(pp) \\
 \midrule
 Baseline (seed~7) & -- & -- & 59.84 & -- \\
 \midrule
@@ -432,13 +491,18 @@ $s{\rightarrow}d$ & MSE & 1.00 & 63.08 & $+3.24$ \\
 
 \begin{table}[H]
 \centering
-\caption{Phase~I (seed~7): dual projection, both loss types.
-$\Delta = \text{mIoU}(\%) - 59.84$\,pp.}
+\caption{Phase~I single-seed calibration (\textit{seed}~$=7$): dual
+projection layout, both loss types, across
+$\lambda_\text{ct} \in \{0.25, 0.50, 0.75, 1.00\}$. Dual projection
+uses two independent $1{\times}1$ heads simultaneously in both
+directions ($33{,}024$ additional parameters, versus $16{,}512$ for
+single projection). Baseline mIoU $= 59.84$\,\%. $\Delta$ values are in
+percentage points~(pp).}
 \label{tab:ct-p1-dual}
 \renewcommand{\arraystretch}{1.2}
 \begin{tabular}{lccc}
 \toprule
-Loss & $\lambda_\text{ct}$ & Best mIoU (\%) & $\Delta$\,(pp) \\
+Loss & $\lambda_\text{ct}$ & mIoU (\%) & $\Delta$\,(pp) \\
 \midrule
 Baseline (seed~7) & -- & 59.84 & -- \\
 \midrule
@@ -457,9 +521,11 @@ MSE & 1.00 & 62.48 & $+2.64$ \\
 
 \noindent
 \textbf{Phase-I findings.}
-All 24 configurations improve over the seed-7 baseline, confirming that
-$\mathcal{L}_\text{ct}$ provides a positive signal across the tested
-projection layouts, directions, loss types, and $\lambda_\text{ct}$ values.
+All 24 configurations improve over the seed-7 baseline, suggesting that
+$\mathcal{L}_\text{ct}$ provides a positive signal in this single-seed
+screen. However, these results are treated only as calibration evidence,
+and multi-seed validation is required before drawing conclusions about
+stability.
 
 For single projection, the $d{\rightarrow}s$ direction achieves a higher
 Phase~I peak than $s{\rightarrow}d$: $63.77$\,\% vs.\ $63.08$\,\%
@@ -508,10 +574,11 @@ descending order.
 
 \begin{table}[H]
 \centering
-\caption{Phase~II three-seed validation (372 labels, best-observed
-across runs), sorted by mean mIoU (descending). Baseline: PAD-MTL
-(Table~\ref{tab:table5_repro}, Multi-Task), $\lambda_\text{ct}=0$.
-$\Delta = \text{mean}(\%) - 60.75$\,pp.}
+\caption{Phase~II three-seed validation (372 labels), sorted by mean
+mIoU (descending). Baseline is PAD-MTL without $\mathcal{L}_\text{ct}$,
+retrained with the same three seeds (7, 25, 42) in the same submission
+batch. $\Delta$~(pp) $= \text{mean} - 60.75$, where $60.75$\,\% is the
+three-seed baseline mean.}
 \label{tab:ct-phase2-3seeds}
 \renewcommand{\arraystretch}{1.3}
 \small
@@ -561,9 +628,11 @@ single $(s{\rightarrow}d)$, cosine, $\lambda=1.00$ &
   tested configurations.}
   All thirteen validated configurations improve over the baseline mean
   ($60.75$\,\%), with gains ranging from $+1.55$ to $+2.81$\,pp.
-  This is consistent with $\mathcal{L}_\text{ct}$ providing a reliable
-  positive signal across the tested architectural choices and
-  hyperparameter settings.
+  This suggests that $\mathcal{L}_\text{ct}$ provides a consistent positive
+  signal across the tested architectural choices and hyperparameter
+  settings, although the limited number of seeds means the result should be
+  interpreted as robustness evidence rather than a formal statistical
+  guarantee.
 
 \item \textit{The highest raw mean does not correspond to the most stable
   configuration.}
@@ -731,9 +800,14 @@ mean-level component ablation rather than a formal statistical test.
 \begin{table}[H]
 \centering
 \caption{Component-level ablation of $\mathcal{L}_\text{ct}$ on three
-PAD-MTL component combinations at 372 labels. Results are reported for
-the selected single-projection direction $d{\rightarrow}s$ using
-three-seed mean mIoU.}
+PAD-MTL component combinations at 372 labels. S~=~data selection
+(DS+US); DX~=~DepthMix; MTL~=~multi-task learning with the PAD decoder.
+All $\mathcal{L}_\text{ct}$ variants use single $d{\rightarrow}s$
+projection with $\lambda_\text{ct}=1.00$. Each baseline row
+(Direction~$=$~--, $\mathcal{L}_\text{ct}$~$=$~none) is trained in the
+same submission batch as its paired variants. Results are three-seed mean
+mIoU~(\%); $\Delta$ values are in percentage points~(pp) relative to
+the matching baseline.}
 \label{tab:ct-component-ablation}
 \renewcommand{\arraystretch}{1.3}
 \small
@@ -853,11 +927,12 @@ perspectives: the quality of the reproduction of the original framework,
 and the effectiveness of the proposed $\mathcal{L}_\text{ct}$ extension.
 
 With respect to reproduction, the main qualitative performance trends from
-the four result tables (Tables~1, 3, 5, and~7) are largely preserved under
-the single-GPU constraint. The reproduced results broadly recover the
-findings of \cite{hoyer2023ijcv_sde}, with most configurations falling
-within $\pm$1\,mIoU of the paper and several single-GPU runs marginally
-exceeding the reported values. Where under-reproduction occurs, the
+the four reproduced result tables corresponding to Tables~1, 3, 5, and~7
+of \cite{hoyer2023ijcv_sde} are largely preserved under the single-GPU
+constraint. The reproduced results broadly recover the findings of
+\cite{hoyer2023ijcv_sde}, with most configurations falling within
+$\pm$1\,mIoU of the reported values and several single-GPU runs
+marginally exceeding them. Where under-reproduction occurs, the
 reduced batch size and absence of SyncBN provide plausible contributing
 factors, since both are known to affect the stability of semi-supervised
 training.
