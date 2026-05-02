@@ -25,11 +25,10 @@ around three progressive stages.
 
 \textbf{Stage (a): Standard supervised pipeline.}
 This is the baseline for the whole framework, representing the simplest
-possible training setup: a subset of images is manually selected from an
-unlabelled pool, annotated, and used for supervised training with standard
-data augmentation. No SDE components are involved at this stage, and it
-serves as the reference point for measuring the improvements introduced in
-later stages.
+training setup: a limited subset of images is treated as annotated and
+used for supervised training with standard data augmentation. No SDE
+components are involved at this stage, and it serves as the reference
+point for measuring the improvements introduced in later stages.
 
 \textbf{Stage (b): SDE-enhanced semi-supervised learning pipeline.}
 This stage builds on the standard pipeline by incorporating self-supervised
@@ -85,41 +84,30 @@ Hoyer et al.~\cite{hoyer2023ijcv_sde} showed that SDE can provide a stable
 geometric signal throughout the training pipeline, enabling
 geometry-consistent data mixing and better feature transfer.
 
-That said, while PAD-Net~\cite{hoyer2023ijcv_sde} already enables some
-implicit cross-task interaction through its attention mechanism, where depth
-and segmentation features modulate each other's self-attention outputs, this
-interaction is indirect. It operates on attention-enhanced features rather
-than placing any constraint on the representations themselves. More
-importantly, the depth decoder receives self-supervised training signals
-from all available unlabelled frames, while the segmentation decoder is only
-supervised on the small labelled subset. This asymmetry means the depth
-branch ends up with much richer geometric representations, yet there is no
-explicit mechanism to pass that geometric knowledge into the segmentation
-feature space.
+However, a structural limitation remains in the PAD-style multi-task
+architecture adopted by Hoyer et al.~\cite{hoyer2023ijcv_sde}, which is
+based on attention-guided feature exchange between the depth and
+segmentation decoders. While this architecture enables implicit cross-task
+interaction, it places no direct constraint on the representations
+themselves. More importantly, the depth decoder receives self-supervised
+training signals from all available unlabelled frames throughout training,
+while the segmentation decoder is only supervised on the small labelled
+subset. This supervision asymmetry means the depth branch accumulates
+richer geometric representations, yet there is no explicit mechanism to
+transfer that geometric knowledge into the segmentation feature space.
 
-Inspired by work on cross-task consistency
-learning~\cite{nakano2021crosstask,zamir2020crosstask} and multi-task
-learning with partial annotations~\cite{li2022mtl}, we propose a
-\textbf{Cross-Task Consistency Loss} $\mathcal{L}_\text{ct}$. The idea is
-fairly straightforward: features extracted from the same scene by both
-decoders should reflect compatible structural information, since pixels in
-the same semantic region tend to share consistent depth values, and sharp
-depth changes usually coincide with semantic boundaries. Rather than letting
-the two decoders learn entirely independently, we explicitly encourage their
-intermediate features to stay aligned. This way, the depth decoder can act
-as a continuously available, label-free teacher for the segmentation branch,
-providing extra geometric supervision precisely when labelled data is most
-limited.
-
-At a high level, the proposed loss aligns intermediate features from the
-depth and segmentation decoders through a lightweight projection module,
-while leaving the original depth objective unchanged. Two similarity
-formulations are considered, and the resulting design is evaluated with
-respect to three questions: whether it improves segmentation performance
-over the reproduced Stage~(b) MTL baseline, whether any improvement
-remains consistent across different random seeds, and whether a stable
-operating range for $\lambda_\text{ct}$ can be identified through
-systematic calibration.
+This gap motivates the main extension proposed in this project: a
+\textbf{Cross-Task Consistency Loss} ($\mathcal{L}_\text{ct}$) that
+explicitly encourages the intermediate features of the depth and
+segmentation decoders to remain aligned. Since pixels in the same semantic
+region tend to share consistent depth values and sharp depth changes
+typically coincide with semantic boundaries, features from the two decoders
+should reflect compatible structural information about the same scene.
+Rather than relying on the implicit feature exchange that the architecture
+already provides, $\mathcal{L}_\text{ct}$ adds a direct alignment objective
+so that the depth decoder can act as a continuously available, label-free
+source of geometric supervision for the segmentation branch, precisely when
+labelled data is most limited.
 
 % -----------------------------------------------------------------------------
 \section{Aims and Objectives}
@@ -147,26 +135,16 @@ measures the individual and combined performance contributions of data
 selection~(S), DepthMix~(DX), and multi-task learning~(MTL).
 
 \item \textbf{Design, implement, and evaluate a Cross-Task Consistency
-Loss.} Inspired by cross-task consistency
-learning~\cite{nakano2021crosstask,zamir2020crosstask} and multi-task
-learning with partial annotations~\cite{li2022mtl}, propose and implement
-$\mathcal{L}_\text{ct}$ within the PAD-Net~\cite{hoyer2023ijcv_sde}
-multi-task architecture. Two loss formulations (normalised MSE and cosine similarity) and two
-projection directions---single~$(d{\rightarrow}s)$, which projects depth
-features into the segmentation space, and single~$(s{\rightarrow}d)$,
-which projects segmentation features into the depth space---are
-investigated. A loss-scale calibration procedure followed by a
-$\lambda$ sweep and a projection direction ablation are used to identify
-the best design choices, and three independent random seeds are used to
-verify whether the mIoU improvements over the Stage~(b) MTL baseline
-are stable and reproducible.
+Loss.} Propose and implement $\mathcal{L}_\text{ct}$ within the PAD-style
+multi-task architecture, investigating different loss formulations and
+projection configurations. A systematic calibration procedure is used to
+identify stable and well-performing design choices, with results validated
+across multiple independent random seeds to confirm that improvements over
+the Stage~(b) MTL baseline are reproducible.
 
 \item \textbf{Evaluate the full combined framework.} Integrate
-$\mathcal{L}_\text{ct}$ into three configurations: MTL with DepthMix, MTL
-with automatic data selection, and MTL with both DepthMix and automatic
-data selection, to assess how well the proposed loss combines with the
-existing framework components and measure the overall performance of the
-complete system.
+$\mathcal{L}_\text{ct}$ with the existing framework components---data
+selection and DepthMix---to assess how well the proposed loss composes with
+them and to measure the overall performance of the complete system.
 
 \end{enumerate}
-% -----------------------------------------------------------------------------
