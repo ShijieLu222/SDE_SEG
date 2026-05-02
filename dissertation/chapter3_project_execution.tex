@@ -1,318 +1,628 @@
 \chapter{Project Execution}
 \label{chap:execution}
 
-This chapter documents how the reproduction experiments and the cross-task
-consistency loss extension were carried out in practice, including the
-computing environment, dataset configuration, training pipeline, use of the
-PAD multi-task decoder, and the organisation of individual experiment
-groups. Throughout, this project adopts the terminology of the original
-paper: Stage~(a) refers to standard supervised learning using all available 
-annotated data as the baseline, while Stage~(b) encompasses 
-semi-supervised extension mechanisms, including automatic data 
-selection~(S), DepthMix data augmentation~(DX), and multi-task 
-learning~(MTL).
+This chapter describes the execution of the project and formalises the
+proposed Cross-Task Consistency Loss extension introduced at the end of
+Chapter~\ref{chap:technical}. The chapter first defines the
+label-efficient Cityscapes setting used in this project, including the
+labelled and semantically unlabelled subsets. It then specifies how the
+proposed $\mathcal{L}_\text{ct}$ is integrated into the PAD-MTL pipeline,
+gives its mathematical formulation, describes the projection-head designs
+evaluated in the experiments, and explains the downstream training
+procedure. The final sections summarise the organisation of the
+experimental runs and the computing environment used to reproduce and
+extend the original framework.
 
 % ============================================================================
-\section{Experimental Setup}
-\label{sec:setup}
+\section{Problem Setup and Dataset Configuration}
+\label{sec:problem-setup}
 
-\subsection{Computing Environment}
-\label{sec:computing-environment}
+This project studies label-efficient semantic segmentation on the
+Cityscapes dataset~\cite{cordts2016cityscapes}. Let $\mathcal{D}$ denote
+the 2,975-image Cityscapes fine-annotation training set. A labelled subset
+$\mathcal{D}_L \subset \mathcal{D}$ of $N_L$ images is selected using the
+fixed subset indices provided by the original framework of
+Hoyer et al.~\cite{hoyer2023ijcv_sde}, ensuring comparability with the
+original reported results. The remaining images are treated as
+semantically unlabelled and form
+$\mathcal{D}_U = \mathcal{D} \setminus \mathcal{D}_L$.
 
-The reproduction experiments (exp~210--213, corresponding to Tables~1, 3,
-5, and~7) were run on the University of Bristol's Isambard-AI
-platform~\cite{isambard_ai}, using a single GPU per job. The subsequent
-cross-task consistency loss extension experiments (exp~219, exp~220, and
-exp~222) were run on the University of Bristol's BluePebble high-performance
-computing platform~(BP1) under the SLURM workload manager. Both sets of
-experiments followed the same configuration management and random seed
-control procedures to ensure traceability and reproducibility.
+The reproduction experiments cover the annotation budgets of 100, 372, and
+744 labelled images, matching the label-budget settings evaluated in the
+original framework~\cite{hoyer2023ijcv_sde}. The proposed Cross-Task
+Consistency Loss extension is evaluated primarily under the 372-label
+setting, corresponding to the $\nicefrac{1}{8}$ Cityscapes regime. In this
+setting, $N_L = 372$ labelled images are used for semantic segmentation
+supervision, while the remaining $N_U = 2{,}603$ images are treated as
+semantically unlabelled during training.
 
-On BluePebble, each SLURM job was allocated one GPU, eight physical cores,
-and 64\,GB of system memory. BP1 is a heterogeneous cluster and node
-assignment is managed automatically by SLURM. The cross-task loss
-experiments were run predominantly on V100 nodes with 32\,GB VRAM. All
-experiments ran within a dedicated Conda environment with pinned
-dependencies to ensure consistent behaviour across node types.
+Each labelled image $x_i \in \mathbb{R}^{H \times W \times 3}$ is paired
+with a pixel-level semantic annotation
+$y_i \in \{1,\ldots,C\}^{H \times W}$ over $C=19$ classes. For the
+self-supervised depth branch, temporally adjacent frames are used when
+available to form photometric training triplets
+$(x_{t-1}, x_t, x_{t+1})$. These triplets provide photometric supervision
+signals for the depth branch without requiring manual depth labels.
 
-\subsection{Training Configuration and Reproducibility}
-\label{sec:training-config}
+The goal is to train a semantic segmentation network
+\[
+    g_\theta^S \colon \mathbb{R}^{H \times W \times 3}
+    \to \mathbb{R}^{C \times H \times W},
+\]
+which predicts a dense class-logit map for each input image. The final
+semantic label map is obtained by applying an argmax operation over the
+class dimension.
 
-Random seeds were fixed across Python, NumPy, and PyTorch at the start of
-every run. Each experiment's full configuration, including experiment ID,
-label budget, seed, and all hyperparameters, was logged alongside model
-checkpoints to support reproducibility.
+The model follows the PAD-MTL architecture used in the reproduced
+framework. It consists of a shared ResNet-101 encoder $f_\theta^E$, a
+semantic segmentation decoder $f_\theta^S$, and a self-supervised depth
+decoder $f_\theta^D$. The segmentation and depth branches are therefore
+defined as:
+\[
+    g_\theta^S = f_\theta^S \circ f_\theta^E,
+    \qquad
+    g_\theta^D = f_\theta^D \circ f_\theta^E.
+\]
+The shared encoder allows both tasks to use a common visual representation,
+while the two task-specific decoders specialise the shared features for
+semantic segmentation and depth estimation respectively.
 
-All reproduction and extension experiments used a ResNet-101
-encoder~\cite{he2016resnet} pretrained on ImageNet~\cite{deng2009imagenet}.
-Training used the SGD optimiser with momentum $0.9$ and weight decay
-$5\!\times\!10^{-4}$, following a polynomial learning-rate decay schedule
-over 40{,}000 iterations. Learning rates were set to $10^{-2}$ for the
-decoder, $10^{-3}$ for the backbone encoder, and $10^{-6}$ for the pose
-network.
+% ============================================================================
+\section{Proposed Extension: Cross-Task Consistency}
+\label{sec:proposed-extension}
 
-A key resource constraint of this project is that all experiments were run
-on a single GPU. Although the University of Bristol's HPC platforms
-technically support multi-GPU jobs, this project required running tens of
-distinct experiment configurations. Waiting for multiple GPUs to become
-simultaneously available would have imposed prohibitively long queue times,
-severely compressing the window available for iterative experimentation.
-The single-GPU strategy was therefore adopted as a deliberate trade-off:
-accepting reduced per-run hardware capacity in exchange for substantially
-higher experiment throughput within the available project timeline.
+Chapter~\ref{chap:technical} identified a gap in the PAD-MTL architecture:
+its attention-guided distillation module allows the segmentation and depth
+branches to exchange information, but this exchange remains implicit. The
+model has no direct objective that requires the intermediate segmentation
+and depth features to be mutually consistent.
 
-As a direct consequence of the single-GPU constraint, a batch size of~2
-was used without Synchronised Batch Normalisation~(SyncBN).
-SyncBN is a technique used in multi-GPU training that synchronises the
-computation of batch normalisation statistics---specifically the per-channel
-mean and variance---across all GPUs at each step, so that the normalisation
-is effectively performed over the full cross-GPU batch rather than each
-GPU's local shard. In the original paper's multi-GPU setup, SyncBN
-produced stable normalisation statistics equivalent to an effective batch
-size of~8; in this project's single-GPU setup with batch size~2, batch
-normalisation statistics are estimated from fewer samples per step,
-introducing greater noise into the normalisation. This is one of the
-primary reasons why the reproduced results are systematically slightly
-below the original paper across most configurations, with gaps in the
-range of approximately $0.2$ to $1.6$\,pp---a discrepancy consistent with
-the well-documented sensitivity of semi-supervised methods to effective
-batch size.
+This limitation is especially relevant in the label-efficient setting. The
+segmentation branch receives direct semantic supervision only from the
+small labelled subset $\mathcal{D}_L$, whereas the depth branch can learn
+from photometric reconstruction over temporal image sequences without
+requiring manual depth labels. This creates an asymmetry in the available training
+signals, motivating the proposed Cross-Task Consistency Loss
+$\mathcal{L}_\text{ct}$, which introduces an explicit feature-level
+alignment objective between the two decoder branches at the PAD
+distillation layer.
 
-The practical impact of these hardware constraints is analysed in
-Chapter~\ref{chap:evaluation}, where the reproduced results are compared
-against the original paper and the proposed $\mathcal{L}_\text{ct}$
-variants are evaluated under the same experimental protocol.
+Unlike the existing PAD feature-exchange module, which passes attended
+features between branches, $\mathcal{L}_\text{ct}$ directly penalises
+disagreement between intermediate feature representations. The proposed
+loss is used only during training. At inference time, the segmentation
+prediction is produced by the same segmentation branch as in the PAD-MTL
+baseline, and the projection heads introduced for $\mathcal{L}_\text{ct}$
+are not required.
 
-All experiment configurations are managed through a centralised
-\texttt{experiments.py} module, which maps discrete experiment IDs to
-fully specified hyperparameter dictionaries. This acts as the central
-configuration reference, reducing configuration drift across runs and
-making individual results reproducible from their experiment IDs alone.
-Table~\ref{tab:exp_id_mapping} summarises the mapping between experiment
-IDs, their purposes, and the result tables to which they contribute.
+% ============================================================================
+\section{Formulation of \texorpdfstring{$\mathcal{L}_\text{ct}$}{Lct}}
+\label{sec:lct-formulation}
+
+\subsection{Feature Representations}
+\label{sec:feature-repr}
+
+In this project's PAD configuration, the cross-task consistency loss is
+applied at the PAD distillation layer, corresponding to decoder upsampling
+layer~7 in this implementation. At this layer, the depth and segmentation
+decoder branches produce feature maps with spatial resolution
+$128 \times 128$ and $C_d = 128$ channels.
+
+Let
+\[
+    f_\text{depth}
+    \in
+    \mathbb{R}^{B \times C_d \times H_d \times W_d},
+    \qquad
+    f_\text{seg}
+    \in
+    \mathbb{R}^{B \times C_d \times H_d \times W_d}
+\]
+denote the depth and segmentation features at this layer for a minibatch
+of size $B$, where $H_d = W_d = 128$.
+
+The loss is applied at the feature level rather than the output level
+because the final task outputs have incompatible meanings: semantic
+segmentation produces class logits, while depth estimation produces a
+geometric depth prediction. Aligning intermediate feature representations
+therefore provides a more appropriate way to encourage cross-task
+consistency without forcing one task output to imitate the other.
+
+Figure~\ref{fig:ct-loss-architecture} illustrates where these intermediate
+features are extracted and how $\mathcal{L}_\text{ct}$ is attached to the
+PAD-MTL architecture across the three projection layouts.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figures/cross_task_consistency_extension.drawio.pdf}
+    \caption{Architecture-level placement of the proposed
+    $\mathcal{L}_\text{ct}$ within PAD-MTL. The shared encoder
+    (SDE \texttt{fd2}-initialised) feeds two task-specific decoder branches for
+    semantic segmentation and self-supervised depth estimation.
+    Intermediate features $f_\text{seg}$ and $f_\text{depth}$ are
+    extracted at the PAD distillation layer. Depending on the selected
+    layout, one or two lightweight $1\!\times\!1$ projection heads are
+    used to produce comparable feature representations, and
+    $\mathcal{L}_\text{ct}$ is computed between them using either
+    normalised MSE or cosine similarity. Three projection layouts are
+    supported: single $(d\!\rightarrow\!s)$, single $(s\!\rightarrow\!d)$,
+    and dual projection. The projection head(s) are used only during
+    training and are not required at inference time.}
+    \label{fig:ct-loss-architecture}
+\end{figure}
+
+The following subsections formalise the projection head and the two
+distance functions used to instantiate $\mathcal{L}_\text{ct}$.
+
+\subsection{Projection Head}
+\label{sec:proj-head}
+
+Although $f_\text{depth}$ and $f_\text{seg}$ have the same spatial
+resolution and number of channels, they are produced by different
+task-specific decoders. Directly forcing them to match may be too
+restrictive, because each branch is expected to retain task-specific
+information. Therefore, a lightweight learnable projection head is used to
+map one branch's features into a space comparable with the other branch.
+
+The projection head is implemented as a $1 \times 1$ convolution:
+\[
+    \phi \colon \mathbb{R}^{C_d} \to \mathbb{R}^{C_d}.
+\]
+It preserves the spatial resolution and channel dimensionality of the
+input feature map, applying a learned linear transformation independently
+at each spatial position. With $C_d=128$, one projection head contains
+$128^2 = 16{,}384$ weight parameters and $128$ bias parameters, giving
+$16{,}512$ additional parameters per head.
+
+Depending on the projection layout, either one or two such projection
+heads are used. The projection layouts are described in
+Section~\ref{sec:projection-design}.
+
+\subsection{Loss Formulations}
+\label{sec:loss-forms}
+
+Two scale-insensitive alignment objectives are evaluated: normalised mean
+squared error and cosine similarity loss. Both compare feature directions
+rather than raw activation magnitudes, because the depth and segmentation
+decoders may naturally operate at different numerical scales.
+
+\paragraph{Normalised MSE.}
+Given a projected representation
+$z \in \mathbb{R}^{B \times C_d \times H_d \times W_d}$ and a target
+feature representation $t$ of the same shape, define the channel-wise
+$\ell_2$-normalised vectors:
+\[
+    \hat{z}_{b,p}
+    =
+    \frac{z_{b,p}}{\|z_{b,p}\|_2 + \varepsilon},
+    \qquad
+    \hat{t}_{b,p}
+    =
+    \frac{t_{b,p}}{\|t_{b,p}\|_2 + \varepsilon},
+\]
+where $p$ indexes spatial positions and $\varepsilon > 0$ is a small
+constant for numerical stability. The normalised MSE loss is:
+\begin{equation}
+    \mathcal{L}_\text{MSE}(z,t)
+    =
+    \frac{1}{B H_d W_d}
+    \sum_{b=1}^{B}
+    \sum_{p=1}^{H_d W_d}
+    \left\|
+    \hat{z}_{b,p}
+    -
+    \hat{t}_{b,p}
+    \right\|_2^2.
+    \label{eq:lct-mse}
+\end{equation}
+
+\paragraph{Cosine similarity loss.}
+The cosine similarity loss penalises angular disagreement between
+corresponding spatial feature vectors:
+\begin{equation}
+    \mathcal{L}_\text{cos}(z,t)
+    =
+    1
+    -
+    \frac{1}{B H_d W_d}
+    \sum_{b=1}^{B}
+    \sum_{p=1}^{H_d W_d}
+    \frac{
+        z_{b,p} \cdot t_{b,p}
+    }{
+        \|z_{b,p}\|_2 \|t_{b,p}\|_2 + \varepsilon
+    }.
+    \label{eq:lct-cos}
+\end{equation}
+Both objectives are minimised when the compared feature vectors point in
+the same direction, yielding zero for perfectly aligned vectors. The cosine
+loss saturates at~$2$ for antipodal vectors; the normalised MSE reaches a
+maximum of~$4$ under the same condition.
+
+\subsection{Definition of the Cross-Task Consistency Loss}
+\label{sec:lct-def}
+
+For a given projection layout, the Cross-Task Consistency Loss
+$\mathcal{L}_\text{ct}$ is computed using either the normalised MSE loss
+or the cosine similarity loss:
+\begin{equation}
+    \mathcal{L}_\text{ct}
+    =
+    \mathcal{L}(z,t),
+    \qquad
+    \mathcal{L}
+    \in
+    \left\{
+    \mathcal{L}_\text{MSE},\;
+    \mathcal{L}_\text{cos}
+    \right\}.
+    \label{eq:lct}
+\end{equation}
+The specific pair of feature representations $(z,t)$ compared by
+$\mathcal{L}_\text{ct}$ depends on the projection layout described in
+Section~\ref{sec:projection-design}. The scalar weight
+$\lambda_\text{ct}$ is applied only once in the final composite objective,
+so that $\mathcal{L}_\text{ct}$ denotes the loss itself and
+$\lambda_\text{ct}$ controls its relative strength during optimisation.
+
+The candidate values
+$\lambda_\text{ct} \in \{0.25, 0.50, 0.75, 1.00\}$ are evaluated
+empirically in the calibration experiments presented in
+Chapter~\ref{chap:evaluation}.
+
+% ============================================================================
+\section{Projection Head Design}
+\label{sec:projection-design}
+
+Three projection layouts are evaluated. They differ in which branch is
+projected and whether the alignment is performed in one branch's
+unprojected feature space or in a shared projected space. The reference
+branch is not frozen; it simply remains unprojected in the loss
+computation. In the equations below, $\mathcal{L}$ denotes the selected
+distance function, either $\mathcal{L}_\text{MSE}$ or
+$\mathcal{L}_\text{cos}$.
+
+\subsection{Single Projection: \texorpdfstring{$d \rightarrow s$}{d to s}}
+\label{sec:single-dtos}
+
+In the depth-to-segmentation layout, the depth feature is projected:
+\[
+    z = \phi(f_\text{depth}).
+\]
+The loss is computed between the projected depth representation and the
+unprojected segmentation feature:
+\[
+    \mathcal{L}_\text{ct}^{d\rightarrow s}
+    =
+    \mathcal{L}(z,\; f_\text{seg}).
+\]
+This layout maps depth features into the segmentation feature space. The
+unprojected segmentation feature provides the reference space for the
+alignment, although gradients are still allowed to update both branches.
+The intuition is that geometric information from the depth branch may help
+regularise the segmentation branch while preserving the segmentation
+feature space as the alignment reference.
+
+\subsection{Single Projection: \texorpdfstring{$s \rightarrow d$}{s to d}}
+\label{sec:single-stod}
+
+In the segmentation-to-depth layout, the segmentation feature is projected:
+\[
+    z = \phi(f_\text{seg}).
+\]
+The loss is computed between the projected segmentation representation and
+the unprojected depth feature:
+\[
+    \mathcal{L}_\text{ct}^{s\rightarrow d}
+    =
+    \mathcal{L}(z,\; f_\text{depth}).
+\]
+Here, the unprojected depth feature provides the reference space for the
+alignment, although it is not frozen during optimisation. This layout
+encourages the segmentation branch to produce intermediate features that
+are compatible with the geometric representation learned by the depth
+branch.
+
+\subsection{Dual Projection}
+\label{sec:dual-proj}
+
+In the dual-projection layout, both branches are projected using separate
+projection heads:
+\[
+    z_d = \phi_d(f_\text{depth}),
+    \qquad
+    z_s = \phi_s(f_\text{seg}).
+\]
+The loss is computed between the two projected representations:
+\[
+    \mathcal{L}_\text{ct}^{\text{dual}}
+    =
+    \mathcal{L}(z_d,\; z_s).
+\]
+This introduces a symmetric alignment constraint in which both feature
+spaces are allowed to adapt simultaneously. It doubles the additional
+parameter count to $33{,}024$. Unlike the single-projection layouts, no
+branch's original feature space serves as the direct reference. Instead,
+both branches are encouraged to meet in a shared projected space. This may
+increase flexibility, but it may also remove the stable anchor provided by
+an unprojected reference branch.
+
+The relative effectiveness of these projection layouts is evaluated
+empirically in Section~\ref{sec:ct-calibration-ablation}.
+
+% ============================================================================
+\section{Training Pipeline}
+\label{sec:training-pipeline}
+
+Figure~\ref{fig:training-pipeline} summarises the two-stage training
+procedure used in this project.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figures/training_pipeline.drawio.pdf}
+    \caption{Two-stage training pipeline used in this project.
+    Stage~1 performs SDE pre-training on unlabelled temporal image
+    triplets $(x_{t-1}, x_t, x_{t+1})$ using
+    $\mathcal{L}_{D,\text{pretrain}} = \mathcal{L}_D + \lambda_F
+    \mathcal{L}_F$, producing the \texttt{fd2} depth-informed encoder
+    initialisation. Stage~2 initialises PAD-MTL from the \texttt{fd2}
+    weights and jointly optimises segmentation, self-supervised depth,
+    and the proposed cross-task consistency objective on the Cityscapes
+    training set. Final performance is evaluated using mIoU on the
+    Cityscapes validation set.}
+    \label{fig:training-pipeline}
+\end{figure}
+
+\subsection{Pre-training Stage: Self-Supervised Depth Estimation}
+\label{sec:pretraining-stage}
+
+Before downstream segmentation training, the shared encoder $f_\theta^E$
+and depth decoder $f_\theta^D$ are pre-trained on image sequences using
+the self-supervised depth estimation objective $\mathcal{L}_D$. This
+objective combines photometric reconstruction with a pose estimation
+network that predicts relative camera motion between adjacent frames.
+
+The \texttt{fd2} checkpoint used throughout this project is obtained by
+adding a feature-distance regularisation term during SDE pre-training:
+\begin{equation}
+    \mathcal{L}_{D,\text{pretrain}}
+    =
+    \mathcal{L}_D
+    +
+    \lambda_F \mathcal{L}_F,
+    \qquad
+    \mathcal{L}_F
+    =
+    \left\|
+    f_\theta^E - f_I^E
+    \right\|_2,
+    \label{eq:pretrain-loss}
+\end{equation}
+where $f_I^E$ denotes the frozen ImageNet-initialised encoder. The role of
+$\mathcal{L}_F$ is to prevent the encoder from drifting too far away from
+the ImageNet feature space during depth pre-training. This helps retain
+semantic representations that are useful for downstream segmentation while
+still incorporating geometric cues from SDE.
+
+The segmentation decoder is not trained during this pre-training stage.
+The resulting \texttt{fd2} encoder weights are then used to initialise the
+downstream PAD-MTL model, where the encoder remains trainable.
+
+\subsection{Downstream Stage: Joint Segmentation and Multi-Task Training}
+\label{sec:downstream-stage}
+
+After SDE pre-training, the PAD-MTL model is trained jointly for semantic
+segmentation and depth estimation. The segmentation branch is supervised
+using the labelled subset $\mathcal{D}_L$. The depth branch continues to
+receive self-supervised geometric supervision from image sequences.
+When semi-supervised components such as DepthMix are enabled, unlabelled
+or pseudo-labelled samples also contribute to the segmentation objective.
+
+During this downstream stage, $\mathcal{L}_\text{ct}$ is applied at the
+PAD distillation layer. At each training iteration, the model performs the
+following operations:
+
+\begin{enumerate}
+    \item sample labelled images and, where applicable, unlabelled or
+    pseudo-labelled images;
+    \item apply the configured augmentations, including DepthMix when
+    enabled;
+    \item forward the images through the shared encoder and both decoder
+    branches;
+    \item compute the segmentation loss, the self-supervised depth loss,
+    and any semi-supervised segmentation contribution;
+    \item extract $f_\text{seg}$ and $f_\text{depth}$ from the PAD
+    distillation layer;
+    \item apply the selected projection layout to obtain the projected
+    representation(s);
+    \item compute $\mathcal{L}_\text{ct}$ using the selected loss
+    formulation;
+    \item optimise the composite objective defined in
+    Eq.~\ref{eq:total-loss}.
+\end{enumerate}
+
+The downstream training stage runs for 40,000 iterations using SGD
+optimisation, following the reproduced framework.
+
+\subsection{Composite Training Objective}
+\label{sec:composite-objective}
+
+The downstream training objective is:
+\begin{equation}
+    \mathcal{L}_\text{total}
+    =
+    \mathcal{L}_\text{seg}
+    +
+    \mathcal{L}_D
+    +
+    \lambda_\text{ct}\mathcal{L}_\text{ct},
+    \label{eq:total-loss}
+\end{equation}
+where:
+\begin{enumerate}
+    \item $\mathcal{L}_\text{seg}$ is the full segmentation objective,
+    comprising the supervised cross-entropy loss on the labelled subset
+    $\mathcal{D}_L$ and, when semi-supervised components are enabled,
+    the quality-weighted cross-entropy on pseudo-labelled or
+    DepthMix-augmented samples;
+    \item $\mathcal{L}_D$ is the self-supervised depth estimation loss
+    computed from image sequences;
+    \item $\lambda_\text{ct}\mathcal{L}_\text{ct}$ is the proposed
+    cross-task feature alignment term.
+\end{enumerate}
+
+The feature-distance loss $\mathcal{L}_F$ does not appear in
+Eq.~\ref{eq:total-loss}. It is used only during the SDE pre-training stage
+to produce the \texttt{fd2} initialisation, as shown in
+Eq.~\ref{eq:pretrain-loss}, and is not continued during downstream joint
+training.
+
+\subsection{Gradient Flow and Parameter Groups}
+\label{sec:grad-flow}
+
+In all projection layouts, gradients from $\mathcal{L}_\text{ct}$ flow
+bidirectionally. They pass through the projection head into whichever
+branch's features are projected, and also flow directly into the
+unprojected branch. This means that the unprojected feature acts as a
+reference space in the loss computation, but it is not frozen during
+optimisation.
+
+This design is intentional. The goal is not to treat one branch as a fixed
+teacher and the other as a student. Instead, $\mathcal{L}_\text{ct}$ acts
+as a regulariser that encourages both decoder branches to learn more
+compatible intermediate representations.
+
+The projection head parameters are assigned to the decoders and
+auxiliary heads parameter group and updated at the decoder learning rate
+of $10^{-2}$.
+This applies to the single-projection head $\phi$ in the single-layout
+variants and to both $\phi_d$ and $\phi_s$ in the dual-projection layout.
+The backbone encoder is updated at $10^{-3}$ and the pose network at
+$10^{-6}$, following the reproduced training configuration.
+Table~\ref{tab:param-groups} summarises the parameter groups.
 
 \begin{table}[H]
 \centering
-\caption{Mapping between experiment IDs and the corresponding purposes.
-Reproduction experiments target specific tables of the original
-paper~\cite{hoyer2023ijcv_sde}; extension experiments evaluate the
-proposed $\mathcal{L}_\text{ct}$.}
-\label{tab:exp_id_mapping}
+\caption{Parameter groups and learning rates during downstream joint
+training.}
+\label{tab:param-groups}
 \small
 \begin{tabular}{lll}
 \toprule
-\textbf{Exp ID} & \textbf{Scope} & \textbf{Purpose} \\
+\textbf{Parameter group} & \textbf{Components} & \textbf{Learning rate} \\
 \midrule
-exp~210 & Reproduction & Table~3 (mixing), Table~5 (baseline, transfer) \\
-exp~211 & Reproduction & Table~1 (data selection) \\
-exp~212 & Reproduction & Tables~5 \& 7 (MTL configurations) \\
-exp~213 & Reproduction & Table~7 (8-cell component ablation) \\
-exp~219 & Extension    & $\mathcal{L}_\text{ct}$ Phase~I sweep (1 seed) \\
-exp~220 & Extension    & $\mathcal{L}_\text{ct}$ Phase~II validation (3 seeds) \\
-exp~222 & Extension    & $\mathcal{L}_\text{ct}$ component-level ablation (3 seeds) \\
+Backbone encoder          & ResNet-101 $f_\theta^E$                              & $10^{-3}$ \\
+Decoders / auxiliary heads    & $f_\theta^S$, $f_\theta^D$, projection head(s) & $10^{-2}$ \\
+Pose network              & Relative pose estimator                              & $10^{-6}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 % ============================================================================
-\section{Dataset and Feature Representation}
-\label{sec:dataset}
+\section{Experimental Organisation}
+\label{sec:experiment-organisation}
 
-The pipeline makes use of two complementary data modalities within the
-Cityscapes dataset~\cite{cordts2016cityscapes}: pixel-level semantic
-annotations for supervised segmentation, and adjacent temporal frames for
-geometric self-supervision.
+This section summarises how the experimental runs were organised; the
+numerical results and their interpretation are presented in
+Chapter~\ref{chap:evaluation}.
 
-The 2,975 fine-annotated images form the labelled pool. Low annotation
-budgets of 100, 372, and 744 samples are simulated by selecting subsets
-from this pool using the author-provided fixed subset indices, thereby
-preserving consistency with the original evaluation protocol. For each
-target image, a three-frame window consisting of the current frame and its
-immediate neighbours supplies geometric cues for self-supervised depth
-estimation and geometry-aware components such as DepthMix. These frames
-carry no semantic annotations and are used only for photometric and pose
-supervision.
+The experiments are organised into two groups. The first group reproduces
+the main Stage~(a) and Stage~(b) results from the original SDE-enhanced
+segmentation framework, including supervised learning, data selection,
+DepthMix, feature transfer, and PAD-MTL component ablations. The second
+group evaluates the proposed $\mathcal{L}_\text{ct}$ extension on top of
+the PAD-MTL baseline.
 
-Images are resized to $1024\!\times\!512$ and randomly cropped to
-$512\!\times\!512$ during training. This resolution balances sufficient
-spatial context for boundary-sensitive tasks against single-GPU VRAM
-feasibility, particularly for Stage~(b) configurations that maintain two
-parallel decoder branches simultaneously.
+Table~\ref{tab:exp-id-mapping} summarises the experiment IDs used in this
+project and their purposes.
 
-Several Stage~(b) components require an SDE-pretrained encoder to provide
-depth-informed encoder initialisation. The framework of
-\cite{hoyer2023ijcv_sde} produces two encoder weight variants, \texttt{fd0}
-and \texttt{fd2}, whose properties are described in detail in
-Section~\ref{sec:sde}. In brief, \texttt{fd0} applies standard monocular
-depth pre-training, optimising the encoder purely for depth estimation;
-this risks the encoder drifting away from the ImageNet feature space and
-losing semantic representations that are beneficial for downstream
-segmentation. \texttt{fd2} addresses this by adding a feature-distance
-regularisation term~$\mathcal{L}_F$ during depth pre-training, which
-penalises large deviations from the ImageNet-initialised feature space.
-This retains useful semantic knowledge while still incorporating geometric
-cues from SDE, making \texttt{fd2} a stronger initialisation for the
-downstream segmentation task. The author-released checkpoints for both
-variants are used throughout and kept fixed across all downstream
-experiments.
+\begin{table}[H]
+\centering
+\caption{Mapping between experiment IDs and their corresponding purposes.}
+\label{tab:exp-id-mapping}
+\small
+\begin{tabular}{lll}
+\toprule
+\textbf{Exp ID} & \textbf{Scope} & \textbf{Purpose} \\
+\midrule
+exp~210 & Reproduction & Table~3 mixing strategies and Table~5 baseline runs \\
+exp~211 & Reproduction & Table~1 data selection \\
+exp~212 & Reproduction & Tables~5 and~7 MTL configurations \\
+exp~213 & Reproduction & Table~7 component ablation \\
+exp~219 & Extension    & $\mathcal{L}_\text{ct}$ Phase~I single-seed sweep \\
+exp~220 & Extension    & $\mathcal{L}_\text{ct}$ Phase~II multi-seed validation \\
+exp~222 & Extension    & $\mathcal{L}_\text{ct}$ component-level ablation \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-% ============================================================================
-\section{Use of the PAD Multi-Task Decoder}
-\label{sec:pad-decoder}
-
-Both Stage~(b) experiments and the $\mathcal{L}_\text{ct}$ extension are
-built on the PAD-Net multi-task architecture~\cite{xu2018padnet}. As
-described in Chapter~\ref{chap:technical}, PAD-Net maintains two parallel
-decoder branches for depth estimation and semantic segmentation on top of
-a shared ResNet-101 encoder, exchanging cross-task information at an
-intermediate distillation layer through an attention-guided distillation
-module.
-
-In this project's configuration, the distillation layer is placed at
-decoder upsampling layer~7, producing feature maps of spatial resolution
-$128\!\times\!128$ with 128 channels. The depth features $f_\text{depth}$
-and segmentation features $f_\text{seg}$ at this layer serve as the inputs
-to $\mathcal{L}_\text{ct}$. The $1\!\times\!1$ convolutional projection
-head used by $\mathcal{L}_\text{ct}$ preserves the channel dimensionality
-of its input, so its input and output feature maps both have 128 channels.
-
-Two projection directions are evaluated under the single-projection
-layout. In single~$(d{\rightarrow}s)$, the depth feature
-$f_\text{depth}$ is passed through the projection head to produce a
-projected representation $z = \phi(f_\text{depth})$, and the loss
-penalises the discrepancy between $f_\text{seg}$ and $z$. In
-single~$(s{\rightarrow}d)$, the segmentation feature $f_\text{seg}$---
-which receives direct gradient signal from ground-truth labels---is
-projected to produce $z = \phi(f_\text{seg})$, and the loss penalises the
-discrepancy between $f_\text{depth}$ and $z$. Both variants share the
-same $1\!\times\!1$ projection head architecture and identical parameter
-count ($16{,}512$ additional parameters).
-
-In addition to the two single-projection variants, a dual-projection
-layout is also evaluated. In this setting, two independent
-$1\!\times\!1$ convolutional projection heads are used: one projects
-$f_\text{depth}$ and the other projects $f_\text{seg}$, and the
-consistency loss is computed between the two projected representations.
-This doubles the number of additional parameters to $33{,}024$ and
-introduces a symmetric alignment constraint in which both feature spaces
-are allowed to adapt simultaneously, in contrast to the single-projection
-design where one branch remains in its original feature space.
-
-The relative effectiveness of these projection layouts and directions is
-evaluated empirically in Section~\ref{sec:ct-calibration-ablation}.
+The reproduction experiments establish the baseline behaviour of the
+SDE-enhanced framework under the available hardware constraints. The
+extension experiments evaluate whether explicit cross-task feature
+alignment improves the PAD-MTL baseline, and whether its effect is stable
+across projection direction, loss type, and framework components.
 
 % ============================================================================
-\section{Experiment Groups}
-\label{sec:hpc_exec}
+\section{Computing Environment and Reproducibility}
+\label{sec:computing-environment}
 
-The experimental runs fall into two broad groups. The first group
-reproduces the core results reported in Tables~1, 3, 5, and~7 of the
-original paper~\cite{hoyer2023ijcv_sde}, while the second group evaluates
-the proposed cross-task consistency loss extension on top of the PAD-MTL
-baseline. The following subsections summarise how each experiment group
-was organised.
+The reproduction experiments, corresponding to exp~210--213, were run on
+the University of Bristol's Isambard-AI platform. The subsequent
+cross-task consistency loss experiments, corresponding to exp~219,
+exp~220, and exp~222, were run on the University of Bristol's BluePebble
+high-performance computing platform under the SLURM workload manager.
 
-\subsection{Table~1: Data Selection (exp~211)}
+All experiments used a single GPU per job. On BluePebble, each job was
+allocated one GPU, eight physical CPU cores, and 64\,GB of system memory.
+The extension experiments were run predominantly on V100 nodes with
+32\,GB of GPU memory. All runs used a dedicated Conda environment with
+pinned dependencies to ensure consistent behaviour across node types.
 
-This experiment curates informative labelled subsets under fixed budgets
-using three selection criteria: random sampling as a baseline; entropy
-sampling, which ranks unlabelled images by model prediction uncertainty;
-and SDE-guided selection combining uncertainty sampling~(US) and diversity
-sampling~(DS). For each criterion, images are scored and the top-$K$ are
-selected to match the target budget of 100, 372, or 744 samples. The
-author-provided fixed subset indices ensure exact comparability across
-runs.
+Random seeds were fixed across Python, NumPy, and PyTorch at the start of
+each run. Each experiment configuration, including experiment ID, label
+budget, seed, projection layout, loss type, and $\lambda_\text{ct}$
+value, was logged alongside model checkpoints and validation results.
 
-\subsection{Table~3: Mixing Strategy (exp~210)}
-
-This run evaluates four training strategies under the 372-label and
-full-supervision settings: a supervised-only baseline, pseudo-label
-self-training, ClassMix, and DepthMix. Semi-supervised variants follow
-the official teacher--student framework with exponential moving average
-teacher updates and confidence-filtered pseudo-label generation. DepthMix
-replaces the binary masks of ClassMix with geometry-consistent composition
-masks derived from SDE depth maps, reducing boundary artefacts at class
-transitions.
-
-\subsection{Tables~5 and~7: Feature Transfer and Component Ablation
-(exp~212, exp~213)}
-
-These runs evaluate SDE-to-segmentation feature transfer using the
-\texttt{fd0} and \texttt{fd2} encoder checkpoints~(Table~5), and the
-combined effects of data selection~(S), DepthMix~(DX), and multi-task
-learning~(MTL)~(Table~7). Table~7 requires eight distinct configurations
-to isolate the contribution of each component; each is trained with three
-independent seeds~(7, 25, 42) and results are reported as mean\,$\pm$\,std.
-
-\subsection{Cross-Task Consistency Loss Calibration (exp~219, exp~220)}
-
-The calibration of $\mathcal{L}_\text{ct}$ follows a two-phase design that
-balances hyperparameter search coverage against result stability within a
-limited computing budget.
-
-Running all candidate configurations with three independent seeds from the
-outset would require a large number of full training runs of 40{,}000
-iterations each, a cost that exceeds the available compute allocation for
-this project. The two-phase strategy therefore first uses a single seed to
-screen the full search space efficiently, and then applies multi-seed
-validation only to the most promising candidates, providing a principled
-balance between hyperparameter coverage and statistical reliability.
-
-Phase~I (exp~219) trains configurations formed by three factors---loss
-type (cosine similarity vs.\ normalised MSE), projection layout (single
-vs.\ dual), and $\lambda_\text{ct} \in \{0.25, 0.50, 0.75, 1.00\}$---for
-the full 40{,}000 iterations under a single seed. An additional direction
-ablation within the single-projection layout evaluates both
-$d{\rightarrow}s$ and $s{\rightarrow}d$ variants, as described in
-Section~\ref{sec:pad-decoder}. Seed~7 is used throughout Phase~I so that
-all configurations are compared under identical random initialisation
-conditions. The purpose of this phase is to identify configurations that
-merit further multi-seed validation, while filtering out settings that do
-not show competitive performance under the shared single-seed condition.
-
-Phase~II (exp~220) retrains the candidates selected from Phase~I using
-three independent seeds~(7, 25, 42) to assess reproducibility. A PAD-MTL
-baseline (without $\mathcal{L}_\text{ct}$) is retrained with the same
-three seeds in the same submission batch, providing a consistent per-seed
-reference for paired comparisons. Each configuration is submitted as an
-independent SLURM job, running all three seeds sequentially.
-
-\subsection{Component-Level Ablation of $\mathcal{L}_\text{ct}$ (exp~222)}
-
-Exp~222 evaluates whether the cross-task consistency loss composes well
-with the existing framework components (data selection~S, DepthMix~DX,
-and multi-task learning~MTL). The ablation covers three component
-combinations on the 372-label setting: MTL\,+\,DX, MTL\,+\,S, and
-MTL\,+\,DX\,+\,S. For each combination, four $\mathcal{L}_\text{ct}$
-variants are trained---covering both projection directions
-($d{\rightarrow}s$ and $s{\rightarrow}d$) and both loss types (normalised
-MSE and cosine similarity)---yielding twelve ablation configurations in
-total. For each of the three component combinations, a matching baseline
-without $\mathcal{L}_\text{ct}$ is trained under the same pipeline and in
-the same submission batch, providing a paired per-seed reference for each
-ablation cell and removing the need for cross-batch comparisons.
-
-All $\mathcal{L}_\text{ct}$ configurations use a single $1\!\times\!1$
-convolutional projection head, $\lambda_\text{ct}=1.0$, and bidirectional
-gradient flow. The variables within the ablation are the loss formulation 
-(MSE versus cosine) and the projection direction ($d{\rightarrow}s$ versus $s{\rightarrow}d$), so
-that any performance difference is attributable to these factors rather
-than to auxiliary hyperparameter effects. Each configuration is trained
-with the same three seeds (7, 25, 42) as the paired baseline, enabling
-direct per-seed comparisons.
+A key practical constraint was that all experiments were run on a single
+GPU. As a result, the effective batch size was limited to~2 and
+Synchronised Batch Normalisation could not be used. This differs from the
+multi-GPU setup of the original framework, where batch-normalisation
+statistics were synchronised across devices. The impact of this constraint
+is considered in Chapter~\ref{chap:evaluation} when interpreting the
+reproduction gap between this project and the original reported results.
 
 % ============================================================================
 \section{Summary}
-\label{sec:exec_summary}
+\label{sec:exec-summary}
 
-This chapter has described how the experiments were implemented and
-organised in practice. It covered the computing environment, dataset
-configuration, model setup, experiment ID mapping, and the design of the
-reproduction and extension experiment groups. The reproduction experiments
-(exp~210--213) were run on Isambard-AI, while the extension experiments
-(exp~219, exp~220, and exp~222) were run on BluePebble. Although the
-single-GPU constraint limited the effective batch size and prevented the
-use of SyncBN, it allowed a larger number of configurations to be evaluated
-within the available project timeline. The effect of this constraint, as
-well as the quantitative outcomes of the experiments, is analysed in
-Chapter~\ref{chap:evaluation}.
+This chapter has described the project execution and formalised the
+proposed Cross-Task Consistency Loss extension. The chapter first defined
+the Cityscapes label-efficient setting, where a 372-image labelled subset
+is used together with semantically unlabelled images and temporal image
+sequences for self-supervised depth estimation. It then introduced the
+proposed explicit feature-level alignment objective between the
+segmentation and depth decoder branches of PAD-MTL.
+
+The proposed $\mathcal{L}_\text{ct}$ was formulated as a feature-level
+alignment loss applied at the PAD distillation layer. Two loss variants
+were defined: normalised MSE and cosine similarity. Three projection
+layouts were described: single $d\rightarrow s$, single $s\rightarrow d$,
+and dual projection. The loss was then integrated into the downstream
+training objective as
+\[
+    \mathcal{L}_\text{total}
+    =
+    \mathcal{L}_\text{seg}
+    +
+    \mathcal{L}_D
+    +
+    \lambda_\text{ct}\mathcal{L}_\text{ct},
+\]
+where $\mathcal{L}_\text{seg}$ covers both the supervised cross-entropy
+loss on $\mathcal{D}_L$ and any semi-supervised segmentation contribution
+from pseudo-labelled or DepthMix-augmented samples.
+
+The chapter also described the experiment organisation, computing
+environment, and reproducibility controls. The quantitative evaluation of
+the reproduction experiments and the proposed cross-task consistency
+extension is presented in Chapter~\ref{chap:evaluation}.

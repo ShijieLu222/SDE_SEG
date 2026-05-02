@@ -50,7 +50,7 @@ To avoid redundancy, this evaluation follows the design and implementation
 described in Chapter~\ref{chap:execution}. Stage~(a) and transfer
 experiments use a ResNet-101 encoder with an ASPP-based decoder;
 Stage~(b) multi-task and cross-task loss experiments additionally employ
-the PAD decoder (Section~\ref{sec:pad-decoder}). We used the
+the PAD decoder (Section~\ref{sec:projection-design}). We used the
 author-provided fixed subset indices for the 100, 372, and 744 label
 regimes. All models were trained for 40,000 iterations using SGD with
 polynomial learning-rate decay, and results are reported as mean
@@ -64,7 +64,7 @@ differences in the surrounding training pipeline rather than implying
 direct numerical comparability across tables.
 
 All experiments in this chapter were conducted under the single-GPU
-constraint described in Section~\ref{sec:setup}: batch size~2 without
+constraint described in Section~\ref{sec:problem-setup}: batch size~2 without
 Synchronised Batch Normalisation~(SyncBN). As discussed in
 Chapter~\ref{chap:execution}, this reduces the number of samples
 available to each batch normalisation step, which is a known source of
