@@ -354,16 +354,32 @@ and its write-up.
     \item \textbf{Claude (Anthropic) --- \LaTeX{} Formatting Assistance:}
     Claude was used to help format \LaTeX{} tables, align equations, and
     structure front-matter sections including the Notation and Acronyms
-    table and the Supporting Technologies page. Example prompts included
-    providing a draft table layout and asking for corrections to column
-    alignment or spacing.
+    table and the Supporting Technologies page. An example prompt:
+    \textit{``The following is a draft LaTeX table for my reproduction
+    results. Please fix the column alignment and spacing so that the
+    reproduced and reported values are vertically aligned within each
+    cell.''}
 
     \item \textbf{Claude (Anthropic) --- SLURM Script Debugging:}
     Claude was used to debug issues in SLURM job submission scripts, such
     as resolving environment activation errors, correcting path references,
-    and adjusting wall-time and memory allocation settings. Example prompts
-    included pasting an error log from a failed job and asking for a
-    diagnosis of the likely cause.
+    and adjusting wall-time and memory allocation settings. An example
+    prompt: \textit{``Here is the error log from a failed SLURM job on
+    BluePebble. The job exits immediately after the conda activate step.
+    What is the likely cause and how should I fix the submission
+    script?''}
+
+    \item \textbf{Claude (Anthropic) --- Result Figure Generation:}
+    Claude was used to generate Python Matplotlib code for producing the
+    result visualisation figures in Chapter~\ref{chap:evaluation},
+    including the Phase~II three-seed validation chart and the
+    component-level ablation chart. Experimental result data were
+    provided alongside the desired figure title and axis labels, and
+    Claude generated the corresponding plotting script. An example
+    prompt: \textit{``Here are the Phase~II three-seed validation
+    results. Please generate a horizontal bar chart sorted by mean
+    mIoU, with the selected configuration highlighted.$\pm$
+    Std by Configuration'.''}
 
     \item \textbf{Grammarly / Overleaf Grammar Checker:}
     The built-in Overleaf grammar and spell checker was used during
