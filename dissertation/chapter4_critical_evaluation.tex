@@ -18,9 +18,10 @@ Consistency Loss ($\mathcal{L}_\text{ct}$), which introduces an explicit
 feature-alignment objective between the segmentation and depth decoder
 branches of the PAD architecture.
 Section~\ref{sec:ct-calibration-ablation} calibrates the loss
-hyperparameters against the PAD-MTL baseline to select the most stable
-configuration, and Section~\ref{sec:ct-component-ablation} evaluates
-whether the calibrated cross-task alignment setting composes with the remaining framework
+hyperparameters against the PAD-MTL baseline to identify the most stable
+individual configuration and the strongest $d{\rightarrow}s$ design
+family. Section~\ref{sec:ct-component-ablation} then evaluates whether
+this selected design family composes with the remaining framework
 components (data selection and DepthMix).
 
 The primary objectives are: (i)~to verify whether the reported
@@ -55,8 +56,9 @@ author-provided fixed subset indices for the 100, 372, and 744 label
 regimes. All models were trained for 40,000 iterations using SGD with
 polynomial learning-rate decay, and results are reported as mean
 mIoU~(\%) $\pm$ standard deviation over three seeds. For Stage~(b)
-transfer-related experiments (Table~5), we use the author-released SDE
-checkpoints (fd0/fd2) to maintain parity with the official pipeline.
+transfer-related experiments (Table~\ref{tab:table5_repro}), we use the
+author-released SDE checkpoints (fd0/fd2) to maintain parity with the
+official pipeline.
 
 Baseline values are reported per table under the corresponding experiment
 configuration. When baseline values differ across tables, this reflects
@@ -64,8 +66,8 @@ differences in the surrounding training pipeline rather than implying
 direct numerical comparability across tables.
 
 All experiments in this chapter were conducted under the single-GPU
-constraint described in Section~\ref{sec:problem-setup}: batch size~2 without
-Synchronised Batch Normalisation~(SyncBN). As discussed in
+constraint described in Section~\ref{sec:problem-setup}: batch size~2
+without Synchronised Batch Normalisation~(SyncBN). As discussed in
 Chapter~\ref{chap:execution}, this reduces the number of samples
 available to each batch normalisation step, which is a known source of
 instability for semi-supervised methods. This provides the unified
@@ -80,12 +82,13 @@ without repeating this explanation.
 \noindent
 \textbf{Objective.} Stage~(a) assesses the effectiveness of various data
 selection strategies under limited label budgets.
-Table~\ref{tab:table1_repro} reproduces Table~1 of \cite{hoyer2023ijcv_sde},
-comparing the random baseline against entropy-based selection and the
-SDE-guided variants. DS denotes diversity sampling based on SDE feature
-distances; US denotes uncertainty sampling based on the depth-estimation
-proxy task; DS+US combines both criteria. These SDE-guided variants follow
-the data selection design of \cite{hoyer2023ijcv_sde}.
+Table~\ref{tab:table1_repro} reproduces Table~1 of
+\cite{hoyer2023ijcv_sde}, comparing the random baseline against
+entropy-based selection and the SDE-guided variants. DS denotes diversity
+sampling based on SDE feature distances; US denotes uncertainty sampling
+based on the depth-estimation proxy task; DS+US combines both criteria.
+These SDE-guided variants follow the data selection design of
+\cite{hoyer2023ijcv_sde}.
 
 \begin{table}[H]
 \centering
@@ -226,11 +229,12 @@ features to the segmentation task, specifically investigating the role of
 the feature-distance loss ($\mathcal{L}_F$) and multi-task learning.
 The \texttt{fd0} and \texttt{fd2} encoder variants and the
 feature-distance regularisation term~$\mathcal{L}_F$ are described in
-detail in Section~\ref{sec:fd0-fd2}. The Multi-Task
-($\mathcal{L}_F=\checkmark$) setting---joint segmentation and SDE
-training with the PAD decoder---is used as the no-$\mathcal{L}_\text{ct}$
-baseline for all cross-task loss experiments in
-Sections~\ref{sec:ct-calibration-ablation}
+detail in Section~\ref{sec:fd0-fd2}. The reproduction results for SDE
+feature transfer are reported in Table~\ref{tab:table5_repro}. The
+Multi-Task ($\mathcal{L}_F=\checkmark$) setting---joint segmentation and
+SDE training with the PAD decoder---is used as the
+no-$\mathcal{L}_\text{ct}$ baseline for all cross-task loss experiments
+in Sections~\ref{sec:ct-calibration-ablation}
 and~\ref{sec:ct-component-ablation}.
 
 \begin{table}[H]
@@ -448,6 +452,9 @@ Seed~7 was selected because it corresponds to the median-performing seed
 in the PAD-MTL baseline ($59.84$\,\%, compared to $60.92$\,\% and
 $61.50$\,\% for seeds~25 and~42), providing a conservative reference.
 All Phase~I $\Delta$ values use $\text{baseline}_{\text{S7}} = 59.84$\,\%.
+The single-projection calibration results are reported in
+Table~\ref{tab:ct-p1-single}, while the dual-projection results are
+reported in Table~\ref{tab:ct-p1-dual}.
 
 \begin{table}[H]
 \centering
@@ -620,21 +627,16 @@ single $(s{\rightarrow}d)$, cosine, $\lambda=1.00$ &
 \end{tabularx}
 \end{table}
 
-% ── NEW: Phase II visualisation ───────────────────────────────────────────────
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{figures/phase2_validation.pdf}
-  \caption{Phase~II three-seed validation: mean mIoU with standard
-  deviation error bars for all configurations (372 labels). All thirteen
-  $\mathcal{L}_\text{ct}$ variants improve over the PAD-MTL baseline
-  ($60.75$\,\%, red line). The selected configuration (single
-  $d{\rightarrow}s$ cosine, $\lambda_\text{ct}=1.00$, highlighted in
-  red) achieves $+2.50$\,pp with the lowest variance ($\sigma=0.17$\,\%),
-  making it the most stable observed candidate for downstream
-  experiments.}
+  \caption[Phase~II three-seed validation results]{Phase~II three-seed
+  validation at the 372-label regime. Bars show mean mIoU with standard
+  deviation; the red line denotes the PAD-MTL baseline ($60.75$\,\%), and
+  the highlighted bar marks the selected single $d{\rightarrow}s$ cosine
+  configuration ($\lambda_\text{ct}=1.00$).}
   \label{fig:phase2-validation}
 \end{figure}
-% ─────────────────────────────────────────────────────────────────────────────
 
 \noindent
 \textbf{Phase-II findings.}
@@ -645,11 +647,11 @@ single $(s{\rightarrow}d)$, cosine, $\lambda=1.00$ &
   As shown in Figure~\ref{fig:phase2-validation}, all thirteen validated
   configurations improve over the baseline mean ($60.75$\,\%), with gains
   ranging from $+1.55$ to $+2.81$\,pp.
-  This suggests that $\mathcal{L}_\text{ct}$ provides a consistent positive
-  signal across the tested architectural choices and hyperparameter
-  settings, although the limited number of seeds means the result should be
-  interpreted as robustness evidence rather than a formal statistical
-  guarantee.
+  This suggests that $\mathcal{L}_\text{ct}$ provides a consistent
+  positive signal across the tested architectural choices and
+  hyperparameter settings, although the limited number of seeds means
+  the result should be interpreted as robustness evidence rather than a
+  formal statistical guarantee.
 
 \item \textit{The highest raw mean does not correspond to the most stable
   configuration.}
@@ -693,6 +695,14 @@ single $(s{\rightarrow}d)$, cosine, $\lambda=1.00$ &
   This stability indicates the improvement is consistent and
   reproducible rather than seed-dependent, and it is therefore
   selected as the primary design choice for downstream experiments.
+  Notably, while single~$(d{\rightarrow}s)$ MSE achieves the highest
+  raw mean ($63.56$\,\%), its higher variance makes it less suitable as
+  the stability-anchored primary choice; both MSE and cosine within the
+  $d{\rightarrow}s$, $\lambda_\text{ct}=1.00$ design family are
+  carried forward into the composability analysis of
+  Section~\ref{sec:ct-component-ablation}, as the interaction between
+  $\mathcal{L}_\text{ct}$ and stronger framework components may shift
+  the relative behaviour of the two loss formulations.
 
 \item \textit{Dual-projection results fall below the best stable
   single-projection result.}
@@ -772,15 +782,19 @@ The two-phase evaluation supports the following conclusions:
 
 \noindent
 The calibration study in Section~\ref{sec:ct-calibration-ablation}
-identified single~$(d{\rightarrow}s)$ projection with cosine similarity
-and $\lambda_\text{ct}=1.00$ as the most reliable configuration on top
-of the PAD-MTL baseline. This section evaluates whether the benefit of
+identified single~$(d{\rightarrow}s)$ projection with
+$\lambda_\text{ct}=1.00$ as the most stable design track on the PAD-MTL
+baseline, with cosine similarity selected as the primary loss formulation
+due to its lower variance. This section evaluates whether the benefit of
 $\mathcal{L}_\text{ct}$ persists when it is combined with the remaining
-framework components, namely data selection~(S) and DepthMix~(DX). Since
-Section~\ref{sec:ct-calibration-ablation} selected $d{\rightarrow}s$ as
-the primary and most stable projection direction, the main composability
-analysis reports only the selected $d{\rightarrow}s$ single-projection
-track.
+framework components, namely data selection~(S) and DepthMix~(DX). The
+main composability analysis fixes the projection direction and
+$\lambda_\text{ct}$ to the calibrated values ($d{\rightarrow}s$,
+$\lambda_\text{ct}=1.00$) and evaluates both MSE and cosine loss
+formulations. Both are retained because, within the $d{\rightarrow}s$,
+$\lambda_\text{ct}=1.00$ family, MSE achieved the highest raw mean while
+cosine achieved the most stable result in Phase~II, and their relative
+ordering may change under stronger framework components.
 
 \vspace{4pt}
 \noindent
@@ -794,19 +808,10 @@ by DepthMix or with the higher-quality supervision introduced by data
 selection. The ablation therefore covers three component combinations on
 top of PAD-MTL: MTL\,+\,DX, MTL\,+\,S, and MTL\,+\,DX\,+\,S. For each
 combination, the main reported ablation compares the matching baseline
-against the selected $d{\rightarrow}s$ single-projection variants using
-both loss types (MSE and cosine). This reporting choice follows the
-Phase~II calibration, where $d{\rightarrow}s$ cosine was identified as
-the most reliable direction on the PAD-MTL baseline. All
-$\mathcal{L}_\text{ct}$ variants use single projection,
-$\lambda_\text{ct}=1.00$, and bidirectional gradient flow.
-
-Although the Phase~II calibration selects cosine alignment as the most
-stable primary configuration on the pure PAD-MTL baseline, the
-component-level ablation reports both cosine and MSE within the fixed
-$d{\rightarrow}s$ direction. This is because the interaction between
-$\mathcal{L}_\text{ct}$ and stronger framework components may change the
-relative behaviour of the two loss formulations.
+against both MSE and cosine variants within the fixed
+$d{\rightarrow}s$, $\lambda_\text{ct}=1.00$ design family. All
+$\mathcal{L}_\text{ct}$ variants use single projection and
+bidirectional gradient flow.
 
 \vspace{4pt}
 \noindent
@@ -823,13 +828,16 @@ mean-level component ablation rather than a formal statistical test.
 
 \begin{table}[H]
 \centering
-\caption{Component-level ablation of $\mathcal{L}_\text{ct}$ on three
+\caption[Component-level ablation of $\mathcal{L}_\text{ct}$]{Component-level ablation of $\mathcal{L}_\text{ct}$ on three
 PAD-MTL component combinations at 372 labels. S~=~data selection
 (DS+US); DX~=~DepthMix; MTL~=~multi-task learning with the PAD decoder.
 All $\mathcal{L}_\text{ct}$ variants use single $d{\rightarrow}s$
-projection with $\lambda_\text{ct}=1.00$. Each baseline row
-(Direction~$=$~--, $\mathcal{L}_\text{ct}$~$=$~none) is trained in the
-same submission batch as its paired variants. Results are three-seed mean
+projection with $\lambda_\text{ct}=1.00$; both MSE and cosine loss
+formulations are evaluated because they were respectively the
+highest-mean and most stable candidates within this design family in
+Phase~II. Each baseline row (Direction~$=$~--,
+$\mathcal{L}_\text{ct}$~$=$~none) is trained in the same submission batch
+as its paired variants. Results are three-seed mean
 mIoU~(\%) $\pm$ standard deviation; $\Delta$ values are in percentage
 points~(pp) relative to the matching baseline.}
 \label{tab:ct-component-ablation}
@@ -865,19 +873,15 @@ points~(pp) relative to the matching baseline.}
 \end{tabular}
 \end{table}
 
-% ── Component ablation visualisation ─────────────────────────────────────────
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{figures/component_ablation.pdf}
-  \caption{Component-level ablation of $\mathcal{L}_\text{ct}$ across
-  three PAD-MTL component combinations at the 372-label regime. Grey bars
-  show the matching no-$\mathcal{L}_\text{ct}$ baselines, while blue and
-  red bars show the single $d{\rightarrow}s$ MSE and cosine variants with
-  $\lambda_\text{ct}=1.00$. Values above the bars report the mean-level
-  mIoU gain relative to the matching baseline.}
+  \caption[Component-level ablation of $\mathcal{L}_\text{ct}$]{Component-level ablation of $\mathcal{L}_\text{ct}$ at the
+  372-label regime. Bars compare matching baselines with single
+  $d{\rightarrow}s$ MSE and cosine variants; values above bars indicate
+  mean mIoU gains.}
   \label{fig:component-ablation}
 \end{figure}
-% ─────────────────────────────────────────────────────────────────────────────
 
 \vspace{4pt}
 \noindent
@@ -893,19 +897,19 @@ points~(pp) relative to the matching baseline.}
   $+0.97$\,pp. However, the smallest gain is within the observed seed
   variation and should be interpreted cautiously. Overall, the mean-level
   trend suggests that the proposed loss can provide additional gains under
-  stronger baselines, rather than being fully subsumed by data selection or
-  DepthMix.
+  stronger baselines, rather than being fully subsumed by data selection
+  or DepthMix.
 
-\item \textit{$d{\rightarrow}s$ is retained as the primary direction for
-  controlled composability analysis.}
-  The Phase~II calibration identified single $(d{\rightarrow}s)$ cosine
-  as the most reliable direction on the PAD-MTL baseline. In the
-  component-level ablation, the same direction remains positive in mean
-  across all three framework combinations: $+0.97$\,pp on MTL\,+\,DX with
-  cosine, $+0.60$\,pp on MTL\,+\,S with MSE, and $+0.53$\,pp on
-  MTL\,+\,DX\,+\,S with MSE. The main ablation table therefore focuses
-  on the calibration-selected $d{\rightarrow}s$ direction to keep the
-  comparison controlled and interpretable.
+\item \textit{The relative ordering of MSE and cosine is
+  component-dependent.}
+  On MTL\,+\,S, MSE achieves higher gains than cosine for the
+  $d{\rightarrow}s$ direction ($+0.60$ vs.\ $+0.10$\,pp). When
+  DepthMix is introduced, cosine becomes stronger on MTL\,+\,DX
+  ($+0.97$\,pp vs.\ $+0.66$\,pp), while on MTL\,+\,DX\,+\,S the MSE
+  variant reaches the higher mean within $d{\rightarrow}s$
+  ($68.19$\,\% vs.\ $67.93$\,\%). This confirms that evaluating both
+  loss formulations within the selected design family is necessary, as
+  neither dominates consistently across all component combinations.
 
 \item \textit{The largest benefit arises on MTL\,+\,DX, which is the
   configuration with the largest reproduction gap.}
@@ -920,18 +924,8 @@ points~(pp) relative to the matching baseline.}
   more stable channel for geometric knowledge transfer when the
   implicit path through the shared encoder is disrupted.
 
-\item \textit{Within the selected $d{\rightarrow}s$ track, MSE--cosine
-  ordering depends on whether DepthMix is present.}
-  On MTL\,+\,S, MSE achieves higher gains than cosine for the
-  $d{\rightarrow}s$ direction ($+0.60$ vs.\ $+0.10$\,pp). When
-  DepthMix is introduced, cosine becomes stronger on MTL\,+\,DX
-  ($+0.97$\,pp vs.\ $+0.66$\,pp), while on MTL\,+\,DX\,+\,S the MSE
-  variant reaches the higher mean within $d{\rightarrow}s$
-  ($68.19$\,\% vs.\ $67.93$\,\%). This indicates that the preferred loss
-  type is component-dependent even after fixing projection direction.
-
-\item \textit{Within the selected direction, the strongest configuration is
-  $d{\rightarrow}s$ MSE on MTL\,+\,DX\,+\,S.}
+\item \textit{Within the selected design family, the strongest
+  configuration is $d{\rightarrow}s$ MSE on MTL\,+\,DX\,+\,S.}
   This configuration attains $68.19$\,\%, exceeding the reproduced
   full-framework baseline ($67.66$\,\%) by $+0.53$\,pp. Compared with the
   paper's reported S\,+\,DX\,+\,MTL value ($68.01$\,\%), the difference is
@@ -950,12 +944,10 @@ observed in Section~\ref{sec:ct-calibration-ablation} is not specific to
 the pure PAD-MTL setting. As visualised in
 Figure~\ref{fig:component-ablation}, all three component combinations
 show positive mean-level gains from the proposed loss within the selected
-$d{\rightarrow}s$ track; the gain is largest where the reproduction is
-weakest (MTL\,+\,DX); and the best full-framework configuration within
-this selected track becomes comparable to the original paper's reported
-value under the constrained single-GPU setting. Accordingly, the main
-composability analysis retains only the calibration-selected
-$d{\rightarrow}s$ single-projection track for final comparison.
+$d{\rightarrow}s$, $\lambda_\text{ct}=1.00$ track; the gain is largest
+where the reproduction is weakest (MTL\,+\,DX); and the best
+full-framework configuration within this track becomes comparable to the
+original paper's reported value under the constrained single-GPU setting.
 
 % ============================================================
 \section{Chapter Summary}
@@ -981,14 +973,15 @@ With respect to the extension, $\mathcal{L}_\text{ct}$ produces positive
 mean improvements across all validated configurations. The highest raw
 Phase~II mean is obtained by single~$(d{\rightarrow}s)$ MSE,
 $\lambda_\text{ct}=1.00$, but its higher variance makes it less reliable
-for model selection. The calibrated primary design---single
-$(d{\rightarrow}s)$ cosine, $\lambda_\text{ct}=1.00$---achieves a
+for model selection in isolation. The calibrated primary
+design---single $(d{\rightarrow}s)$ cosine, $\lambda_\text{ct}=1.00$---achieves a
 consistent, low-variance gain of $+2.50$\,pp over the PAD-MTL baseline
 across three independent seeds, as visualised in
-Figure~\ref{fig:phase2-validation}. Based on this calibration, the final
-composability analysis focuses on the selected $d{\rightarrow}s$
-single-projection track. When combined with data selection and DepthMix,
-$\mathcal{L}_\text{ct}$ shows positive mean-level gains within this
-selected track, supporting the conclusion that the improvement is not
-limited to the isolated PAD-MTL baseline and remains observable under the
+Figure~\ref{fig:phase2-validation}. Both cosine and MSE within the
+selected $d{\rightarrow}s$, $\lambda_\text{ct}=1.00$ design family were
+carried forward into the composability analysis. The results confirm
+positive mean-level gains across all three framework component
+combinations and show that the best full-framework result
+($68.19$\,\% mIoU, $d{\rightarrow}s$ MSE on MTL\,+\,DX\,+\,S) is
+comparable to the original paper's multi-GPU reference under the
 constrained single-GPU setting used in this project.

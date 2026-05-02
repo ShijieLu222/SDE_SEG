@@ -44,31 +44,30 @@ The main contributions of this project are as follows:
 
 \begin{itemize}
 
-\item The four result tables of \cite{hoyer2023ijcv_sde} (data
-  selection, mixing strategy, SDE feature transfer, and framework
-  component ablation) were successfully reproduced on Cityscapes under
-  a single-GPU constraint at the University of Bristol. All qualitative
-  performance trends are preserved, with most configurations falling
-  within $\pm$1\,mIoU of the paper.
-
-\item $\mathcal{L}_\text{ct}$ was designed and implemented within the
-  PAD-Net multi-task decoder, with two loss formulations---normalised
-  MSE and cosine similarity---evaluated through a systematic two-phase
-  calibration procedure.
-
-\item The best-performing configuration (single-projection cosine loss,
-  $\lambda_\text{ct}=1.00$) yields a consistent $+2.50$\,pp improvement
-  over the PAD-MTL baseline across three independent seeds, with a
-  standard deviation of only $0.17$\,\%.
-
-\item When combined with the full framework, the strongest configuration
-  achieves $68.19$\,\% mIoU at the 372-label regime, exceeding both the
-  reproduced full-framework baseline by $+0.53$\,pp and the original
-  paper's multi-GPU result by $+0.18$\,pp, suggesting that the proposed 
-  method remains competitive with the original multi-GPU result even 
-  under more constrained hardware conditions.
-
-\end{itemize}
+  \item The four result tables of \cite{hoyer2023ijcv_sde} (data
+    selection, mixing strategy, SDE feature transfer, and framework
+    component ablation) were successfully reproduced on Cityscapes under
+    a single-GPU constraint at the University of Bristol. All qualitative
+    performance trends are preserved, with most configurations falling
+    within $\pm$1\,mIoU of the paper.
+  
+  \item $\mathcal{L}_\text{ct}$ was designed and implemented within the
+    PAD-Net multi-task decoder, with two loss formulations---normalised
+    MSE and cosine similarity---evaluated through a systematic two-phase
+    calibration procedure.
+  
+  \item The best-performing individual configuration in the PAD-MTL setting
+    (single-projection cosine loss, $\lambda_\text{ct}=1.00$) yields a
+    consistent $+2.50$\,pp improvement over the PAD-MTL baseline across three
+    independent seeds, with a standard deviation of only $0.17$\,\%.
+  
+  \item When composed with the full framework, the strongest variant within
+    the selected $d{\rightarrow}s$, $\lambda_\text{ct}=1.00$ design family
+    (the MSE formulation) achieves $68.19$\,\% mIoU at the 372-label regime,
+    exceeding both the reproduced full-framework baseline by $+0.53$\,pp
+    and the original paper's multi-GPU result by $+0.18$\,pp.
+  
+  \end{itemize}
 
 % -----------------------------------------------------------------------------
 \chapter*{Dedication and Acknowledgements}
@@ -300,41 +299,59 @@ which were completed.
 \section{Limitations and Future Work}
 
 \noindent
-Three directions emerge naturally from the experimental findings.
+Several limitations remain, and they suggest natural directions for
+future work.
+
+\paragraph{Multi-GPU reproduction under the original training setting.}
+A central limitation of this project is the constrained single-GPU
+environment. All experiments were conducted with batch size~2 and without
+Synchronised Batch Normalisation, whereas the original framework of
+\cite{hoyer2023ijcv_sde} was trained under a larger multi-GPU setting.
+This difference is a plausible source of the reproduction gaps observed
+in several configurations, especially those involving pseudo-label
+training and the combination of DepthMix with multi-task learning. Future
+work should repeat the main reproduction and $\mathcal{L}_\text{ct}$
+experiments under a multi-GPU setup matching the original configuration
+more closely, for example with an effective batch size of~8 and SyncBN
+enabled. This would help separate the effect of the proposed loss from
+hardware-induced optimisation differences and provide a fairer comparison
+with the original paper.
 
 \paragraph{Component-conditioned $\lambda$ scheduling.}
 The composability ablation showed that the preferred loss type is
-component-dependent: within the $d{\rightarrow}s$ track, MSE achieves
-higher gains when DepthMix is absent (MTL\,+\,S: $+0.60$\,pp), while
-cosine is more stable when DepthMix is present (MTL\,+\,DX: $+0.97$\,pp).
-The MSE variant ultimately achieves the highest raw mean on
-MTL\,+\,DX\,+\,S ($68.19$\,\%), but with higher variance
-(std~$1.03$\,\%) than the cosine counterpart. Treating
-$\lambda_\text{ct}$ as a component-conditioned hyperparameter---or
-annealing it when DepthMix is active---could reduce this variance
-without sacrificing the mean-level gain.
+component-dependent. Within the selected $d{\rightarrow}s$ track, MSE
+achieves higher gains when DepthMix is absent (MTL\,+\,S:
+$+0.60$\,pp), while cosine is stronger when DepthMix is present
+(MTL\,+\,DX: $+0.97$\,pp). The MSE variant ultimately achieves the
+highest raw mean on MTL\,+\,DX\,+\,S ($68.19$\,\%), but with higher
+variance (std~$1.03$\,\%) than the cosine counterpart. Treating
+$\lambda_\text{ct}$ as a component-conditioned hyperparameter, or
+annealing it when DepthMix is active, could reduce this variance without
+sacrificing the mean-level gain.
 
-\paragraph{Dual projection revisited.}
-Dual projection was only evaluated at the same $\lambda_\text{ct}$
-values used for single projection. Because dual projection introduces a
-symmetric alignment constraint and potentially larger alignment
-gradients, lower values (e.g., $\lambda \in \{0.25, 0.50\}$) may yield
-a more stable training regime. A targeted sweep in this region could
-determine whether dual projection is fundamentally inferior or merely
-over-regularised at the current $\lambda$ range.
+\paragraph{Evaluation across additional label regimes and datasets.}
+The proposed $\mathcal{L}_\text{ct}$ was primarily evaluated on
+Cityscapes at the 1/8-label regime, where the relationship between
+scene geometry and semantic layout is particularly strong. Future work
+should test whether the same alignment objective remains effective under
+more extreme or less constrained label budgets, such as the 1/30 and
+1/4 regimes, and whether it generalises beyond urban driving scenes.
+Datasets such as ADE20K~\cite{zhou2019ade20k}, PASCAL VOC, or indoor
+RGB-D benchmarks would provide useful tests of domain generality,
+provided that suitable self-supervised or pretrained depth estimates are
+available. A longer-term direction is to extend the same feature-alignment
+idea to additional geometrically related auxiliary tasks, such as surface
+normal estimation or optical flow.
 
-\paragraph{Generalisation beyond Cityscapes.}
-The proposed $\mathcal{L}_\text{ct}$ was evaluated only on Cityscapes
-at the 1/8-label regime, where the structural correlation between depth
-and segmentation is particularly strong due to the urban driving domain.
-Whether the loss transfers to domains with weaker geometric
-structure---such as indoor scenes or aerial imagery---remains open.
-Evaluating on datasets such as ADE20K~\cite{zhou2019ade20k}, PASCAL
-VOC, or indoor RGB-D benchmarks, provided that suitable self-supervised
-or pretrained depth estimates are available, would provide a direct test
-of domain generality. A longer-term direction is to extend the same
-alignment idea to additional geometrically related auxiliary tasks, such
-as surface normal estimation or optical flow.
+\noindent
+Overall, the results support the central hypothesis of this project:
+explicit feature-level alignment between the depth and segmentation
+decoder branches can improve label-efficient semantic segmentation under
+a constrained single-GPU setting. While further validation is needed
+under the original multi-GPU training configuration and beyond Cityscapes
+at the 372-label regime, the proposed $\mathcal{L}_\text{ct}$ provides a
+lightweight and reproducible extension to the SDE-enhanced PAD-MTL
+framework.
 
 % =============================================================================
 \bibliography{dissertation}
