@@ -22,14 +22,14 @@ Cityscapes dataset~\cite{cordts2016cityscapes}. Let $\mathcal{D}$ denote
 the 2,975-image Cityscapes fine-annotation training set. A labelled subset
 $\mathcal{D}_L \subset \mathcal{D}$ of $N_L$ images is selected using the
 fixed subset indices provided by the original framework of
-Hoyer et al.~\cite{hoyer2023ijcv_sde}, ensuring comparability with the
+Hoyer et al.~\cite{hoyer2023improving}, ensuring comparability with the
 original reported results. The remaining images are treated as
 semantically unlabelled and form
 $\mathcal{D}_U = \mathcal{D} \setminus \mathcal{D}_L$.
 
 The reproduction experiments cover the annotation budgets of 100, 372, and
 744 labelled images, matching the label-budget settings evaluated in the
-original framework~\cite{hoyer2023ijcv_sde}. The proposed Cross-Task
+original framework~\cite{hoyer2023improving}. The proposed Cross-Task
 Consistency Loss extension is evaluated primarily under the 372-label
 setting, corresponding to the $\nicefrac{1}{8}$ Cityscapes regime. In this
 setting, $N_L = 372$ labelled images are used for semantic segmentation

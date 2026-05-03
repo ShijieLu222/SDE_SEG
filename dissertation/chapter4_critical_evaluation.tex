@@ -11,7 +11,7 @@ This chapter is organised in two parts. The first part
 critical evaluation of the reproduction results for Stage~(a) (standard
 supervised learning and data selection strategies) and Stage~(b)
 (semi-supervised and multi-task learning) based on the framework proposed
-by \cite{hoyer2023ijcv_sde}. The second part
+by \cite{hoyer2023improving}. The second part
 (Sections~\ref{sec:ct-calibration-ablation}
 and~\ref{sec:ct-component-ablation}) evaluates the proposed Cross-Task
 Consistency Loss ($\mathcal{L}_\text{ct}$), which introduces an explicit
@@ -25,7 +25,7 @@ this selected design family composes with the remaining framework
 components (data selection and DepthMix).
 
 The primary objectives are: (i)~to verify whether the reported
-performance trends of \cite{hoyer2023ijcv_sde} are consistent under a
+performance trends of \cite{hoyer2023improving} are consistent under a
 constrained single-GPU academic computing environment; and
 (ii)~to evaluate whether $\mathcal{L}_\text{ct}$ yields reliable,
 seed-consistent improvements over the reproduced multi-task baseline
@@ -83,16 +83,16 @@ without repeating this explanation.
 \textbf{Objective.} Stage~(a) assesses the effectiveness of various data
 selection strategies under limited label budgets.
 Table~\ref{tab:table1_repro} reproduces Table~1 of
-\cite{hoyer2023ijcv_sde}, comparing the random baseline against
+\cite{hoyer2023improving}, comparing the random baseline against
 entropy-based selection and the SDE-guided variants. DS denotes diversity
 sampling based on SDE feature distances; US denotes uncertainty sampling
 based on the depth-estimation proxy task; DS+US combines both criteria.
 These SDE-guided variants follow the data selection design of
-\cite{hoyer2023ijcv_sde}.
+\cite{hoyer2023improving}.
 
 \begin{table}[H]
 \centering
-\caption{Reproduction of Table~1 from \cite{hoyer2023ijcv_sde}: data
+\caption{Reproduction of Table~1 from \cite{hoyer2023improving}: data
 selection strategies on Cityscapes. mIoU~(\%) is reported as
 mean$\pm$std over three seeds. Each cell shows
 reproduced~/~{\scriptsize (reported)}, followed by $\Delta$ in
@@ -159,20 +159,20 @@ selection improves over random sampling is consistently reproduced.
 \textbf{Objective.} This section evaluates Stage~(b) mixing strategies
 applied to the subsets defined in Stage~(a).
 Table~\ref{tab:table3_repro} reproduces Table~3 of
-\cite{hoyer2023ijcv_sde}, comparing four training strategies. DX denotes
+\cite{hoyer2023improving}, comparing four training strategies. DX denotes
 DepthMix, the geometry-aware mixing strategy introduced by
-\cite{hoyer2023ijcv_sde}; ClassMix is a class-segment-based mixing
+\cite{hoyer2023improving}; ClassMix is a class-segment-based mixing
 baseline from \cite{olsson2021classmix}; Pseudo-Labels refers to
 mean-teacher self-training without geometric mixing. The experimental
-setup follows \cite{hoyer2023ijcv_sde} throughout.
+setup follows \cite{hoyer2023improving} throughout.
 
 \begin{table}[H]
 \centering
-\caption{Reproduction of Table~3 from \cite{hoyer2023ijcv_sde}: data
+\caption{Reproduction of Table~3 from \cite{hoyer2023improving}: data
 mixing strategies on Cityscapes. mIoU~(\%) is reported as mean$\pm$std
 over three seeds. Each entry shows reproduced~/~{\scriptsize (reported)},
 followed by $\Delta$ in percentage points~(pp). DX denotes DepthMix, the
-geometry-aware mixing strategy introduced by \cite{hoyer2023ijcv_sde}.}
+geometry-aware mixing strategy introduced by \cite{hoyer2023improving}.}
 \label{tab:table3_repro}
 \renewcommand{\arraystretch}{1.2}
 \begin{tabularx}{\textwidth}{lXX}
@@ -239,7 +239,7 @@ and~\ref{sec:ct-component-ablation}.
 
 \begin{table}[H]
 \centering
-\caption{Reproduction of Table~5 from \cite{hoyer2023ijcv_sde}: SDE
+\caption{Reproduction of Table~5 from \cite{hoyer2023improving}: SDE
 feature transfer methods on Cityscapes. mIoU~(\%) is reported as
 mean$\pm$std over three seeds. Each entry shows
 reproduced~/~{\scriptsize (reported)}, followed by $\Delta$ in
@@ -309,11 +309,11 @@ automatic data selection strategy; DX denotes DepthMix augmentation; MTL
 denotes joint segmentation and SDE training using the PAD decoder for
 cross-task feature exchange. Table~\ref{tab:table7_repro} presents a
 direct comparison between our results and the values reported in
-\cite{hoyer2023ijcv_sde}.
+\cite{hoyer2023improving}.
 
 \begin{table}[H]
 \centering
-\caption{Reproduction of Table~7 from \cite{hoyer2023ijcv_sde}: framework
+\caption{Reproduction of Table~7 from \cite{hoyer2023improving}: framework
 component ablation on Cityscapes. mIoU~(\%) is reported as mean$\pm$std
 over three seeds. Each cell shows reproduced~/~{\scriptsize (reported)},
 followed by $\Delta$ in percentage points~(pp). S~=~data selection
@@ -960,9 +960,9 @@ and the effectiveness of the proposed $\mathcal{L}_\text{ct}$ extension.
 
 With respect to reproduction, the main qualitative performance trends from
 the four reproduced result tables corresponding to Tables~1, 3, 5, and~7
-of \cite{hoyer2023ijcv_sde} are largely preserved under the single-GPU
+of \cite{hoyer2023improving} are largely preserved under the single-GPU
 constraint. The reproduced results broadly recover the findings of
-\cite{hoyer2023ijcv_sde}, with most configurations falling within
+\cite{hoyer2023improving}, with most configurations falling within
 $\pm$1\,mIoU of the reported values and several single-GPU runs
 marginally exceeding them. Where under-reproduction occurs, the
 reduced batch size and absence of SyncBN provide plausible contributing

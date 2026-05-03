@@ -19,7 +19,7 @@ over 4,460 working hours for the full training set. Building effective
 segmentation systems under limited annotation budgets therefore remains a
 key challenge in computer vision.
 
-To reduce this dependence on dense annotations, Hoyer et al.~\cite{hoyer2023ijcv_sde}
+To reduce this dependence on dense annotations, Hoyer et al.~\cite{hoyer2023improving}
 proposed a framework for annotation-efficient semantic segmentation, built
 around three progressive stages.
 
@@ -80,12 +80,12 @@ boundaries. Road surfaces, for example, are consistently flat and sit at
 ground level. Self-supervised depth estimation (SDE) can extract these depth
 cues from unlabelled video sequences through geometric and photometric
 consistency, with no manual annotation required~\cite{godard2017unsupervised}.
-Hoyer et al.~\cite{hoyer2023ijcv_sde} showed that SDE can provide a stable
+Hoyer et al.~\cite{hoyer2023improving} showed that SDE can provide a stable
 geometric signal throughout the training pipeline, enabling
 geometry-consistent data mixing and better feature transfer.
 
 However, a structural limitation remains in the PAD-style multi-task
-architecture adopted by Hoyer et al.~\cite{hoyer2023ijcv_sde}, which is
+architecture adopted by Hoyer et al.~\cite{hoyer2023improving}, which is
 based on attention-guided feature exchange between the depth and
 segmentation decoders. While this architecture enables implicit cross-task
 interaction, it places no direct constraint on the representations
@@ -113,7 +113,7 @@ labelled data is most limited.
 \section{Aims and Objectives}
 
 This project has two main goals: to reproduce the SDE-enhanced segmentation
-framework proposed by Hoyer et al.~\cite{hoyer2023ijcv_sde}, and to extend
+framework proposed by Hoyer et al.~\cite{hoyer2023improving}, and to extend
 the multi-task architecture with an explicit cross-task feature alignment
 loss. The specific objectives are as follows.
 
@@ -122,9 +122,9 @@ loss. The specific objectives are as follows.
 \item \textbf{Reproduce Stage~(a).} Set up and verify the original codebase,
 establishing a reproducible training and evaluation pipeline on
 Cityscapes~\cite{cordts2016cityscapes}. This involves reproducing the fully
-supervised baseline using a shared ResNet101~\cite{he2016resnet} encoder
-with an ASPP~\cite{chen2018deeplabv3plus} decoder and
-U-Net~\cite{ronneberger2015unet} upsampling blocks, which serves as the
+supervised baseline using a shared ResNet101~\cite{he2016deep} encoder
+with an ASPP~\cite{chen2018encoder} decoder and
+U-Net~\cite{ronneberger2015u} upsampling blocks, which serves as the
 reference point for all subsequent experiments.
 
 \item \textbf{Reproduce Stage~(b).} Building on Stage~(a), reproduce four

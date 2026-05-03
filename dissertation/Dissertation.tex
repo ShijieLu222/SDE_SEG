@@ -44,7 +44,7 @@ The main contributions of this project are as follows:
 
 \begin{itemize}
 
-  \item The four result tables of \cite{hoyer2023ijcv_sde} (data
+  \item The four result tables of \cite{hoyer2023improving} (data
     selection, mixing strategy, SDE feature transfer, and framework
     component ablation) were successfully reproduced on Cityscapes under
     a single-GPU constraint at the University of Bristol. All qualitative
@@ -206,7 +206,7 @@ $\alpha$    &:& EMA smoothing coefficient                         \\
 
 \noindent
 This project had two primary goals: to reproduce the SDE-enhanced
-label-efficient segmentation framework of \cite{hoyer2023ijcv_sde} under
+label-efficient segmentation framework of \cite{hoyer2023improving} under
 a constrained single-GPU environment, and to extend the PAD-Net
 multi-task architecture with a Cross-Task Consistency Loss
 ($\mathcal{L}_\text{ct}$) that provides an explicit feature-alignment
@@ -224,7 +224,7 @@ combined with the full framework.
 \item \textbf{Faithful reproduction of four result tables.}
   The data selection (Table~1), mixing strategy (Table~3), SDE feature
   transfer (Table~5), and framework component ablation (Table~7) from
-  \cite{hoyer2023ijcv_sde} were reproduced on Cityscapes. The data
+  \cite{hoyer2023improving} were reproduced on Cityscapes. The data
   selection experiment covered multiple label regimes, while the main
   Stage~(b) comparisons were reproduced at the 1/8-label (372-label)
   regime. All qualitative performance trends are preserved, with most
@@ -306,7 +306,7 @@ future work.
 A central limitation of this project is the constrained single-GPU
 environment. All experiments were conducted with batch size~2 and without
 Synchronised Batch Normalisation, whereas the original framework of
-\cite{hoyer2023ijcv_sde} was trained under a larger multi-GPU setting.
+\cite{hoyer2023improving} was trained under a larger multi-GPU setting.
 This difference is a plausible source of the reproduction gaps observed
 in several configurations, especially those involving pseudo-label
 training and the combination of DepthMix with multi-task learning. Future
@@ -336,7 +336,7 @@ scene geometry and semantic layout is particularly strong. Future work
 should test whether the same alignment objective remains effective under
 more extreme or less constrained label budgets, such as the 1/30 and
 1/4 regimes, and whether it generalises beyond urban driving scenes.
-Datasets such as ADE20K~\cite{zhou2019ade20k}, PASCAL VOC, or indoor
+Datasets such as ADE20K~\cite{zhou2019semantic}, PASCAL VOC, or indoor
 RGB-D benchmarks would provide useful tests of domain generality,
 provided that suitable self-supervised or pretrained depth estimates are
 available. A longer-term direction is to extend the same feature-alignment

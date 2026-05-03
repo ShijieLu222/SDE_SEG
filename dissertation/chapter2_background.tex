@@ -65,7 +65,7 @@ project.
 \subsection{Encoder--Decoder Networks}
 
 Modern segmentation models follow an encoder--decoder
-structure~\cite{long2015fcn}. The encoder, typically a deep convolutional
+structure~\cite{long2015fully}. The encoder, typically a deep convolutional
 backbone, progressively reduces spatial resolution through pooling and
 strided convolutions. As depth increases, each feature map captures
 increasingly abstract semantic information over a larger receptive field,
@@ -77,7 +77,7 @@ understanding back onto the pixel grid.
 
 \subsection{ResNet-101 Backbone}
 
-The reproduced framework uses ResNet-101~\cite{he2016resnet} as its
+The reproduced framework uses ResNet-101~\cite{he2016deep} as its
 encoder backbone.
 Standard deep networks suffer from vanishing gradients during
 backpropagation: as gradient signals travel through many layers, repeated
@@ -104,7 +104,7 @@ apparent size depending on their distance from the camera. A module that
 only aggregates local context cannot simultaneously handle distant
 pedestrians (appearing small) and nearby buildings (appearing large).
 Atrous Spatial Pyramid Pooling
-(ASPP)~\cite{chen2018deeplabv3plus} addresses this by running multiple
+(ASPP)~\cite{chen2018encoder} addresses this by running multiple
 atrous (dilated) convolutions in parallel at different dilation rates.
 Atrous convolutions insert gaps between kernel elements, expanding the
 effective receptive field without increasing parameter count or reducing
@@ -120,7 +120,7 @@ Upsampling from the low-resolution bottleneck to a full-resolution
 prediction map with bilinear interpolation alone is insufficient for
 accurate boundary prediction: the fine spatial detail has been discarded
 by the encoder's downsampling steps and cannot be recovered from the
-deep features alone. U-Net~\cite{ronneberger2015unet} addresses this
+deep features alone. U-Net~\cite{ronneberger2015u} addresses this
 with skip connections that concatenate the encoder's feature maps at each
 resolution directly onto the corresponding decoder layer. This gives the
 decoder simultaneous access to high-level semantic context from deep
@@ -139,7 +139,7 @@ Chapter~\ref{chap:execution}.
 \subsection{Batch Normalisation}
 
 Training deep networks is stabilised by Batch Normalisation
-(BN)~\cite{ioffe2015batchnorm}, which normalises layer activations across
+(BN)~\cite{ioffe2015batch}, which normalises layer activations across
 the training batch at each step. This reduces sensitivity to weight
 initialisation and allows higher learning rates. In multi-GPU setups,
 Synchronised BN (SyncBN) aggregates statistics across all devices so
@@ -165,7 +165,7 @@ to close the gap between limited-supervision and full-supervision
 performance by exploiting the structural information in unlabelled data.
 
 Semi-supervised learning (SSL) is the dominant approach to this
-problem~\cite{chapelle2006ssl}. In the segmentation context, the model
+problem. In the segmentation context, the model
 is trained on a small labelled subset of images alongside a much larger
 unlabelled pool. The supervised objective is a pixel-wise cross-entropy
 loss over labelled images; the semi-supervised objective encourages the
@@ -176,13 +176,13 @@ budgets used in this project, is given in Chapter~\ref{chap:execution}.
 \subsection{Pseudo-Labels and Confirmation Bias}
 
 Pseudo-labelling is the most widely used SSL strategy for
-segmentation~\cite{lee2013pseudolabel}. The model generates predictions
+segmentation~\cite{lee2013pseudo}. The model generates predictions
 for unlabelled images, treats those predictions as ground-truth labels,
 and trains on the combined labelled and pseudo-labelled data. The process
 can be iterated as predictions improve.
 
 However, pseudo-labelling introduces a fundamental risk: confirmation
-bias~\cite{arazo2020pseudolabel}. When the model's initial performance is
+bias~\cite{arazo2020pseudo}. When the model's initial performance is
 poor, the pseudo-labels it generates contain many errors. Training on
 those incorrect labels reinforces the model's mistakes, causing
 performance to stagnate or degrade. This risk is most severe when very
@@ -192,7 +192,7 @@ needed.
 
 \subsection{Mean Teacher}
 
-The Mean Teacher framework~\cite{tarvainen2017meanteacher} helps reduce
+The Mean Teacher framework~\cite{tarvainen2017mean} helps reduce
 confirmation bias by separating the pseudo-label generator from
 the model being trained. Two networks are maintained: a student, updated
 by standard gradient descent, and a teacher, whose weights are an
@@ -237,7 +237,7 @@ in varied contexts. However, ClassMix ignores scene geometry and can
 produce physically implausible composites---for example, pasting a
 distant building in front of a nearby car.
 
-DepthMix~\cite{hoyer2023ijcv_sde} resolves this by using the predicted
+DepthMix~\cite{hoyer2023improving} resolves this by using the predicted
 depth ordering between two images to decide which regions should appear
 in front in the mixed sample. In effect, closer regions are allowed to
 occlude more distant regions, consistent with real-world geometry. This
@@ -278,7 +278,7 @@ predictions are accurate, the synthesised view should closely match the
 real target frame. Training minimises the photometric reprojection error
 between synthesised and real target frames, combining an $\ell_1$
 pixel-intensity term with a Structural Similarity
-(SSIM)~\cite{wang2004ssim} term. Because the entire supervision signal comes from the images themselves,
+(SSIM)~\cite{wang2004image} term. Because the entire supervision signal comes from the images themselves,
 SDE can be trained on large volumes of unlabelled driving video, including
 video sequences that commonly accompany autonomous-driving datasets,
 building up rich geometric priors at no annotation cost.
@@ -286,7 +286,7 @@ building up rich geometric priors at no annotation cost.
 \subsection{Depth Pre-training Variants: \texttt{fd0} and \texttt{fd2}}
 \label{sec:fd0-fd2}
 
-Within the framework of Hoyer et al.~\cite{hoyer2023ijcv_sde}, SDE
+Within the framework of Hoyer et al.~\cite{hoyer2023improving}, SDE
 pre-training produces two encoder weight variants that differ in how the
 encoder is regularised during depth pre-training.
 
@@ -301,7 +301,7 @@ difficult to recover.
 
 \textbf{\texttt{fd2}} addresses this by adding a feature-distance
 regularisation term~$\mathcal{L}_F$ during depth
-pre-training~\cite{hoyer2023ijcv_sde}, which penalises the $\ell_2$
+pre-training~\cite{hoyer2023improving}, which penalises the $\ell_2$
 distance between the current encoder's features~$f^E_\theta$ and those
 of the frozen ImageNet-initialised encoder~$f^E_I$:
 \[
@@ -317,7 +317,7 @@ SDE feature transfer experiments discussed in Chapter~\ref{chap:evaluation}.
 
 \subsection{How SDE Benefits Label-Efficient Segmentation}
 
-Hoyer et al.~\cite{hoyer2023ijcv_sde} demonstrate several ways in which
+Hoyer et al.~\cite{hoyer2023improving} demonstrate several ways in which
 SDE improves label-efficient segmentation, each targeting a
 different stage of the training pipeline.
 
@@ -367,7 +367,7 @@ available unlabelled frames without requiring any segmentation annotations.
 \subsection{PAD-Net}
 
 The multi-task architecture reproduced and extended in this project is
-based on PAD-Net~\cite{xu2018padnet}. PAD-Net maintains two parallel decoder
+based on PAD-Net~\cite{xu2018pad}. PAD-Net maintains two parallel decoder
 branches on top of a shared encoder: one for depth estimation and one
 for semantic segmentation. Both branches use the ASPP and U-Net
 upsampling block structure described in Section~\ref{sec:architectures}.
@@ -441,13 +441,13 @@ experimental design described in later chapters.
 
 The idea that predictions or representations from different tasks should
 be mutually consistent has been explored from several angles.
-Zamir et al.~\cite{zamir2020crosstask} formalise it through inference-path
+Zamir et al.~\cite{zamir2020robust} formalise it through inference-path
 invariance: predictions obtained via different combinations of tasks
 should remain geometrically consistent regardless of the path taken.
-Nakano et al.~\cite{nakano2021crosstask} apply this principle directly to
+Nakano et al.~\cite{nakano2021cross} apply this principle directly to
 multi-task learning by constraining intermediate features across task
 branches, demonstrating improved performance. Li et
-al.~\cite{li2022mtl} study multi-task dense prediction under partial
+al.~\cite{li2022learning} study multi-task dense prediction under partial
 annotations, showing that cross-task relationships can be exploited when
 different tasks have access to different amounts of labelled
 data---a situation directly analogous to the label-efficient multi-task
