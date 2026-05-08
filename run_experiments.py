@@ -42,6 +42,11 @@ if __name__ == "__main__":
         default="all",
         help="Run id within an experiment. If not specified, run all."
     )
+    parser.add_argument(
+        "--save-model",
+        action="store_true",
+        help="Set training.save_model True so best_model.pkl is written when val mIoU improves.",
+    )
     args = parser.parse_args()
     if args.run == "all":
         pass
@@ -87,6 +92,8 @@ if __name__ == "__main__":
             continue
         print("Dispatch job {}".format(variant["experiment_tag"]))
         cfg = variant["spec"]["config"]
+        if args.save_model:
+            cfg["training"]["save_model"] = True
         cfg["name"] = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + variant["experiment_tag"]
         cfg["machine"] = args.machine
         cfg["training"]["log_path"] = os.path.join(cfg["training"]["log_path"], experiment_name) + "/"
